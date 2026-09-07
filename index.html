@@ -1062,9 +1062,9 @@ function update(dt) {
   }
 
   // ---- collisions / win-lose checks ----
-  if (checkGoal())                  { win();  return; }
-  if (checkWalls())                 { loseCause = 'SMACKED THE TAPE!'; lose(); return; }
-  if (checkBounds())                { loseCause = 'LEFT THE STUDIO!';   lose(); return; }
+  if (status === 'playing' && checkGoal()) { win();  return; }
+  if (status === 'playing' && checkWalls()) { loseCause = 'SMACKED THE TAPE!'; lose(); return; }
+  if (status === 'playing' && checkBounds()) { loseCause = 'LEFT THE STUDIO!'; lose(); return; }
 
   // trail history - longer/denser the faster you go
   trail.unshift({ x: player.x, y: player.y });
