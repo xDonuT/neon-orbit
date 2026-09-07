@@ -110,14 +110,15 @@
     border: 1px solid rgba(97, 76, 48, 0.4);
     color: #4a4038;
     font-family: inherit;
-    font-size: 11px;
     letter-spacing: 0.14em;
-    padding: 7px 12px;
     border-radius: 5px;
     cursor: pointer;
     white-space: nowrap;
     text-shadow: 0 1px 0 rgba(255, 255, 255, 0.4);
-    min-height: 44px;
+    font-size: 20px;
+    padding: 4px 8px;
+    min-height: 40px;
+    line-height: 1;
   }
   .hud-btn:hover { background: rgba(255, 250, 235, 0.9); }
   .hud-btn:active { transform: scale(0.97); }
@@ -220,20 +221,23 @@
     flex: 1 1 auto;
     display: flex;
     flex-direction: column;
-    gap: 4px;
-    font-size: 10px;
-    letter-spacing: 0.06em;
+    gap: 3px;
+    font-size: 9px;
+    letter-spacing: 0.04em;
     color: #5a4a3a;
   }
   @media (min-width: 701px) {
     #guideBox { gap: 6px; font-size: 11px; letter-spacing: 0.08em; }
   }
-  .guideItem { display: flex; align-items: center; gap: 5px; white-space: nowrap; }
+  .guideItem { display: flex; align-items: center; gap: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  @media (min-width: 701px) {
+    .guideItem { gap: 6px; }
+  }
   .guideTitle {
-    font-size: 9px;
-    letter-spacing: 0.12em;
+    font-size: 8px;
+    letter-spacing: 0.1em;
     color: #8a6a1c;
-    margin-bottom: 3px;
+    margin-bottom: 2px;
     font-weight: bold;
   }
   @media (min-width: 701px) {
@@ -531,9 +535,9 @@
     </div>
     <div id="sidePanel">
       <div class="panelBox" id="hudBox">
-<button class="hud-btn" id="pauseBtn" aria-label="Pause">PAUSE</button>
-<button class="hud-btn" id="sndBtn" aria-label="Sound on">SOUND ON</button>
-<button class="hud-btn" id="menuBtn" aria-label="Menu">MENU</button>
+<button class="hud-btn" id="pauseBtn" aria-label="Pause">⏸</button>
+<button class="hud-btn" id="sndBtn" aria-label="Sound on">🔊</button>
+<button class="hud-btn" id="menuBtn" aria-label="Menu">☰</button>
       </div>
       <div class="panelBox" id="controlBox">
         <div id="controlCircle" role="button" aria-label="Tap to grab and swing">
@@ -2423,7 +2427,7 @@ bindButton(elPause, togglePause);
 bindButton(elSnd, () => {
   ensureAudio();
   sndOn = !sndOn;
-  elSnd.textContent = sndOn ? 'SOUND ON' : 'SOUND OFF';
+  elSnd.textContent = sndOn ? '🔊' : '🔇';
   elSnd.setAttribute('aria-label', sndOn ? 'Sound on' : 'Sound off');
   setRush(sndOn ? rushTarget : 0);
   if (!sndOn) stopTurboBed();
