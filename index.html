@@ -3,21 +3,23 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>NEON ORBIT</title>
+<title>PAINT ORBIT</title>
 <style>
   :root {
-    --neon-cyan: #22d3ee;
-    --neon-magenta: #e879f9;
-    --neon-green: #4ade80;
-    --neon-yellow: #fde047;
-    --neon-red: #f87171;
-    --neon-purple: #c084fc;
-    --text: #e5e7eb;
+    --neon-cyan: #1f8a9c;
+    --neon-magenta: #a04d8c;
+    --neon-green: #2f9e70;
+    --neon-yellow: #c99a2e;
+    --neon-red: #d64f3f;
+    --neon-purple: #8a55b8;
+    --text: #3d3530;
+    --paper: #f2ecdd;
+    --ink: #3d3530;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body {
     height: 100%;
-    background: #05050a;
+    background: #cfc7b4;
     color: var(--text);
     font-family: 'Courier New', ui-monospace, monospace;
     overflow: hidden;
@@ -34,7 +36,7 @@
     align-items: center;
     justify-content: center;
     padding: 0;
-    background: #05050a;
+    background: #cfc7b4;
   }
 
   /* ------- HUD top bar (overlay on canvas) ------- */
@@ -50,24 +52,24 @@
     width: max-content;
     max-width: calc(100% - 12px);
     padding: 6px 14px;
-    background: rgba(10, 10, 20, 0.72);
-    border: 1px solid rgba(34, 211, 238, 0.35);
+    background: rgba(240, 234, 218, 0.92);
+    border: 1px solid rgba(120, 90, 50, 0.35);
     border-radius: 8px;
-    box-shadow: 0 0 18px rgba(34, 211, 238, 0.2);
+    box-shadow: 0 1px 6px rgba(80, 60, 30, 0.25);
     letter-spacing: 0.2em;
     pointer-events: auto;
   }
   #title {
     font-size: 15px;
     font-weight: bold;
-    color: #fff;
-    text-shadow: 0 0 10px var(--neon-cyan), 0 0 22px rgba(34, 211, 238, 0.6);
+    color: var(--ink);
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6), 0 0 10px rgba(31, 138, 156, 0.35);
     white-space: nowrap;
   }
   #hudTimer {
     font-size: 12px;
     color: var(--neon-yellow);
-    text-shadow: 0 0 8px rgba(253, 224, 71, 0.6);
+    text-shadow: 0 0 8px rgba(201, 154, 46, 0.45);
     white-space: nowrap;
     font-variant-numeric: tabular-nums;
   }
@@ -76,14 +78,14 @@
     text-align: center;
     font-size: 12px;
     color: var(--neon-magenta);
-    text-shadow: 0 0 8px rgba(232, 121, 249, 0.6);
+    text-shadow: 0 0 8px rgba(160, 77, 140, 0.4);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
   .hud-btn {
-    background: rgba(34, 211, 238, 0.12);
-    border: 1px solid rgba(34, 211, 238, 0.7);
+    background: rgba(31, 138, 156, 0.12);
+    border: 1px solid rgba(31, 138, 156, 0.6);
     color: var(--neon-cyan);
     font-family: inherit;
     font-size: 11px;
@@ -92,17 +94,17 @@
     border-radius: 5px;
     cursor: pointer;
     white-space: nowrap;
-    text-shadow: 0 0 6px rgba(34, 211, 238, 0.7);
+    text-shadow: 0 0 6px rgba(31, 138, 156, 0.5);
   }
-  .hud-btn:hover { background: rgba(34, 211, 238, 0.3); }
+  .hud-btn:hover { background: rgba(31, 138, 156, 0.28); }
   .hud-btn:active { transform: scale(0.97); }
   #hudRestartBtn {
-    border-color: rgba(239, 68, 68, 0.7);
+    border-color: rgba(214, 79, 63, 0.7);
     color: var(--neon-red);
-    background: rgba(239, 68, 68, 0.12);
-    text-shadow: 0 0 6px rgba(248, 113, 113, 0.7);
+    background: rgba(214, 79, 63, 0.12);
+    text-shadow: 0 0 6px rgba(214, 79, 63, 0.5);
   }
-  #hudRestartBtn:hover { background: rgba(239, 68, 68, 0.32); }
+  #hudRestartBtn:hover { background: rgba(214, 79, 63, 0.3); }
 
   /* ------- Canvas wrapper (full screen, letterboxed canvas) ------- */
   #wrap {
@@ -110,7 +112,7 @@
     width: 100%;
     height: 100%;
     overflow: hidden;
-    background: #0a0a0f;
+    background: #cfc7b4;
   }
   canvas {
     position: absolute;
@@ -135,7 +137,7 @@
     align-items: center;
     justify-content: center;
     gap: 18px;
-    background: rgba(5, 5, 12, 0.55);
+    background: rgba(70, 52, 34, 0.35);
     text-align: center;
     z-index: 5;
     pointer-events: auto;
@@ -145,54 +147,73 @@
     font-size: clamp(24px, 5vmin, 52px);
     font-weight: bold;
     letter-spacing: 0.25em;
-    color: #fff;
-    text-shadow: 0 0 18px var(--neon-cyan), 0 0 40px rgba(34, 211, 238, 0.55);
+    color: var(--ink);
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5), 0 0 18px rgba(31, 138, 156, 0.4), 0 0 40px rgba(31, 138, 156, 0.25);
   }
-  #message.lost #msgTitle { color: #fca5a5; text-shadow: 0 0 18px var(--neon-red), 0 0 40px rgba(239, 68, 68, 0.6); }
+  #message.lost #msgTitle { color: var(--neon-red); text-shadow: 0 0 18px rgba(214, 79, 63, 0.5), 0 0 40px rgba(214, 79, 63, 0.3); }
   #msgStars {
     font-size: clamp(30px, 7vmin, 56px);
     letter-spacing: 0.3em;
     line-height: 1;
-    color: #fef08a;
-    text-shadow: 0 0 18px rgba(253, 224, 71, 0.8), 0 0 40px rgba(250, 204, 21, 0.5);
+    color: #b57f16;
+    text-shadow: 0 0 18px rgba(192, 138, 30, 0.55), 0 0 40px rgba(201, 154, 46, 0.4);
   }
   #msgScore {
     font-size: 14px;
     letter-spacing: 0.14em;
-    color: #cbd5e1;
-    text-shadow: 0 0 8px rgba(203, 213, 225, 0.4);
+    color: #4a4038;
+    text-shadow: 0 0 8px rgba(74, 64, 56, 0.35);
   }
-  #msgScore .best { color: #86efac; text-shadow: 0 0 8px rgba(134, 239, 172, 0.6); }
-  #msgScore .newbest { color: #fde047; text-shadow: 0 0 8px rgba(253, 224, 71, 0.6); }
+  #msgScore .best { color: #1f7a55; text-shadow: 0 0 8px rgba(47, 158, 112, 0.5); }
+  #msgScore .newbest { color: #b57f16; text-shadow: 0 0 8px rgba(201, 154, 46, 0.5); }
   #msgSub {
     font-size: 15px;
     letter-spacing: 0.15em;
     color: var(--neon-purple);
-    text-shadow: 0 0 10px rgba(192, 132, 252, 0.6);
+    text-shadow: 0 0 10px rgba(138, 85, 184, 0.45);
   }
-  #message.lost #msgSub { color: var(--neon-yellow); text-shadow: 0 0 10px rgba(253, 224, 71, 0.5); }
+  #message.lost #msgSub { color: var(--neon-yellow); text-shadow: 0 0 10px rgba(201, 154, 46, 0.45); }
   #msgObj {
     display: none;
     font-size: 16px;
     letter-spacing: 0.18em;
     color: var(--neon-cyan);
-    text-shadow: 0 0 12px rgba(34, 211, 238, 0.6);
+    text-shadow: 0 0 12px rgba(31, 138, 156, 0.45);
   }
   #restartBtn {
     font-family: inherit;
     font-size: 15px;
     letter-spacing: 0.2em;
-    color: #fff;
-    background: rgba(239, 68, 68, 0.18);
+    color: var(--ink);
+    background: rgba(214, 79, 63, 0.14);
     border: 1.5px solid var(--neon-red);
     padding: 10px 26px;
     border-radius: 6px;
     cursor: pointer;
-    text-shadow: 0 0 8px rgba(248, 113, 113, 0.8);
-    box-shadow: 0 0 18px rgba(239, 68, 68, 0.35);
+    box-shadow: 0 0 18px rgba(214, 79, 63, 0.25);
   }
-  #restartBtn:hover { background: rgba(239, 68, 68, 0.4); }
+  #restartBtn:hover { background: rgba(214, 79, 63, 0.3); }
   #restartBtn:active { transform: scale(0.97); }
+  #msgBtns {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    justify-content: center;
+  }
+  #nextLevelBtn {
+    font-family: inherit;
+    font-size: 16px;
+    letter-spacing: 0.2em;
+    color: var(--ink);
+    background: rgba(31, 138, 156, 0.14);
+    border: 1.5px solid var(--neon-cyan);
+    padding: 11px 30px;
+    border-radius: 6px;
+    cursor: pointer;
+    box-shadow: 0 0 18px rgba(31, 138, 156, 0.25);
+  }
+  #nextLevelBtn:hover { background: rgba(31, 138, 156, 0.32); }
+  #nextLevelBtn:active { transform: scale(0.97); }
 
   #toast {
     position: absolute;
@@ -201,15 +222,15 @@
     transform: translateX(-50%);
     z-index: 6;
     max-width: 86%;
-    background: rgba(5, 5, 12, 0.8);
-    border: 1px solid rgba(34, 211, 238, 0.65);
-    color: #fff;
+    background: rgba(60, 45, 30, 0.88);
+    border: 1px solid rgba(31, 138, 156, 0.6);
+    color: #f7f1e3;
     font-size: 13px;
     letter-spacing: 0.16em;
     padding: 8px 18px;
     border-radius: 20px;
     white-space: nowrap;
-    text-shadow: 0 0 8px rgba(34, 211, 238, 0.7);
+    box-shadow: 0 2px 10px rgba(60, 45, 30, 0.35);
     pointer-events: none;
     opacity: 0;
     transition: opacity 0.25s ease;
@@ -232,10 +253,10 @@
     flex-wrap: wrap;
     font-size: 11px;
     letter-spacing: 0.12em;
-    color: #94a3b8;
+    color: #5d5044;
     padding: 4px 10px;
     text-align: center;
-    background: rgba(10, 10, 20, 0.55);
+    background: rgba(242, 236, 221, 0.78);
     border-radius: 6px;
     pointer-events: none;
   }
@@ -248,18 +269,18 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background: rgba(5, 5, 12, 0.7);
-    color: #fff;
+    background: rgba(242, 236, 221, 0.92);
+    color: var(--ink);
     gap: 24px;
     overflow: hidden;
   }
   #menu.hidden { display: none; }
-  #menuTitle { font-size: clamp(32px, 8vmin, 72px); font-weight: bold; letter-spacing: 0.3em; color: #fff; text-shadow: 0 0 20px var(--neon-cyan), 0 0 40px rgba(34, 211, 238, 0.6); }
-  #menuSub { font-size: 14px; color: #94a3b8; letter-spacing: 0.15em; margin-bottom: 32px; }
-  .menuBtn { font-family: inherit; font-size: 16px; letter-spacing: 0.2em; color: #fff; background: rgba(34, 211, 238, 0.2); border: 1px solid var(--neon-cyan); padding: 12px 28px; border-radius: 6px; cursor: pointer; text-shadow: 0 0 8px rgba(34, 211, 238, 0.7); transition: background 0.15s; }
-  .menuBtn:hover { background: rgba(34, 211, 238, 0.4); }
+  #menuTitle { font-size: clamp(32px, 8vmin, 72px); font-weight: bold; letter-spacing: 0.3em; color: var(--ink); text-shadow: 0 2px 0 rgba(255,255,255,0.7), 0 0 20px rgba(31, 138, 156, 0.4), 0 0 40px rgba(31, 138, 156, 0.25); }
+  #menuSub { font-size: 14px; color: #6b5f4f; letter-spacing: 0.15em; margin-bottom: 32px; }
+  .menuBtn { font-family: inherit; font-size: 16px; letter-spacing: 0.2em; color: var(--ink); background: rgba(31, 138, 156, 0.14); border: 1px solid var(--neon-cyan); padding: 12px 28px; border-radius: 6px; cursor: pointer; transition: background 0.15s; }
+  .menuBtn:hover { background: rgba(31, 138, 156, 0.3); }
   .menuBtn:active { transform: scale(0.98); }
-  .levelsInfo { font-size: 12px; color: #94a3b8; letter-spacing: 0.1em; }
+  .levelsInfo { font-size: 12px; color: #6b5f4f; letter-spacing: 0.1em; }
   /* ------- Level Select overlay ------- */
   #levelSelect {
     position: absolute;
@@ -270,10 +291,10 @@
     align-items: center;
     justify-content: center;
     gap: 8px;
-    color: #fff;
+    color: var(--ink);
     padding: 20px;
     overflow-y: auto;
-    background: rgba(5, 5, 12, 0.9);
+    background: rgba(242, 236, 221, 0.94);
   }
   #levelSelect:not(.hidden) { display: flex; }
   .dot {
@@ -311,8 +332,8 @@
 <div id="app">
   <!-- Menu screen (start screen, hidden after tap) -->
   <div id="menu">
-    <div id="menuTitle">NEON&nbsp;ORBIT</div>
-    <div id="menuSub">Tap to Start</div>
+    <div id="menuTitle">PAINT&nbsp;ORBIT</div>
+    <div id="menuSub">Keep a bucket, ruin a canvas.</div>
     <button class="menuBtn" id="menuStartBtn">Play</button>
     <button class="menuBtn" id="menuLevelSelectBtn">Level Select</button>
     <div class="levelsInfo">Levels 1–20</div>
@@ -324,7 +345,7 @@
 
     <!-- Top bar overlay -->
     <div id="hud">
-      <div id="title">NEON&nbsp;ORBIT</div>
+      <div id="title">PAINT&nbsp;ORBIT</div>
       <div id="hudTimer">0:00</div>
       <div id="levelLabel">LEVEL 1 &mdash; FIRST STEPS</div>
       <button class="hud-btn" id="hudRestartBtn">RESTART</button>
@@ -342,7 +363,7 @@
       <div id="levelSelectGrid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(80px,1fr));gap:8px;width:100%;max-width:400px;"></div>
       <div style="display:flex;gap:12px;margin-top:16px;">
         <button class="menuBtn" id="levelSelectClose">Close</button>
-        <button class="menuBtn" id="resetProgressBtn" style="border-color:rgba(239,68,68,0.7);color:#fca5a5;text-shadow:0 0 8px rgba(248,113,113,0.7);">Reset Progress</button>
+        <button class="menuBtn" id="resetProgressBtn" style="border-color:rgba(214,79,63,0.7);color:#7a2c22;text-shadow:0 0 8px rgba(214,79,63,0.4);">Reset Progress</button>
       </div>
     </div>
 
@@ -352,7 +373,10 @@
       <div id="msgScore"></div>
       <div id="msgObj"></div>
       <div id="msgSub"></div>
-      <button id="restartBtn">RESTART LEVEL</button>
+      <div id="msgBtns">
+        <button id="restartBtn">RESTART LEVEL</button>
+        <button id="nextLevelBtn">NEXT LEVEL &#8594;</button>
+      </div>
     </div>
     <div id="toast"></div>
 
@@ -371,7 +395,7 @@
 'use strict';
 
 /* ============================================================
-   NEON ORBIT - single-file arcade swing game
+   PAINT ORBIT - single-file swing game (bucket & canvas)
    ============================================================ */
 
 // ---------- Canvas ----------
@@ -522,12 +546,14 @@ let landTier = 0;     // landing quality 0=SOFT 1=POWER 2=MASSIVE (FX now, resul
 let winLabelT = 0;    // remaining time for the in-world tier word
 let time = 0;                     // global animation clock
 
-const playerColor  = { core: '#ffffff', ring: '#22d3ee', glow: 'rgba(34,211,238,0.9)' };
+const playerColor  = { core: '#f3f6f8', ring: '#8b99a5', glow: 'rgba(139,153,165,0.55)' };
 const orbColors = {
-  normal: { fill: '#4ade80', stroke: '#22c55e', glow: '#22c55e' },
-  turbo:  { fill: '#fde047', stroke: '#facc15', glow: '#facc15' },
-  repel:  { fill: '#f87171', stroke: '#ef4444', glow: '#ef4444' }
+  normal: { fill: '#2f9e70', stroke: '#1f7a55', glow: '#1f7a55', paint: '49,150,104' },
+  turbo:  { fill: '#e0af3c', stroke: '#b8871b', glow: '#b8871b', paint: '221,165,44' },
+  repel:  { fill: '#e4513f', stroke: '#b5372a', glow: '#b5372a', paint: '224,76,56' }
 };
+// color of the wet paint the bucket currently pours (per attached orb)
+let paintRGB = '49,150,104';
 
 // ---------- DOM handles ----------
 const elMsg    = document.getElementById('message');
@@ -537,6 +563,7 @@ const elMsgScore = document.getElementById('msgScore');
 const elMsgObj = document.getElementById('msgObj');
 const elMsgS   = document.getElementById('msgSub');
 const elRestart= document.getElementById('restartBtn');
+const elNextBtn = document.getElementById('nextLevelBtn');
 const elLevel  = document.getElementById('levelLabel');
 const elHudTimer = document.getElementById('hudTimer');
 const elPause  = document.getElementById('pauseBtn');
@@ -604,10 +631,11 @@ function showReadyUI(on) {
     elMsgT.textContent = 'TAP TO LAUNCH';
     elMsgObj.style.display = '';
     elMsgObj.textContent = level && level.walls && level.walls.length
-      ? 'OBJECTIVE: weave past the red bars to the purple core'
-      : 'OBJECTIVE: reach the purple core';
+      ? 'OBJECTIVE: swing past the tape to the signing spot'
+      : 'OBJECTIVE: reach the signing spot';
     elMsgS.textContent = 'tap to start \u00b7 then hold to swing, release to fly';
     elRestart.style.display = 'none';
+    elNextBtn.style.display = 'none';
   } else {
     elMsg.classList.add('hidden');
   }
@@ -621,6 +649,7 @@ function showPauseUI(on) {
     elMsgObj.style.display = 'none';
     elMsgS.textContent = 'press PAUSE (top bar) to resume';
     elRestart.style.display = 'none';
+    elNextBtn.style.display = 'none';
   } else {
     elMsg.classList.add('hidden');
   }
@@ -628,6 +657,7 @@ function showPauseUI(on) {
 
 function loadLevel(idx) {
   if (idx >= LEVELS.length) idx = 0;
+  clearPaintLayer();   // new canvas to mangle each level
   levelIndex = idx;
   level = LEVELS[idx];
   player = { x: level.player.x, y: level.player.y, vx: 0, vy: 0 };
@@ -651,13 +681,14 @@ function loadLevel(idx) {
   runTime = 0;
   elHudTimer.textContent = fmtTime(0);
   pathFadeAt = -1;                        // fresh route hint each level
-  if (level.walls && level.walls.length) toast('Dive under the red bars!');
+  if (level.walls && level.walls.length) toast('Dunk under the tape!');
   showReadyUI(true);
   // close level select overlay if open
   closeLevelSelect();
   elLevel.textContent = 'LEVEL ' + (idx + 1) + ' \u2014 ' + level.name;
   elMsgStars.textContent = '';
   elMsgScore.textContent = '';
+  elNextBtn.style.display = 'none';
 }
 
 /* ============================================================
@@ -692,7 +723,7 @@ if (best.type === 'turbo') {
       const rx = dx / dist, ry = dy / dist;
       player.vx += rx * 2.5;
       player.vy += ry * 2.5;
-      toast('\u26A0 RED \u2014 beware, it flips you around!');
+      toast('\u26A0 ALIZARIN \u2014 beware, it flips you loose!');
       return;
     }
     // repel forces the OPPOSITE spin direction
@@ -706,6 +737,7 @@ if (best.type === 'turbo') {
 
   tethered = true;
   snap = 1;
+  paintRGB = orbColors[best.type].paint;
   rings.push({ x: best.x, y: best.y, r: best.r * 0.5, vr: 2.2, life: 0.30, col: '255,255,255' });
   tether = {
     orb:   best,
@@ -774,15 +806,10 @@ function update(dt) {
   if (status === 'paused' || status === 'ready') return;   // freeze physics while paused/ready
 
   if (status !== 'playing') {
-    statusTimer -= dt * ts;
-    if (statusTimer <= 0) {
-      if (status === 'won') {
-        // advance to the next level (or wrap around at the end)
-        const nextIdx = levelIndex + 1;
-        loadLevel(nextIdx >= LEVELS.length ? 0 : nextIdx);
-      } else {
-        loadLevel(levelIndex);       // restart current
-      }
+    // 'lost' auto-restarts after a moment; 'won' waits for NEXT LEVEL tap
+    if (status === 'lost') {
+      statusTimer -= dt * ts;
+      if (statusTimer <= 0) loadLevel(levelIndex);   // restart current
     }
     return;   // freeze physics, keep background animating
   }
@@ -828,7 +855,7 @@ function update(dt) {
 
     // ---- tether paint-splatter (subtle drips from the orb) ----
     if (Math.random() < 0.18) {
-      const color = t.repel ? '252,80,80' : (t.turbo ? '255,240,60' : '34,230,255');
+      const color = t.repel ? orbColors.repel.paint : (t.turbo ? orbColors.turbo.paint : orbColors.normal.paint);
       tetherParticles.push({
         x: o.x + (Math.random() - 0.5) * 10,
         y: o.y + (Math.random() - 0.5) * 10,
@@ -861,6 +888,9 @@ function update(dt) {
   const targetLen = 22 + Math.min(18, Math.hypot(player.vx, player.vy) * 2.2);
   while (trail.length > targetLen) trail.pop();
 
+  // persistent wet paint: the bucket keeps the canvas stained
+  addPaintStroke(player.x, player.y, Math.hypot(player.vx, player.vy), paintRGB);
+
   snap *= Math.pow(0.84, dt);   // attach pop decays
 }
 
@@ -887,7 +917,7 @@ function checkBounds() {
 // ---------- win / lose ----------
 function spawnGoalBurst(tier) {
   const g = level.goal;
-  const colors = ['#c084fc', '#f0abfc', '#ffffff', '#22d3ee'];
+  const colors = ['#8a55b8', '#e0af3c', '#2f9e70', '#e4513f'];
   const cfg = BURST_CFG[tier];
   for (let i = 0; i < cfg.sparks; i++) {
     const a = Math.random() * Math.PI * 2;
@@ -911,7 +941,7 @@ function spawnGoalBurst(tier) {
         maxLen: 70 + Math.random() * 110,
         width: 3.5 + Math.random() * 2.5,
         life: 0.55 + Math.random() * 0.25,
-        rgb: Math.random() < 0.3 ? '240,171,252' : '252,252,255',
+        rgb: Math.random() < 0.35 ? '184,135,27' : '76,58,34',
       });
     }
   }
@@ -965,6 +995,8 @@ function win() {
   elMsgT.textContent = stars === 3 ? 'FLAWLESS!' : last ? 'ORBIT MASTERED!' : 'LEVEL COMPLETE!';
   elMsgS.textContent = last ? 'Back around to FIRST STEPS...' : 'Next: ' + LEVELS[levelIndex + 1].name + ' \u2192';
   elRestart.style.display = 'none';
+  elNextBtn.style.display = '';
+  elNextBtn.textContent = last ? 'PLAY AGAIN' : 'NEXT LEVEL \u2192';
 }
 
 function lose() {
@@ -977,6 +1009,7 @@ function lose() {
   elMsgT.textContent = loseCause || 'LOST IN THE VOID!';
   elMsgS.textContent = 'Tap the screen to retry';
   elRestart.style.display = '';
+  elNextBtn.style.display = 'none';
   loseCause = '';
 }
 
@@ -989,7 +1022,7 @@ for (let i = 0; i < 44; i++) {
     x: Math.random() * W, y: Math.random() * H,
     r: Math.random() * 1.5 + 0.4,
     s: Math.random() * 0.25 + 0.05,
-    c: Math.random() < 0.5 ? '34,211,238' : '232,121,249'
+    c: Math.random() < 0.5 ? '112,146,128' : '176,124,92'
   });
 }
 
@@ -1001,18 +1034,122 @@ let bgGrad = null;
 let vignetteGrad = null;
 let goalGrad = null;
 
-function drawBackground() {
-  if (!bgGrad) {
-    bgGrad = ctx.createLinearGradient(0, 0, 0, H);
-    bgGrad.addColorStop(0, '#0a0a0f');
-    bgGrad.addColorStop(1, '#05050a');
-  }
-  ctx.fillStyle = bgGrad;
-  ctx.fillRect(0, 0, W, H);
+// ---- offscreen layers (baked once, blitted each frame) ----
+// paperLayer: the stretched-sheet background (grain + frame). paintLayer:
+// the wet paint the bucket leaves behind - it ACCUMULATES and persists.
+// Both are created lazily and skipped where document.createElement is
+// unavailable (e.g. the automated test harness), falling back to flat fills.
+let paperLayer = null;
+let paintCanvas = null;
+let paintCtx = null;
+let lastPaintX = null, lastPaintY = null;
 
+function makeCtx() {
+  if (typeof document === 'undefined' || typeof document.createElement !== 'function') return null;
+  const c = document.createElement('canvas');
+  c.width = W; c.height = H;
+  return { el: c, ctx: c.getContext('2d') };
+}
+
+function ensurePaperLayer() {
+  if (paperLayer || typeof document === 'undefined') return;
+  const mk = makeCtx();
+  if (!mk) { paperLayer = null; return; }
+  paperLayer = mk.el;
+  const p = mk.ctx;
+  p.fillStyle = '#f2ecdd';
+  p.fillRect(0, 0, W, H);
+
+  // stretcher bars peeking around the sheet
+  p.fillStyle = 'rgba(74,56,38,0.14)';
+  p.fillRect(12, 12, W - 24, 9);
+  p.fillRect(12, H - 21, W - 24, 9);
+  p.fillRect(12, 12, 9, H - 24);
+  p.fillRect(W - 21, 12, 9, H - 24);
+
+  // broad, uneven water stains
+  const stainA = p.createRadialGradient(W * 0.24, H * 0.3, 10, W * 0.24, H * 0.3, 330);
+  stainA.addColorStop(0, 'rgba(122,100,58,0.055)');
+  stainA.addColorStop(1, 'rgba(122,100,58,0)');
+  p.fillStyle = stainA; p.fillRect(0, 0, W, H);
+  const stainB = p.createRadialGradient(W * 0.8, H * 0.72, 10, W * 0.8, H * 0.72, 300);
+  stainB.addColorStop(0, 'rgba(158,72,52,0.045)');
+  stainB.addColorStop(1, 'rgba(158,72,52,0)');
+  p.fillStyle = stainB; p.fillRect(0, 0, W, H);
+
+  // fiber grain: fine specks + short strands
+  for (let i = 0; i < 2400; i++) {
+    const gx = Math.random() * W, gy = Math.random() * H;
+    const gw = Math.random() * 1.6 + 0.4;
+    p.fillStyle = Math.random() < 0.5 ? 'rgba(88,66,40,0.055)' : 'rgba(46,36,24,0.05)';
+    p.fillRect(gx, gy, gw, gw * 0.4);
+  }
+  p.strokeStyle = 'rgba(88,66,40,0.06)';
+  p.lineWidth = 0.6;
+  for (let i = 0; i < 200; i++) {
+    const sx = Math.random() * W, sy = Math.random() * H;
+    const sa = Math.random() * Math.PI;
+    p.beginPath();
+    p.moveTo(sx, sy);
+    p.lineTo(sx + Math.cos(sa) * (8 + Math.random() * 26), sy + Math.sin(sa) * (8 + Math.random() * 26));
+    p.stroke();
+  }
+}
+
+function ensurePaintLayer() {
+  if (paintCanvas || typeof document === 'undefined') return;
+  const mk = makeCtx();
+  if (!mk) { paintCanvas = null; return; }
+  paintCanvas = mk.el;
+  paintCtx = mk.ctx;
+}
+
+// stamp the current wet-paint streak onto the persistent paint layer
+function addPaintStroke(x, y, spd, rgb) {
+  ensurePaintLayer();
+  if (!paintCtx) return;
+  if (lastPaintX !== null && spd > 0.6) {
+    paintCtx.lineCap = 'round';
+    paintCtx.lineJoin = 'round';
+    // broad wet smear
+    paintCtx.globalAlpha = 0.16;
+    paintCtx.strokeStyle = 'rgb(' + rgb + ')';
+    paintCtx.lineWidth = 9 + Math.min(9, spd * 1.4);
+    paintCtx.beginPath();
+    paintCtx.moveTo(lastPaintX, lastPaintY);
+    paintCtx.lineTo(x, y);
+    paintCtx.stroke();
+    // bright wet core
+    paintCtx.globalAlpha = 0.9;
+    paintCtx.lineWidth = 3 + Math.min(3, spd * 0.5);
+    paintCtx.beginPath();
+    paintCtx.moveTo(lastPaintX, lastPaintY);
+    paintCtx.lineTo(x, y);
+    paintCtx.stroke();
+    paintCtx.globalAlpha = 1;
+  }
+  lastPaintX = x;
+  lastPaintY = y;
+}
+
+function clearPaintLayer() {
+  if (paintCtx) paintCtx.clearRect(0, 0, W, H);
+  lastPaintX = lastPaintY = null;
+}
+
+function drawBackground() {
+  ensurePaperLayer();
+  if (paperLayer) {
+    ctx.drawImage(paperLayer, 0, 0);
+  } else {
+    ctx.fillStyle = '#f2ecdd';
+    ctx.fillRect(0, 0, W, H);
+  }
+
+  // faint paint flecks drifting over the canvas
   for (const p of particles) {
     p.y += p.s; if (p.y > H + 4) { p.y = -4; p.x = Math.random() * W; }
-    ctx.globalAlpha = 0.35;
+    ctx.globalAlpha = 0.12;
     ctx.fillStyle = 'rgb(' + p.c + ')';
     ctx.beginPath();
     ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
@@ -1027,12 +1164,12 @@ function drawBackground() {
 let boundsGrads = null;   // created lazily with ctx dimensions available
 function makeBoundsGrads() {
   const band = 22;
-  const comp = 'rgba(239,68,68,';
+  const comp = 'rgba(190,44,34,';
   const mk = (from, to, dir) => {
     const g = dir === 'v' ? ctx.createLinearGradient(0, from, 0, to)
                           : ctx.createLinearGradient(from, 0, to, 0);
-    g.addColorStop(0, comp + '0.16)');
-    g.addColorStop(1, 'rgba(239,68,68,0)');
+    g.addColorStop(0, comp + '0.14)');
+    g.addColorStop(1, 'rgba(190,44,34,0)');
     return g;
   };
   return {
@@ -1051,12 +1188,12 @@ function drawBounds() {
   ctx.fillStyle = boundsGrads.right;  ctx.fillRect(W - 22, 0, 22, H);
 
   ctx.save();
-  ctx.strokeStyle = 'rgba(239,68,68,0.55)';
+  ctx.strokeStyle = 'rgba(190,44,34,0.5)';
   ctx.lineWidth = 2;
   ctx.strokeRect(1, 1, W - 2, H - 2);
 
   // inward chevrons along each edge (steady, subtle)
-  ctx.strokeStyle = 'rgba(239,68,68,0.5)';
+  ctx.strokeStyle = 'rgba(190,44,34,0.45)';
   ctx.lineWidth = 2;
   ctx.lineCap = 'round';
   const step = 200;
@@ -1082,7 +1219,7 @@ function drawPathHint() {
   pts.push({ x: level.goal.x, y: level.goal.y });
 
   ctx.save();
-  ctx.strokeStyle = 'rgba(192,132,252,' + (0.5 * alpha).toFixed(3) + ')';
+  ctx.strokeStyle = 'rgba(155,111,208,' + (0.5 * alpha).toFixed(3) + ')';
   ctx.lineWidth = 2;
   ctx.setLineDash([5, 11]);
   ctx.beginPath();
@@ -1095,19 +1232,29 @@ function drawPathHint() {
 
 function drawWalls() {
   for (const w of level.walls) {
-    ctx.fillStyle = 'rgba(239,68,68,0.16)';
+    // translucent red masking tape: "don't paint here"
+    ctx.fillStyle = 'rgba(228,80,66,0.22)';
     ctx.fillRect(w.x, w.y, w.w, w.h);
-    ctx.strokeStyle = 'rgba(239,68,68,0.8)';
+
+    // torn tape edge
+    ctx.strokeStyle = 'rgba(176,46,34,0.85)';
     ctx.lineWidth = 2;
-    ctx.shadowColor = 'rgba(239,68,68,0.7)';
-    ctx.shadowBlur = 14;
-    ctx.strokeRect(w.x, w.y, w.w, w.h);
-    ctx.shadowBlur = 0;
-    ctx.strokeStyle = 'rgba(239,68,68,0.25)';
-    ctx.lineWidth = 1;
+    ctx.strokeRect(w.x + 1, w.y + 1, w.w - 2, w.h - 2);
+
+    // diagonal hatch clipped to the strip
+    ctx.save();
     ctx.beginPath();
-    ctx.moveTo(w.x, w.y + w.h); ctx.lineTo(w.x + w.w, w.y);
-    ctx.stroke();
+    ctx.rect(w.x, w.y, w.w, w.h);
+    ctx.clip();
+    ctx.strokeStyle = 'rgba(160,42,32,0.3)';
+    ctx.lineWidth = 1.2;
+    for (let d = -w.h; d <= w.w; d += 16) {
+      ctx.beginPath();
+      ctx.moveTo(w.x + d, w.y);
+      ctx.lineTo(w.x + d + w.h, w.y + w.h);
+      ctx.stroke();
+    }
+    ctx.restore();
   }
 }
 
@@ -1116,16 +1263,29 @@ function drawOrbs() {
     const c = orbColors[o.type];
     ctx.save();
     ctx.shadowColor = c.glow;
-    ctx.shadowBlur = 24;
+    ctx.shadowBlur = 18;
     ctx.fillStyle = c.fill;
     ctx.beginPath();
     ctx.arc(o.x, o.y, o.r, 0, Math.PI * 2);
     ctx.fill();
     ctx.shadowBlur = 0;
 
+    // glossy paint puddle highlight
+    ctx.fillStyle = 'rgba(255,255,255,0.3)';
+    ctx.beginPath();
+    ctx.arc(o.x - o.r * 0.32, o.y - o.r * 0.32, o.r * 0.34, 0, Math.PI * 2);
+    ctx.fill();
+
+    // puddle rim
+    ctx.strokeStyle = c.stroke;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(o.x, o.y, o.r + 1, 0, Math.PI * 2);
+    ctx.stroke();
+
     if (o.type === 'turbo') {
-      // spinning energy arcs
-      ctx.strokeStyle = 'rgba(250,204,21,0.6)';
+      // cadmium is thick - heavier spin arcs
+      ctx.strokeStyle = 'rgba(184,135,27,0.7)';
       ctx.lineWidth = 2.5;
       const a0 = time * 4 + i;
       for (let k = 0; k < 2; k++) {
@@ -1134,12 +1294,14 @@ function drawOrbs() {
         ctx.stroke();
       }
     } else if (o.type === 'repel') {
-      // warning ring + radiating spikes
-      ctx.strokeStyle = 'rgba(248,113,113,0.9)';
+      // alizarin: dashed warning ring + radiating spikes
+      ctx.strokeStyle = 'rgba(181,55,42,0.95)';
       ctx.lineWidth = 2;
       ctx.beginPath();
-      ctx.arc(o.x, o.y, o.r + 4, 0, Math.PI * 2);
+      ctx.setLineDash([4, 4]);
+      ctx.arc(o.x, o.y, o.r + 5, 0, Math.PI * 2);
       ctx.stroke();
+      ctx.setLineDash([]);
       ctx.beginPath();
       const a0 = -time * 2 - i;
       for (let k = 0; k < 8; k++) {
@@ -1150,11 +1312,6 @@ function drawOrbs() {
       ctx.stroke();
     }
 
-    ctx.strokeStyle = c.stroke;
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.arc(o.x, o.y, o.r + 1, 0, Math.PI * 2);
-    ctx.stroke();
     ctx.restore();
   });
 }
@@ -1162,24 +1319,41 @@ function drawOrbs() {
 function drawGoal() {
   const g = level.goal;
   const pulse = g.r + Math.sin(time * 3) * 4;
-  // soft inner fill (cached - rebuilt only when the goal changes)
+  // soft sign-spot fill (cached - rebuilt only when the goal changes)
   if (!goalGrad) {
     goalGrad = ctx.createRadialGradient(g.x, g.y, 4, g.x, g.y, g.r * 0.9);
-    goalGrad.addColorStop(0, 'rgba(192,132,252,0.45)');
-    goalGrad.addColorStop(1, 'rgba(192,132,252,0.08)');
+    goalGrad.addColorStop(0, 'rgba(155,111,208,0.5)');
+    goalGrad.addColorStop(1, 'rgba(155,111,208,0.1)');
   }
   ctx.fillStyle = goalGrad;
   ctx.beginPath();
   ctx.arc(g.x, g.y, g.r * 0.9, 0, Math.PI * 2);
   ctx.fill();
 
-  // glowing ring
-  ctx.shadowColor = 'rgba(192,132,252,0.9)';
-  ctx.shadowBlur = 22;
-  ctx.strokeStyle = 'rgba(216,180,254,0.95)';
-  ctx.lineWidth = 3;
+  // dashed "sign here" ring
+  ctx.strokeStyle = 'rgba(138,85,184,0.8)';
+  ctx.lineWidth = 2.5;
+  ctx.setLineDash([6, 7]);
   ctx.beginPath();
   ctx.arc(g.x, g.y, pulse, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // registration cross (the spot you sign)
+  ctx.strokeStyle = 'rgba(138,85,184,0.6)';
+  ctx.lineWidth = 1.4;
+  ctx.beginPath();
+  ctx.moveTo(g.x, g.y - 7); ctx.lineTo(g.x, g.y + 7);
+  ctx.moveTo(g.x - 7, g.y); ctx.lineTo(g.x + 7, g.y);
+  ctx.stroke();
+
+  // inner pulse with a soft glow
+  ctx.shadowColor = 'rgba(138,85,184,0.9)';
+  ctx.shadowBlur = 22;
+  ctx.strokeStyle = 'rgba(172,132,216,0.9)';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(g.x, g.y, pulse - 4, 0, Math.PI * 2);
   ctx.stroke();
   ctx.shadowBlur = 0;
 }
@@ -1196,7 +1370,7 @@ function drawBeacon() {
   const len = Math.min(80, 24 + d * 0.035);
 
   ctx.save();
-  ctx.strokeStyle = 'rgba(192,132,252,0.45)';
+  ctx.strokeStyle = 'rgba(138,85,184,0.5)';
   ctx.lineWidth = 2;
   ctx.setLineDash([5, 9]);
   ctx.beginPath();
@@ -1207,7 +1381,7 @@ function drawBeacon() {
 
   const hx = x0 + Math.cos(angle) * (len - 6);
   const hy = y0 + Math.sin(angle) * (len - 6);
-  ctx.fillStyle = 'rgba(216,180,254,0.75)';
+  ctx.fillStyle = 'rgba(172,132,216,0.8)';
   ctx.beginPath();
   ctx.moveTo(hx, hy);
   ctx.lineTo(hx - Math.cos(angle - 0.45) * 9, hy - Math.sin(angle - 0.45) * 9);
@@ -1219,36 +1393,36 @@ function drawBeacon() {
 
 function drawTether() {
   if (!tethered) return;
-  const c = orbColors[tether.orb.type];
+  const o = tether.orb;
+  const dx = o.x - player.x, dy = o.y - player.y;
+  const d = Math.hypot(dx, dy) || 1;
+  const side = Math.sin(time * 2.2) * Math.min(8, d * 0.02);
+  const px = -dy / d, py = dx / d;
+  const mx = (player.x + o.x) / 2 + px * side;
+  const my = (player.y + o.y) / 2 + py * side;
 
   ctx.lineCap = 'round';
 
-  // soft ribbon in the orb's color (no shadowBlur - cheap glow)
-  ctx.strokeStyle = c.glow;
-  ctx.globalAlpha = 0.4;
-  ctx.lineWidth = 5;
+  // hanging rope (hay-braid tan)
+  ctx.strokeStyle = 'rgba(126,94,50,0.9)';
+  ctx.lineWidth = 2.6;
   ctx.beginPath();
   ctx.moveTo(player.x, player.y);
-  ctx.lineTo(tether.orb.x, tether.orb.y);
+  ctx.quadraticCurveTo(mx, my, o.x, o.y);
   ctx.stroke();
 
-  // bright white core
-  ctx.globalAlpha = 1;
-  ctx.strokeStyle = 'rgba(255,255,255,0.92)';
-  ctx.lineWidth = 2;
+  // lighter highlight strand
+  ctx.strokeStyle = 'rgba(216,182,120,0.45)';
+  ctx.lineWidth = 1;
   ctx.beginPath();
   ctx.moveTo(player.x, player.y);
-  ctx.lineTo(tether.orb.x, tether.orb.y);
+  ctx.quadraticCurveTo(mx, my, o.x, o.y);
   ctx.stroke();
 
-  // energy pulse traveling along the tether
-  const t = (time * 0.75) % 1;
-  ctx.fillStyle = '#ffffff';
+  // knot at the bucket handle
+  ctx.fillStyle = 'rgba(96,70,34,1)';
   ctx.beginPath();
-  ctx.arc(
-    player.x + (tether.orb.x - player.x) * t,
-    player.y + (tether.orb.y - player.y) * t,
-    2.6, 0, Math.PI * 2);
+  ctx.arc(player.x + px * 3, player.y + py * 3, 1.7, 0, Math.PI * 2);
   ctx.fill();
 
   ctx.lineCap = 'butt';
@@ -1262,9 +1436,9 @@ function drawTrail() {
   ctx.lineCap = 'round';
   for (let i = 0; i < trail.length - 1; i += stride) {
     const t = 1 - i / trail.length;               // 1 near the player
-    const a = Math.min(0.70, t * 0.55 * gain);
-    ctx.strokeStyle = 'rgba(34,211,238,' + a.toFixed(3) + ')';
-    ctx.lineWidth = (3 * t + 1) * (0.7 + 0.45 * gain);
+    const a = Math.min(0.5, t * 0.4 * gain);
+    ctx.strokeStyle = 'rgba(' + paintRGB + ',' + a.toFixed(3) + ')';
+    ctx.lineWidth = (4 * t + 1.2) * (0.7 + 0.45 * gain);
     ctx.beginPath();
     ctx.moveTo(trail[i].x, trail[i].y);
     ctx.lineTo(trail[i + 1].x, trail[i + 1].y);
@@ -1278,23 +1452,61 @@ function drawPlayer() {
   stretchEase += (target - stretchEase) * 0.22;     // ease, so direction flips can't flicker
   const str = stretchEase;
   const pop = 1 + 0.32 * snap;                      // attach pop
+
+  // the tin bucket leans into its flight and tips to pour
+  const lean = tethered
+    ? Math.max(-0.18, Math.min(0.18, -player.vx * 0.006))
+    : Math.max(-0.55, Math.min(0.55, -player.vx * 0.008));
+
   ctx.save();
   ctx.translate(player.x, player.y);
-  ctx.rotate(Math.atan2(player.vy, player.vx));
-  // stretch along travel, squeeze across it (area ~constant)
-  ctx.scale(str * pop, (2 - str) * pop);
-  ctx.shadowColor = playerColor.glow;
-  ctx.shadowBlur = 18;
-  ctx.fillStyle = playerColor.core;
+  ctx.scale(pop * str, pop * (2 - str));
+  ctx.rotate(lean);
+
+  const R = PLAYER_R;
+  // tapered bucket body (wider mouth, narrow base)
+  ctx.fillStyle = '#dfe6ea';
+  ctx.strokeStyle = '#77828b';
+  ctx.lineWidth = 1.3;
   ctx.beginPath();
-  ctx.arc(0, 0, PLAYER_R, 0, Math.PI * 2);
+  ctx.moveTo(-R * 1.05, -R * 1.5);
+  ctx.lineTo(R * 1.05, -R * 1.5);
+  ctx.lineTo(R * 0.78, R * 1.05);
+  ctx.lineTo(-R * 0.78, R * 1.05);
+  ctx.closePath();
   ctx.fill();
-  ctx.shadowBlur = 0;
-  ctx.strokeStyle = playerColor.ring;
+  ctx.stroke();
+
+  // open mouth / inner paint visible at the top
+  ctx.fillStyle = '#aeb7bd';
+  ctx.beginPath();
+  ctx.ellipse(0, -R * 1.5, R * 1.05, R * 0.42, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = 'rgba(' + paintRGB + ',0.9)';
+  ctx.beginPath();
+  ctx.ellipse(0, -R * 1.5, R * 0.72, R * 0.28, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // wire bail (handle) over the mouth
+  ctx.strokeStyle = '#8c959c';
   ctx.lineWidth = 1.5;
   ctx.beginPath();
-  ctx.arc(0, 0, PLAYER_R - 0.5, 0, Math.PI * 2);
+  ctx.arc(0, -R * 1.5, R * 1.05, Math.PI, 0, false);
   ctx.stroke();
+
+  // pouring stream toward the puddle when tethered
+  if (tethered && tether) {
+    const o = tether.orb;
+    const ang = Math.atan2(o.y - player.y, o.x - player.x);
+    ctx.strokeStyle = 'rgba(' + paintRGB + ',0.9)';
+    ctx.lineWidth = 1.5;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(0, R * 0.8);
+    ctx.lineTo(Math.cos(ang) * R * 2.2, R * 0.8 + Math.sin(ang) * R * 2.2);
+    ctx.stroke();
+  }
+
   ctx.restore();
 }
 
@@ -1303,7 +1515,7 @@ function drawGoalBurst() {
   ctx.lineWidth = 2.5;
   for (const r of rings) {
     ctx.strokeStyle = r.col ? 'rgba(' + r.col + ',' + (r.life * 1.4).toFixed(3) + ')'
-                            : 'rgba(192,132,252,' + (r.life * 1.4).toFixed(3) + ')';
+                            : 'rgba(138,85,184,' + (r.life * 1.4).toFixed(3) + ')';
     ctx.beginPath();
     ctx.arc(r.x, r.y, r.r, 0, Math.PI * 2);
     ctx.stroke();
@@ -1334,13 +1546,13 @@ function drawGoalBurst() {
   }
   ctx.globalAlpha = 1;
 
-  // landing tier word ("SOFT" / "POWER!" / "MASSIVE!!")
+  // landing tier word ("dab" / "STROKE!" / "SPLASH!!")
   if (winLabelT > 0) {
     const g = level.goal;
-    const words = ['soft', 'POWER!', 'MASSIVE!!'];
+    const words = ['dab', 'STROKE!', 'SPLASH!!'];
     ctx.globalAlpha = Math.min(1, winLabelT * 1.6);
-    ctx.fillStyle = '#ffffff';
-    ctx.font = (landTier === 2 ? 54 : landTier === 1 ? 40 : 26) + 'px 900 system-ui, sans-serif';
+    ctx.fillStyle = '#3d3530';
+    ctx.font = (landTier === 2 ? 52 : landTier === 1 ? 40 : 26) + 'px 900 system-ui, sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(words[landTier], g.x, g.y - (landTier === 2 ? 28 : landTier === 1 ? 20 : 12));
@@ -1351,9 +1563,9 @@ function drawGoalBurst() {
 
 function drawVignette() {
   if (!vignetteGrad) {
-    vignetteGrad = ctx.createRadialGradient(W / 2, H / 2, W * 0.35, W / 2, H / 2, W * 0.78);
-    vignetteGrad.addColorStop(0, 'rgba(0,0,0,0)');
-    vignetteGrad.addColorStop(1, 'rgba(0,0,6,0.55)');
+    vignetteGrad = ctx.createRadialGradient(W / 2, H / 2, W * 0.35, W / 2, H / 2, W * 0.75);
+    vignetteGrad.addColorStop(0, 'rgba(96,74,44,0)');
+    vignetteGrad.addColorStop(1, 'rgba(96,74,44,0.18)');
   }
   ctx.fillStyle = vignetteGrad;
   ctx.fillRect(0, 0, W, H);
@@ -1373,6 +1585,7 @@ function drawTetherParticles() {
 
 function draw() {
   drawBackground();
+  if (paintCanvas) ctx.drawImage(paintCanvas, 0, 0);
   drawBounds();
   drawPathHint();
   drawWalls();
@@ -1545,6 +1758,15 @@ wrap.addEventListener('contextmenu', (e) => e.preventDefault());
 elRestart.addEventListener('mousedown', (e) => e.stopPropagation());
 elRestart.addEventListener('touchstart', (e) => { e.stopPropagation(); e.preventDefault(); }, { passive: false });
 elRestart.addEventListener('click', () => { ensureAudio(); playTick(); loadLevel(levelIndex); });
+
+// NEXT LEVEL: advance (or wrap to level 1 after the last)
+elNextBtn.addEventListener('mousedown', (e) => e.stopPropagation());
+elNextBtn.addEventListener('touchstart', (e) => { e.stopPropagation(); e.preventDefault(); }, { passive: false });
+elNextBtn.addEventListener('click', () => {
+  ensureAudio(); playTick();
+  const nextIdx = levelIndex + 1;
+  loadLevel(nextIdx >= LEVELS.length ? 0 : nextIdx);
+});
 
 // ---------- HUD buttons ----------
 const elHudRestart = document.getElementById('hudRestartBtn');
