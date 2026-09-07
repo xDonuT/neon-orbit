@@ -276,6 +276,17 @@
     align-items: center;
     justify-content: center;
   }
+  #msgBtns.ready {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  #msgBtns.ready #menuBtnMsg {
+    order: -1;
+    align-self: flex-end;
+    margin-bottom: 12px;
+    padding: 8px 16px;
+    font-size: 12px;
+  }
   #nextLevelBtn {
     font-family: inherit;
     font-size: 18px;
@@ -697,6 +708,7 @@ const elMsgStars = document.getElementById('msgStars');
 const elMsgScore = document.getElementById('msgScore');
 const elMsgObj = document.getElementById('msgObj');
 const elMsgS   = document.getElementById('msgSub');
+const elMsgBtns = document.getElementById('msgBtns');
 const elRestart= document.getElementById('restartBtn');
 const elNextBtn = document.getElementById('nextLevelBtn');
 const elLevelTitle = document.getElementById('levelTitle');
@@ -773,6 +785,8 @@ function showReadyUI(on) {
     elMsgS.textContent = 'tap to start \u00b7 then hold to swing, release to fly';
     elRestart.style.display = 'none';
     elNextBtn.style.display = 'none';
+    document.getElementById('menuBtnMsg').style.display = '';
+    elMsgBtns.classList.add('ready');
   } else {
     elMsg.classList.add('hidden');
   }
