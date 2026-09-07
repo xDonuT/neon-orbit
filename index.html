@@ -129,7 +129,7 @@
     overflow: hidden;
     background: #cfc7b4;
   }
-  canvas {
+  canvas, #bounds {
     position: absolute;
     left: 50%;
     top: 50%;
@@ -140,9 +140,13 @@
     max-height: 100%;
     aspect-ratio: 1400 / 850;
     touch-action: none;
-    cursor: crosshair;
     display: block;
   }
+  #bounds {
+    pointer-events: none;
+    z-index: 7;
+  }
+  canvas { cursor: crosshair; }
 
   /* ------- Center message overlay ------- */
   #message {
@@ -365,7 +369,8 @@
   <div id="wrap">
     <canvas id="game" width="1400" height="850"></canvas>
 
-    <!-- Top-left info chip + right-side button rail -->
+    <!-- Red danger edge overlay: sits ABOVE the HUD so nothing covers it -->
+    <canvas id="bounds" width="1400" height="850"></canvas>
     <div id="hudInfo">
       <div id="title">PAINT&nbsp;ORBIT</div>
       <div id="hudInfoRow">
@@ -423,7 +428,9 @@
 // ---------- Canvas ----------
 const W = 1400, H = 850;
 const canvas = document.getElementById('game');
+const boundsOverlay = document.getElementById('bounds');
 const ctx = canvas.getContext('2d');
+const boundsCtx = boundsOverlay.getContext('2d');
 
 // ---------- Physics constants (tuned at 60 fps) ----------
 const DRAG          = 0.999;   // free-flight air drag per frame (lower = floatier)
@@ -1228,14 +1235,15 @@ function drawBackground() {
 // (blurring a full-perimeter stroke every frame is a known mobile-jank source).
 let boundsGrads = null;   // created lazily with ctx dimensions available
 function makeBoundsGrads() {
+  const g = boundsCtx;
   const band = 22;
   const comp = 'rgba(190,44,34,';
   const mk = (from, to, dir) => {
-    const g = dir === 'v' ? ctx.createLinearGradient(0, from, 0, to)
-                          : ctx.createLinearGradient(from, 0, to, 0);
-    g.addColorStop(0, comp + '0.14)');
-    g.addColorStop(1, 'rgba(190,44,34,0)');
-    return g;
+    const gr = dir === 'v' ? g.createLinearGradient(0, from, 0, to)
+                           : g.createLinearGradient(from, 0, to, 0);
+    gr.addColorStop(0, comp + '0.14)');
+    gr.addColorStop(1, 'rgba(190,44,34,0)');
+    return gr;
   };
   return {
     top:    mk(0, band, 'v'),
@@ -1245,32 +1253,36 @@ function makeBoundsGrads() {
   };
 }
 
+// drawn on the #bounds overlay canvas, which sits above the HUD/footer,
+// so no UI element can ever cover the danger edge
 function drawBounds() {
+  const g = boundsCtx;
   if (!boundsGrads) boundsGrads = makeBoundsGrads();
-  ctx.fillStyle = boundsGrads.top;    ctx.fillRect(0, 0, W, 22);
-  ctx.fillStyle = boundsGrads.bottom; ctx.fillRect(0, H - 22, W, 22);
-  ctx.fillStyle = boundsGrads.left;   ctx.fillRect(0, 0, 22, H);
-  ctx.fillStyle = boundsGrads.right;  ctx.fillRect(W - 22, 0, 22, H);
+  g.clearRect(0, 0, W, H);
+  g.fillStyle = boundsGrads.top;    g.fillRect(0, 0, W, 22);
+  g.fillStyle = boundsGrads.bottom; g.fillRect(0, H - 22, W, 22);
+  g.fillStyle = boundsGrads.left;   g.fillRect(0, 0, 22, H);
+  g.fillStyle = boundsGrads.right;  g.fillRect(W - 22, 0, 22, H);
 
-  ctx.save();
-  ctx.strokeStyle = 'rgba(190,44,34,0.55)';
-  ctx.lineWidth = 3;
-  ctx.strokeRect(1, 1, W - 2, H - 2);
+  g.save();
+  g.strokeStyle = 'rgba(190,44,34,0.55)';
+  g.lineWidth = 3;
+  g.strokeRect(1, 1, W - 2, H - 2);
 
   // inward chevrons along each edge (steady, subtle)
-  ctx.strokeStyle = 'rgba(190,44,34,0.5)';
-  ctx.lineWidth = 3;
-  ctx.lineCap = 'round';
+  g.strokeStyle = 'rgba(190,44,34,0.5)';
+  g.lineWidth = 3;
+  g.lineCap = 'round';
   const step = 200;
   for (let x = 46; x < W - 30; x += step) {
-    ctx.beginPath(); ctx.moveTo(x - 8, 5); ctx.lineTo(x, 14); ctx.lineTo(x + 8, 5); ctx.stroke();          // top: points down
-    ctx.beginPath(); ctx.moveTo(x - 8, H - 5); ctx.lineTo(x, H - 14); ctx.lineTo(x + 8, H - 5); ctx.stroke(); // bottom: points up
+    g.beginPath(); g.moveTo(x - 8, 5); g.lineTo(x, 14); g.lineTo(x + 8, 5); g.stroke();          // top: points down
+    g.beginPath(); g.moveTo(x - 8, H - 5); g.lineTo(x, H - 14); g.lineTo(x + 8, H - 5); g.stroke(); // bottom: points up
   }
   for (let y = 46; y < H - 30; y += step) {
-    ctx.beginPath(); ctx.moveTo(5, y - 8); ctx.lineTo(14, y); ctx.lineTo(5, y + 8); ctx.stroke();          // left: points right
-    ctx.beginPath(); ctx.moveTo(W - 5, y - 8); ctx.lineTo(W - 14, y); ctx.lineTo(W - 5, y + 8); ctx.stroke(); // right: points left
+    g.beginPath(); g.moveTo(5, y - 8); g.lineTo(14, y); g.lineTo(5, y + 8); g.stroke();          // left: points right
+    g.beginPath(); g.moveTo(W - 5, y - 8); g.lineTo(W - 14, y); g.lineTo(W - 5, y + 8); g.stroke(); // right: points left
   }
-  ctx.restore();
+  g.restore();
 }
 
 // Faint dashed route through the intended chain; fades after the first release.
@@ -2085,6 +2097,8 @@ function fitLayout() {
     else              { cw = ww; ch = ww / AR; }   // tall viewport: width-bound, top/bottom bars
     canvas.style.width = cw + 'px';
     canvas.style.height = ch + 'px';
+    boundsOverlay.style.width = cw + 'px';
+    boundsOverlay.style.height = ch + 'px';
     const r = canvas.getBoundingClientRect();
     const topPad = Math.max(0, r.top - wrapRect.top);
     const botPad = Math.max(0, wrapRect.bottom - r.bottom);
