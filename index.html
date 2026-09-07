@@ -105,7 +105,7 @@
   }
   #hudRestartBtn:hover { background: rgba(166, 60, 42, 0.16); }
 
-  /* ------- Canvas wrapper (full screen; canvas is JS-sized to fill) ------- */
+  /* ------- Canvas wrapper (full screen; canvas letterbox-fit via JS) ------- */
   #wrap {
     position: relative;
     width: 100%;
@@ -118,10 +118,11 @@
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
-    width: 100vw;
+    width: auto;
     height: auto;
-    max-width: none;
-    max-height: none;
+    max-width: 100%;
+    max-height: 100%;
+    aspect-ratio: 1400 / 850;
     touch-action: none;
     cursor: crosshair;
     display: block;
@@ -2047,20 +2048,23 @@ const wrap = document.getElementById('wrap');
 let lastTouch = 0;
 
 /* ============================================================
-   FULL-SCREEN FIT
-   The canvas always spans the wrap width. On wide (landscape)
-   screens the 1400x850 arena is taller than the viewport, so the
-   overflow is cropped symmetrically and the whole screen becomes
-   the canvas. In portrait it letterboxes top/bottom (the game
-   stays landscape-first). HUD / footer / toast are re-pinned to
-   the canvas box so they never float over the desk area.
+   CANVAS FIT (contain / letterbox)
+   The full 1400x850 room is always visible so the danger edges
+   (out-of-bounds) stay on screen: the canvas is scaled down to
+   fit the viewport and centered, leaving desk bars around it.
+   HUD / footer / toast are re-pinned to the canvas box so they
+   never float over the desk area.
    ============================================================ */
 function fitLayout() {
   try {
     const wrapRect = wrap.getBoundingClientRect();
-    const vw = wrap.clientWidth > 0 ? wrap.clientWidth : wrapRect.width;
-    const ch = vw / (W / H);
-    canvas.style.width = vw + 'px';
+    const ww = wrap.clientWidth > 0 ? wrap.clientWidth : wrapRect.width;
+    const wh = wrap.clientHeight > 0 ? wrap.clientHeight : wrapRect.height;
+    const AR = W / H;
+    let cw, ch;
+    if (ww / wh > AR) { ch = wh; cw = wh * AR; }   // wide viewport: height-bound, side bars
+    else              { cw = ww; ch = ww / AR; }   // tall viewport: width-bound, top/bottom bars
+    canvas.style.width = cw + 'px';
     canvas.style.height = ch + 'px';
     const r = canvas.getBoundingClientRect();
     const topPad = Math.max(0, r.top - wrapRect.top);
