@@ -420,6 +420,11 @@ const WIN_FX = [
   { halt: 0.12, slow: 0.8,  flash: 0.5  },   // POWER
   { halt: 0.20, slow: 1.3,  flash: 0.85 },   // MASSIVE
 ];
+const BURST_CFG = [
+  { sparks: 12, spMin: 0.8,  spMax: 2.4, sizeMin: 1.2, sizeMax: 2.2, rings: [{ r: 8,  vr: 6,  life: 0.5 }] },
+  { sparks: 24, spMin: 1.6,  spMax: 5.5, sizeMin: 1.6, sizeMax: 3.2, rings: [{ r: 8,  vr: 9,  life: 0.65 }, { r: 4, vr: 6.5, life: 0.45 }] },
+  { sparks: 80, spMin: 2.5,  spMax: 9.5, sizeMin: 2.0, sizeMax: 4.5, rings: [{ r: 10, vr: 12, life: 0.8 }, { r: 6, vr: 9, life: 0.6 }, { r: 3, vr: 7, life: 0.5 }] },
+];
 const OUT_MARGIN    = 50;      // death buffer beyond canvas edges
 
 // ---------- Levels ----------
@@ -733,19 +738,7 @@ if (best.type === 'turbo') {
   tethered = true;
   snap = 1;
   paintRGB = orbColors[best.type].paint;
-  // splat on grab: a permanent stain on the puddle + paint droplets
-  addSplatStamp(best.x, best.y, best.r * 0.8, orbColors[best.type].paint, 0.5);
-  for (let i = 0; i < 3; i++) {
-    const a = Math.random() * Math.PI * 2;
-    tetherParticles.push({
-      x: best.x, y: best.y,
-      vx: Math.cos(a) * (1 + Math.random() * 2),
-      vy: Math.sin(a) * (1 + Math.random() * 2) - 0.4,
-      life: 0.5 + Math.random() * 0.3,
-      r: 1.6 + Math.random() * 1.6,
-      color: orbColors[best.type].paint
-    });
-  }
+  rings.push({ x: best.x, y: best.y, r: best.r * 0.5, vr: 2.2, life: 0.30, col: '255,255,255' });
   tether = {
     orb:   best,
     angVel: angVel,
@@ -955,30 +948,35 @@ function checkBounds() {
 }
 
 // ---------- win / lose ----------
-// the winning bucket slams its colour onto the "sign here" spot and the
-// splat stays on the paper permanently (no vanishing sparks/beams)
-function stainGoal(tier) {
+function spawnGoalBurst(tier) {
   const g = level.goal;
-  const mix = paintRGB;
-  const big = 2.0 + tier * 0.8;
-  addSplatStamp(g.x, g.y, g.r * big, mix, 0.5 + tier * 0.18);
-  addSplatStamp(g.x - g.r * 0.45, g.y + g.r * 0.28, g.r * 0.85, mix, 0.5);
-  for (let i = 0; i < 6 + tier * 4; i++) {
+  const colors = ['#8a55b8', '#e0af3c', '#2f9e70', '#e4513f'];
+  const cfg = BURST_CFG[tier];
+  for (let i = 0; i < cfg.sparks; i++) {
     const a = Math.random() * Math.PI * 2;
-    const d = g.r * (0.4 + Math.random() * (2.2 + tier));
-    addSplatStamp(g.x + Math.cos(a) * d, g.y + Math.sin(a) * d,
-                  g.r * (0.16 + Math.random() * 0.24), mix, 0.7);
-  }
-  // a brief paper-dust puff instead of a sci-fi flash
-  for (let i = 0; i < 8 + tier * 6; i++) {
-    const a = Math.random() * Math.PI * 2;
-    const sp = 0.6 + Math.random() * (1.6 + tier);
+    const sp = cfg.spMin + Math.random() * (cfg.spMax - cfg.spMin);
     sparks.push({
       x: g.x, y: g.y,
-      vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 0.5,
-      life: 1, size: 1.2 + Math.random() * 1.5,
-      color: 'rgba(122,96,60,0.5)'
+      vx: Math.cos(a) * sp, vy: Math.sin(a) * sp,
+      life: 1,
+      size: cfg.sizeMin + Math.random() * (cfg.sizeMax - cfg.sizeMin),
+      color: colors[(Math.random() * colors.length) | 0],
     });
+  }
+  for (const r of cfg.rings) rings.push({ x: g.x, y: g.y, r: r.r, vr: r.vr, life: r.life });
+
+  if (tier === 2) {
+    // MASSIVE only: radial energy beams exploding from the goal
+    for (let i = 0; i < 16; i++) {
+      beams.push({
+        x: g.x, y: g.y,
+        a: (Math.PI * 2 * i) / 16 + Math.random() * 0.22,
+        maxLen: 70 + Math.random() * 110,
+        width: 3.5 + Math.random() * 2.5,
+        life: 0.55 + Math.random() * 0.25,
+        rgb: Math.random() < 0.35 ? '184,135,27' : '76,58,34',
+      });
+    }
   }
 }
 
@@ -1014,9 +1012,9 @@ function win() {
   winHalt = fx.halt;
   winSlow = fx.slow;
   winSlowMax = fx.slow;
-  flashAlpha = 0;                       // no white flash - the splat IS the payoff
+  flashAlpha = fx.flash;
   winLabelT = 0.9;
-  stainGoal(landTier);
+  spawnGoalBurst(landTier);
   playWin(landTier);
   stopTurboBed();
   elMsg.classList.remove('lost');
@@ -1175,44 +1173,6 @@ function clearPaintLayer() {
   lastPaintX = lastPaintY = null;
 }
 
-// smooth closed irregular blob; wobble is deterministic from the seed so
-// a given puddle keeps its silhouette from frame to frame.
-function blobPath(g, x, y, rad, seed, wobble) {
-  const seg = 14, w = wobble || 0.1;
-  g.beginPath();
-  let prev = null;
-  for (let i = 0; i <= seg; i++) {
-    const a = (i % seg) / seg * Math.PI * 2;
-    const rr = rad * (1 + w * Math.sin(2 * a + seed) + w * 0.6 * Math.sin(5 * a + seed * 1.7));
-    const cx = x + Math.cos(a) * rr, cy = y + Math.sin(a) * rr;
-    if (!prev) { g.moveTo(cx, cy); prev = { x: cx, y: cy }; continue; }
-    g.lineTo((prev.x + cx) / 2, (prev.y + cy) / 2);
-    prev = { x: cx, y: cy };
-  }
-  g.closePath();
-}
-
-// stamp a permanent splat onto the persistent paint layer (grab splashes
-// and the goal signature stay on the paper instead of vanishing)
-function addSplatStamp(x, y, rad, rgb, alpha) {
-  ensurePaintLayer();
-  if (!paintCtx) return;
-  const p = paintCtx;
-  p.save();
-  p.globalAlpha = alpha == null ? 0.55 : alpha;
-  p.fillStyle = 'rgb(' + rgb + ')';
-  blobPath(p, x, y, rad, Math.random() * 6.283, 0.24);
-  p.fill();
-  for (let i = 0; i < 4; i++) {
-    const a = Math.random() * Math.PI * 2;
-    const d = rad * (0.5 + Math.random() * 0.7);
-    p.beginPath();
-    p.arc(x + Math.cos(a) * d, y + Math.sin(a) * d, 1 + Math.random() * 2.2, 0, Math.PI * 2);
-    p.fill();
-  }
-  p.restore();
-}
-
 function drawBackground() {
   ensurePaperLayer();
   if (paperLayer) {
@@ -1335,113 +1295,60 @@ function drawWalls() {
 }
 
 function drawOrbs() {
-  level.orbs.forEach((o) => {
+  level.orbs.forEach((o, i) => {
     const c = orbColors[o.type];
-    if (o._seed === undefined) o._seed = Math.random() * 6.283;   // stable wobble
-    const s = o._seed;
-
-    // contact shadow on the paper under the puddle
-    ctx.fillStyle = 'rgba(62,42,26,0.14)';
+    ctx.save();
+    ctx.shadowColor = c.glow;
+    ctx.shadowBlur = 18;
+    ctx.fillStyle = c.fill;
     ctx.beginPath();
-    ctx.ellipse(o.x, o.y + o.r * 0.99, o.r * 0.82, o.r * 0.2, 0, 0, Math.PI * 2);
+    ctx.arc(o.x, o.y, o.r, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    // glossy paint puddle highlight
+    ctx.fillStyle = 'rgba(255,255,255,0.3)';
+    ctx.beginPath();
+    ctx.arc(o.x - o.r * 0.32, o.y - o.r * 0.32, o.r * 0.34, 0, Math.PI * 2);
     ctx.fill();
 
-    if (o.type === 'repel') {
-      // alizarin: dried, mean, cracked - no shine, no warning ring
-      blobPath(ctx, o.x, o.y, o.r, s, 0.15);
-      ctx.fillStyle = c.fill;
-      ctx.fill();
-      // dried cracked ridge around the edge
-      ctx.strokeStyle = 'rgba(150,38,26,0.55)';
-      ctx.lineWidth = 2.4;
-      blobPath(ctx, o.x, o.y, o.r * 0.97, s, 0.17);
-      ctx.stroke();
-      // cracks radiating from the dried centre
-      ctx.strokeStyle = 'rgba(118,30,22,0.45)';
-      ctx.lineWidth = 1.3;
-      ctx.lineCap = 'round';
-      for (let k = 0; k < 5; k++) {
-        const a = s + k * 2.2;
-        const r2 = o.r * (0.6 + Math.sin(a * 3) * 0.22);
+    // puddle rim
+    ctx.strokeStyle = c.stroke;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(o.x, o.y, o.r + 1, 0, Math.PI * 2);
+    ctx.stroke();
+
+    if (o.type === 'turbo') {
+      // cadmium is thick - heavier spin arcs
+      ctx.strokeStyle = 'rgba(184,135,27,0.7)';
+      ctx.lineWidth = 2.5;
+      const a0 = time * 4 + i;
+      for (let k = 0; k < 2; k++) {
         ctx.beginPath();
-        ctx.moveTo(o.x + Math.cos(a) * o.r * 0.18, o.y + Math.sin(a) * o.r * 0.18);
-        ctx.lineTo(o.x + Math.cos(a) * r2 * 0.62 + Math.sin(a * 2.3) * 3,
-                   o.y + Math.sin(a) * r2 * 0.62 - Math.cos(a * 2.3) * 3);
-        ctx.lineTo(o.x + Math.cos(a) * r2, o.y + Math.sin(a) * r2);
+        ctx.arc(o.x, o.y, o.r + 6, a0 + k * Math.PI, a0 + k * Math.PI + 1.5);
         ctx.stroke();
       }
-      ctx.lineCap = 'butt';
-      // faint dull blush, off-centre - dried paint has almost no gloss
-      ctx.fillStyle = 'rgba(255,255,255,0.07)';
-      ctx.beginPath();
-      ctx.ellipse(o.x - o.r * 0.28, o.y - o.r * 0.3, o.r * 0.26, o.r * 0.14, -0.4, 0, Math.PI * 2);
-      ctx.fill();
-    } else if (o.type === 'turbo') {
-      // cadmium: thick, wet, bubbling - a heaped pool, not a disc
-      blobPath(ctx, o.x, o.y, o.r, s, 0.09);
-      ctx.fillStyle = c.fill;
-      ctx.fill();
-      blobPath(ctx, o.x + o.r * 0.16, o.y - o.r * 0.14, o.r * 0.72, s * 1.3, 0.1);
-      ctx.fill();
-      // meniscus
-      ctx.strokeStyle = 'rgba(168,124,22,0.5)';
+    } else if (o.type === 'repel') {
+      // alizarin: dashed warning ring + radiating spikes
+      ctx.strokeStyle = 'rgba(181,55,42,0.95)';
       ctx.lineWidth = 2;
-      blobPath(ctx, o.x, o.y, o.r * 0.96, s, 0.09);
+      ctx.beginPath();
+      ctx.setLineDash([4, 4]);
+      ctx.arc(o.x, o.y, o.r + 5, 0, Math.PI * 2);
       ctx.stroke();
-      // bubbles blooming in the skin
-      ctx.fillStyle = 'rgba(250,233,160,0.9)';
-      for (let k = 0; k < 4; k++) {
-        const ba = s + k * 2.1 + time * 0.7;
-        const grow = 0.35 + 0.65 * (0.5 + 0.5 * Math.sin(time * 2.6 + k * 2.4));
-        if (grow > 0.5) {
-          ctx.beginPath();
-          ctx.arc(o.x + Math.cos(ba) * o.r * 0.42,
-                  o.y + Math.sin(ba) * o.r * 0.42, 1.7 * grow, 0, Math.PI * 2);
-          ctx.fill();
-        }
+      ctx.setLineDash([]);
+      ctx.beginPath();
+      const a0 = -time * 2 - i;
+      for (let k = 0; k < 8; k++) {
+        const a = a0 + k * Math.PI / 4;
+        ctx.moveTo(o.x + Math.cos(a) * (o.r + 3), o.y + Math.sin(a) * (o.r + 3));
+        ctx.lineTo(o.x + Math.cos(a) * (o.r + 11), o.y + Math.sin(a) * (o.r + 11));
       }
-      // fat glossy highlight
-      ctx.fillStyle = 'rgba(255,255,255,0.5)';
-      ctx.beginPath();
-      ctx.ellipse(o.x - o.r * 0.34, o.y - o.r * 0.38, o.r * 0.36, o.r * 0.2, -0.5, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = 'rgba(255,255,255,0.85)';
-      ctx.beginPath();
-      ctx.arc(o.x - o.r * 0.42, o.y - o.r * 0.46, o.r * 0.08, 0, Math.PI * 2);
-      ctx.fill();
-    } else {
-      // wet normal puddle: glossy on top, meniscus lip, contact shadow
-      blobPath(ctx, o.x, o.y, o.r, s, 0.1);
-      ctx.fillStyle = c.fill;
-      ctx.fill();
-      ctx.strokeStyle = c.stroke;
-      ctx.globalAlpha = 0.55;
-      ctx.lineWidth = 2;
-      blobPath(ctx, o.x, o.y, o.r * 0.97, s, 0.1);
       ctx.stroke();
-      ctx.globalAlpha = 1;
-      // fat highlight + tiny glint
-      ctx.fillStyle = 'rgba(255,255,255,0.4)';
-      ctx.beginPath();
-      ctx.ellipse(o.x - o.r * 0.34, o.y - o.r * 0.38, o.r * 0.34, o.r * 0.18, -0.5, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = 'rgba(255,255,255,0.75)';
-      ctx.beginPath();
-      ctx.arc(o.x - o.r * 0.42, o.y - o.r * 0.46, o.r * 0.07, 0, Math.PI * 2);
-      ctx.fill();
     }
 
-    // hanging drip bead (wet puddles only)
-    if (o.type !== 'repel') {
-      ctx.fillStyle = c.fill;
-      ctx.globalAlpha = 0.85;
-      const dx = o.x + o.r * 0.24, dy = o.y + o.r * 0.94;
-      ctx.beginPath();
-      ctx.arc(dx, dy, o.r * 0.14, 0, Math.PI * 2);
-      ctx.ellipse(dx, dy + o.r * 0.2, o.r * 0.06, o.r * 0.12, 0, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.globalAlpha = 1;
-    }
+    ctx.restore();
   });
 }
 
@@ -1548,17 +1455,11 @@ function drawTether() {
   ctx.quadraticCurveTo(mx, my, o.x, o.y);
   ctx.stroke();
 
-  // knot where the rope meets the bail, up at the top of the bucket
-  const hx = player.x + px * 2, hy = player.y - 24;
+  // knot at the bucket handle
   ctx.fillStyle = 'rgba(96,70,34,1)';
   ctx.beginPath();
-  ctx.arc(hx, hy, 2, 0, Math.PI * 2);
+  ctx.arc(player.x + px * 3, player.y + py * 3, 1.7, 0, Math.PI * 2);
   ctx.fill();
-  ctx.strokeStyle = 'rgba(96,70,34,0.8)';
-  ctx.lineWidth = 1.4;
-  ctx.beginPath();
-  ctx.arc(hx, hy, 4.5, Math.PI * 0.15, Math.PI * 0.85, false);
-  ctx.stroke();
 
   ctx.lineCap = 'butt';
 }
@@ -1593,116 +1494,53 @@ function drawPlayer() {
     ? Math.max(-0.18, Math.min(0.18, -player.vx * 0.006))
     : Math.max(-0.55, Math.min(0.55, -player.vx * 0.008));
 
-  // contact shadow on the paper, under the can (no tilt)
-  ctx.save();
-  ctx.translate(player.x, player.y);
-  ctx.scale(pop, pop);
-  ctx.fillStyle = 'rgba(62,42,26,0.2)';
-  ctx.beginPath();
-  ctx.ellipse(0, 12, 9, 2.6, 0, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.restore();
-
   ctx.save();
   ctx.translate(player.x, player.y);
   ctx.scale(pop * str, pop * (2 - str));
   ctx.rotate(lean);
 
-  const Rv = 11;   // visual size is much bigger than the 6px hitbox
-
-  // ---- tapered tin body (wider mouth, narrow base), cylinder shading ----
-  const grad = ctx.createLinearGradient(-Rv, 0, Rv, 0);
-  grad.addColorStop(0, '#c9d1d6');
-  grad.addColorStop(0.45, '#eef1f4');
-  grad.addColorStop(1, '#a6b0b7');
-  ctx.fillStyle = grad;
-  ctx.strokeStyle = '#76828a';
+  const R = PLAYER_R;
+  // tapered bucket body (wider mouth, narrow base)
+  ctx.fillStyle = '#dfe6ea';
+  ctx.strokeStyle = '#77828b';
   ctx.lineWidth = 1.3;
   ctx.beginPath();
-  ctx.moveTo(-Rv, -1.34 * Rv);
-  ctx.lineTo(Rv, -1.34 * Rv);
-  ctx.quadraticCurveTo(Rv * 1.06, -0.2 * Rv, Rv * 0.74, 1.06 * Rv);
-  ctx.lineTo(-Rv * 0.74, 1.06 * Rv);
-  ctx.quadraticCurveTo(-Rv * 1.06, -0.2 * Rv, -Rv, -1.34 * Rv);
+  ctx.moveTo(-R * 1.05, -R * 1.5);
+  ctx.lineTo(R * 1.05, -R * 1.5);
+  ctx.lineTo(R * 0.78, R * 1.05);
+  ctx.lineTo(-R * 0.78, R * 1.05);
   ctx.closePath();
   ctx.fill();
   ctx.stroke();
 
-  // vertical can seams
-  ctx.strokeStyle = 'rgba(112,124,150,0.16)';
-  ctx.lineWidth = 1;
+  // open mouth / inner paint visible at the top
+  ctx.fillStyle = '#aeb7bd';
   ctx.beginPath();
-  ctx.moveTo(-0.5 * Rv, -1.3 * Rv); ctx.lineTo(-0.38 * Rv, 1.04 * Rv);
-  ctx.moveTo(0.5 * Rv, -1.3 * Rv);  ctx.lineTo(0.38 * Rv, 1.04 * Rv);
-  ctx.stroke();
-
-  // paper label band with a painted swatch in the current colour
-  ctx.fillStyle = 'rgba(247,242,228,0.95)';
-  ctx.beginPath();
-  ctx.moveTo(-0.86 * Rv, -0.62 * Rv); ctx.lineTo(0.86 * Rv, -0.62 * Rv);
-  ctx.lineTo(0.8 * Rv, 0.3 * Rv); ctx.lineTo(-0.8 * Rv, 0.3 * Rv);
-  ctx.closePath();
+  ctx.ellipse(0, -R * 1.5, R * 1.05, R * 0.42, 0, 0, Math.PI * 2);
   ctx.fill();
-  ctx.strokeStyle = 'rgba(110,88,56,0.5)';
-  ctx.lineWidth = 0.8;
-  ctx.beginPath();
-  ctx.moveTo(-0.86 * Rv, -0.62 * Rv); ctx.lineTo(0.86 * Rv, -0.62 * Rv);
-  ctx.moveTo(-0.8 * Rv, 0.3 * Rv); ctx.lineTo(0.8 * Rv, 0.3 * Rv);
-  ctx.stroke();
-  ctx.fillStyle = 'rgba(' + paintRGB + ',0.95)';
-  ctx.beginPath();
-  ctx.arc(-0.52 * Rv, -0.16 * Rv, 0.16 * Rv, 0, Math.PI * 2);
-  ctx.fill();
-
-  // rim lip + wet paint visible inside the mouth
-  ctx.fillStyle = '#d7dee2';
-  ctx.beginPath();
-  ctx.ellipse(0, -1.34 * Rv, Rv, Rv * 0.36, 0, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.strokeStyle = '#76828a';
-  ctx.lineWidth = 1.1;
-  ctx.stroke();
-  ctx.fillStyle = 'rgba(' + paintRGB + ',0.85)';
-  ctx.beginPath();
-  ctx.ellipse(0, -1.34 * Rv, Rv * 0.72, Rv * 0.26, 0, 0, Math.PI * 2);
-  ctx.fill();
-
-  // wire bail arcing over the mouth (the rope meets it from above)
-  ctx.strokeStyle = '#8c959c';
-  ctx.lineWidth = 1.6;
-  ctx.beginPath();
-  ctx.arc(0, -1.34 * Rv, Rv, Math.PI, 0, false);
-  ctx.stroke();
-
-  // paint drips hanging off the rim
   ctx.fillStyle = 'rgba(' + paintRGB + ',0.9)';
-  for (let k = 0; k < 2; k++) {
-    const dx = (-0.55 + k * 1.1) * Rv;
-    const len = 2.5 + Math.abs(Math.sin(time * 2 + k * 2.6)) * 3;
-    ctx.beginPath();
-    ctx.arc(dx, -1.15 * Rv, 1.1, 0, Math.PI * 2);
-    ctx.ellipse(dx, -1.15 * Rv + len, 0.65, len / 2, 0, 0, Math.PI * 2);
-    ctx.fill();
-  }
+  ctx.beginPath();
+  ctx.ellipse(0, -R * 1.5, R * 0.72, R * 0.28, 0, 0, Math.PI * 2);
+  ctx.fill();
 
-  // pouring stream falls STRAIGHT DOWN off the rim when tethered
+  // wire bail (handle) over the mouth
+  ctx.strokeStyle = '#8c959c';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.arc(0, -R * 1.5, R * 1.05, Math.PI, 0, false);
+  ctx.stroke();
+
+  // pouring stream toward the puddle when tethered
   if (tethered && tether) {
-    const sway = Math.sin(time * 9) * 0.7;
-    const pourGrad = ctx.createLinearGradient(0, -1.34 * Rv, 0, Rv * 1.6);
-    pourGrad.addColorStop(0, 'rgba(' + paintRGB + ',0.4)');
-    pourGrad.addColorStop(1, 'rgba(' + paintRGB + ',0.05)');
-    ctx.strokeStyle = pourGrad;
+    const o = tether.orb;
+    const ang = Math.atan2(o.y - player.y, o.x - player.x);
+    ctx.strokeStyle = 'rgba(' + paintRGB + ',0.9)';
+    ctx.lineWidth = 1.5;
     ctx.lineCap = 'round';
-    ctx.lineWidth = 3.2;
     ctx.beginPath();
-    ctx.moveTo(0.15 * Rv, -1.28 * Rv);
-    ctx.quadraticCurveTo(sway, -0.1 * Rv, sway * 1.8, Rv * 1.5);
+    ctx.moveTo(0, R * 0.8);
+    ctx.lineTo(Math.cos(ang) * R * 2.2, R * 0.8 + Math.sin(ang) * R * 2.2);
     ctx.stroke();
-    ctx.fillStyle = 'rgba(' + paintRGB + ',0.8)';
-    ctx.beginPath();
-    ctx.arc(sway * 1.8, Rv * 1.5 + 1.5, 1.4, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.lineCap = 'butt';
   }
 
   ctx.restore();
