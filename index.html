@@ -117,12 +117,13 @@
     cursor: pointer;
     white-space: nowrap;
     text-shadow: 0 1px 0 rgba(255, 255, 255, 0.4);
+    min-height: 44px;
   }
   .hud-btn:hover { background: rgba(255, 250, 235, 0.9); }
   .hud-btn:active { transform: scale(0.97); }
 
   /* ------- Canvas wrapper (full screen; canvas letterbox-fit via JS) ------- */
-  /* ------- Casino machine layout ------- */
+  /* ------- Casino machine layout (mobile-first) ------- */
   #wrap {
     position: relative;
     width: 100%;
@@ -140,21 +141,24 @@
   }
   #sidePanel {
     flex: 0 0 auto;
-    width: 180px;
+    width: 110px;
     display: flex;
     flex-direction: column;
-    gap: 6px;
-    padding: 6px;
+    gap: 4px;
+    padding: 4px;
   }
-  @media (max-width: 700px) {
-    #sidePanel { width: 130px; padding: 4px; gap: 4px; }
+  @media (min-width: 701px) {
+    #sidePanel { width: 180px; gap: 6px; padding: 6px; }
   }
   .panelBox {
     background: rgba(247, 242, 228, 0.92);
     border: 1px solid rgba(120, 90, 50, 0.35);
     border-radius: 6px;
     box-shadow: 0 1px 0 rgba(255, 255, 255, 0.6) inset, 0 2px 5px rgba(80, 60, 30, 0.18);
-    padding: 8px;
+    padding: 6px;
+  }
+  @media (min-width: 701px) {
+    .panelBox { padding: 8px; }
   }
   #hudBox {
     display: flex;
@@ -165,11 +169,14 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 10px;
+    padding: 8px;
+  }
+  @media (min-width: 701px) {
+    #controlBox { padding: 10px; }
   }
   #controlCircle {
-    width: 110px;
-    height: 110px;
+    width: 96px;
+    height: 96px;
     border-radius: 50%;
     background: rgba(255, 250, 235, 0.6);
     border: 2px solid rgba(97, 76, 48, 0.4);
@@ -181,6 +188,9 @@
     -webkit-user-select: none;
     touch-action: none;
     position: relative;
+  }
+  @media (min-width: 701px) {
+    #controlCircle { width: 110px; height: 110px; }
   }
   #controlCircle::before {
     content: '';
@@ -197,32 +207,37 @@
     box-shadow: 0 0 12px rgba(184, 135, 27, 0.5);
   }
   #controlLabel {
-    font-size: 10px;
-    letter-spacing: 0.15em;
+    font-size: 9px;
+    letter-spacing: 0.12em;
     color: #5a4a3a;
     text-align: center;
     z-index: 1;
   }
-  @media (max-width: 700px) {
-    #controlCircle { width: 80px; height: 80px; }
-    #controlLabel { font-size: 9px; }
+  @media (min-width: 701px) {
+    #controlLabel { font-size: 10px; letter-spacing: 0.15em; }
   }
   #guideBox {
     flex: 1 1 auto;
     display: flex;
     flex-direction: column;
-    gap: 6px;
-    font-size: 11px;
-    letter-spacing: 0.08em;
+    gap: 4px;
+    font-size: 10px;
+    letter-spacing: 0.06em;
     color: #5a4a3a;
   }
-  .guideItem { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+  @media (min-width: 701px) {
+    #guideBox { gap: 6px; font-size: 11px; letter-spacing: 0.08em; }
+  }
+  .guideItem { display: flex; align-items: center; gap: 5px; white-space: nowrap; }
   .guideTitle {
-    font-size: 10px;
-    letter-spacing: 0.15em;
+    font-size: 9px;
+    letter-spacing: 0.12em;
     color: #8a6a1c;
-    margin-bottom: 4px;
+    margin-bottom: 3px;
     font-weight: bold;
+  }
+  @media (min-width: 701px) {
+    .guideTitle { font-size: 10px; letter-spacing: 0.15em; margin-bottom: 4px; }
   }
   canvas, #bounds {
     position: absolute;
@@ -439,13 +454,10 @@
     padding-bottom: env(safe-area-inset-bottom);
   }
   @media (max-height: 520px) {
-    #hud { gap: 8px; padding: 6px 7px; border-radius: 6px; }
     #hudInfo { padding: 5px 9px; gap: 2px; }
     #title { font-size: 12px; }
     #hudTimer { font-size: 10px; }
     #levelLabel { font-size: 10px; }
-    .hud-btn { padding: 4px 9px; font-size: 10px; }
-    #footer { padding: 3px 6px; font-size: 10px; gap: 10px; }
   }
   /* ------- Portrait rotate prompt ------- */
   #rotatePrompt {
