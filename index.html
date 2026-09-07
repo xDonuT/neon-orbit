@@ -42,40 +42,39 @@
   /* ------- HUD top bar (overlay on canvas) ------- */
   #hud {
     position: absolute;
-    top: 6px;
+    top: calc(env(safe-area-inset-top, 0px) + 6px);
     left: auto;
-    right: 8px;
+    right: calc(env(safe-area-inset-right, 0px) + 8px);
     z-index: 4;
     display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 4px;
+    flex-direction: row;
+    align-items: center;
+    gap: 6px;
     width: max-content;
     max-width: calc(100% - 12px);
-    padding: 5px 5px;
-    background: rgba(247, 242, 228, 0.92);
-    border: 1px solid rgba(120, 90, 50, 0.35);
-    border-radius: 6px;
-    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.6) inset, 0 2px 5px rgba(80, 60, 30, 0.18);
+    padding: 0;
+    background: transparent;
+    border: none;
+    box-shadow: none;
     pointer-events: auto;
   }
   #hudInfo {
     position: absolute;
-    top: 6px;
-    left: 10px;
+    top: calc(env(safe-area-inset-top, 0px) + 6px);
+    left: calc(env(safe-area-inset-left, 0px) + 10px);
     z-index: 4;
     display: flex;
     flex-direction: column;
-    gap: 3px;
-    padding: 7px 12px;
-    background: rgba(247, 242, 228, 0.92);
-    border: 1px solid rgba(120, 90, 50, 0.35);
-    border-radius: 6px;
-    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.6) inset, 0 2px 5px rgba(80, 60, 30, 0.18);
-    letter-spacing: 0.12em;
+    gap: 2px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    box-shadow: none;
     pointer-events: none;
-    max-width: 46%;
+    max-width: 50%;
+    transition: opacity 0.6s ease;
   }
+  #hudInfo.faded { opacity: 0; }
   #hudInfoRow {
     display: flex;
     align-items: baseline;
@@ -89,12 +88,50 @@
     text-shadow: 0 1px 0 rgba(255, 255, 255, 0.75);
     white-space: nowrap;
   }
+  /* Level title (top-left, fades after 3s) */
+  #levelTitle {
+    font-size: 13px;
+    font-weight: bold;
+    letter-spacing: 0.15em;
+    color: rgba(74, 64, 56, 0.75);
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    opacity: 0.85;
+  }
+  /* Timer (top-center, dripping paint style) */
+  #hudTimerWrap {
+    position: absolute;
+    top: calc(env(safe-area-inset-top, 0px) + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 4;
+    pointer-events: none;
+  }
   #hudTimer {
-    font-size: 12px;
-    color: #8a6a1c;
-    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+    font-size: 14px;
+    font-weight: bold;
+    letter-spacing: 0.1em;
+    color: rgba(138, 106, 28, 0.85);
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.7);
     white-space: nowrap;
     font-variant-numeric: tabular-nums;
+    padding: 2px 10px;
+    background: rgba(247, 242, 228, 0.6);
+    border-radius: 12px;
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+  }
+  #hudTimerWrap::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 100%;
+    width: 2px;
+    height: 6px;
+    background: rgba(138, 106, 28, 0.4);
+    border-radius: 0 0 2px 2px;
   }
   #levelLabel {
     font-size: 12px;
@@ -105,23 +142,28 @@
     text-overflow: ellipsis;
   }
   .hud-btn {
-    background: rgba(255, 250, 235, 0.6);
-    border: 1px solid rgba(97, 76, 48, 0.4);
+    background: rgba(255, 250, 235, 0.4);
+    border: 1px solid rgba(97, 76, 48, 0.2);
     color: #4a4038;
     font-family: inherit;
-    border-radius: 5px;
+    border-radius: 50%;
     cursor: pointer;
     white-space: nowrap;
     text-shadow: 0 1px 0 rgba(255, 255, 255, 0.4);
-    font-size: 18px;
-    padding: 4px 10px;
+    font-size: 16px;
+    padding: 0;
     line-height: 1;
-    min-width: 38px;
-    min-height: 38px;
+    width: 40px;
+    height: 40px;
     text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
   }
-  .hud-btn:hover { background: rgba(255, 250, 235, 0.9); }
-  .hud-btn:active { transform: scale(0.97); }
+  .hud-btn:hover { background: rgba(255, 250, 235, 0.7); }
+  .hud-btn:active { transform: scale(0.92); }
 
   /* ------- Canvas wrapper (full screen; canvas letterbox-fit via JS) ------- */
   #wrap {
@@ -357,13 +399,9 @@
     padding-bottom: env(safe-area-inset-bottom);
   }
   @media (max-height: 520px) {
-    #hud { gap: 8px; padding: 6px 7px; border-radius: 6px; }
-    #hudInfo { padding: 5px 9px; gap: 2px; }
-    #title { font-size: 12px; }
-    #hudTimer { font-size: 10px; }
-    #levelLabel { font-size: 10px; }
-    .hud-btn { padding: 4px 9px; font-size: 10px; }
-    #footer { padding: 3px 6px; font-size: 10px; gap: 10px; }
+    #levelTitle { font-size: 11px; }
+    #hudTimer { font-size: 12px; padding: 1px 8px; }
+    .hud-btn { width: 36px; height: 36px; font-size: 14px; }
   }
   /* ------- Portrait rotate prompt ------- */
   #rotatePrompt {
@@ -427,16 +465,14 @@
 <!-- Red danger edge overlay: sits ABOVE the HUD so nothing covers it -->
 <canvas id="bounds" width="1400" height="850" aria-hidden="true"></canvas>
     <div id="hudInfo">
-      <div id="title">PAINT&nbsp;ORBIT</div>
-      <div id="hudInfoRow">
-        <div id="hudTimer">0:00</div>
-        <div id="levelLabel">LEVEL 1 &mdash; FIRST STEPS</div>
-      </div>
+      <div id="levelTitle">LEVEL 1 &mdash; FIRST STEPS</div>
+    </div>
+    <div id="hudTimerWrap">
+      <div id="hudTimer">0:00</div>
     </div>
     <div id="hud">
 <button class="hud-btn" id="pauseBtn" aria-label="Pause">⏸</button>
 <button class="hud-btn" id="sndBtn" aria-label="Sound on">🔊</button>
-<button class="hud-btn" id="menuBtn" aria-label="Menu">☰</button>
     </div>
 
     <!-- Level Select overlay (hidden by default) -->
@@ -457,19 +493,12 @@
       <div id="msgSub"></div>
       <div id="msgBtns">
 <button id="restartBtn" aria-label="Restart level">RESTART LEVEL</button>
+<button id="menuBtnMsg" class="menuBtn" aria-label="Back to menu" style="display:none;">MENU</button>
 <button id="nextLevelBtn" aria-label="Next level">NEXT LEVEL &#8594;</button>
       </div>
     </div>
     <div id="toast" aria-live="polite"></div>
 
-    <!-- Bottom instructions overlay -->
-    <div id="footer">
-      <span class="instr-item">HOLD to grab &amp; swing &middot; RELEASE to fly</span>
-      <span class="instr-item"><span class="dot d-green"></span>swing</span>
-      <span class="instr-item"><span class="dot d-yellow"></span>cadmium</span>
-      <span class="instr-item"><span class="dot d-red"></span>alizarin &mdash; avoid</span>
-      <span class="instr-item"><span class="dot d-purple"></span>sign spot</span>
-    </div>
   </div>
 </div>
 
@@ -670,7 +699,7 @@ const elMsgObj = document.getElementById('msgObj');
 const elMsgS   = document.getElementById('msgSub');
 const elRestart= document.getElementById('restartBtn');
 const elNextBtn = document.getElementById('nextLevelBtn');
-const elLevel  = document.getElementById('levelLabel');
+const elLevelTitle = document.getElementById('levelTitle');
 const elHud    = document.getElementById('hud');
 const elHudInfo = document.getElementById('hudInfo');
 const elHudTimer = document.getElementById('hudTimer');
@@ -707,7 +736,6 @@ function writeSave(s) {
 }
 
 const elToast  = document.getElementById('toast');
-const elFooter = document.getElementById('footer');
 let toastTimer = 0;
 const shownToasts = new Set();
 
@@ -794,12 +822,19 @@ function loadLevel(idx) {
   statusTimer = 0;
   runTime = 0;
   elHudTimer.textContent = fmtTime(0);
+  elLevelTitle.textContent = 'LEVEL ' + (idx + 1) + ' \u2014 ' + level.name;
+  elHudInfo.classList.remove('faded');
+  setTimeout(() => elHudInfo.classList.add('faded'), 3000);
   pathFadeAt = -1;                        // fresh route hint each level
+  // one-time orb legend (replaces the old footer)
+  if (idx === 0) toast('HOLD to grab & swing \u00b7 RELEASE to fly');
+  if (idx === 3) toast('YELLOW orb = cadmium \u00b7 speeds you up');
+  if (idx === 6) toast('RED orb = alizarin \u00b7 kicks you loose');
   if (level.walls && level.walls.length) toast('Dunk under the tape!');
   showReadyUI(true);
   // close level select overlay if open
   closeLevelSelect();
-  elLevel.textContent = 'LEVEL ' + (idx + 1) + ' \u2014 ' + level.name;
+  elLevelTitle.textContent = 'LEVEL ' + (idx + 1) + ' \u2014 ' + level.name;
   elMsgStars.textContent = '';
   elMsgScore.textContent = '';
   elNextBtn.style.display = 'none';
@@ -1152,9 +1187,10 @@ function win() {
   elMsgScore.className = wasNewBest ? 'newbest' : '';
   elMsgT.textContent = stars === 3 ? 'FLAWLESS!' : last ? 'ALL 25 SIGNED!' : 'LEVEL COMPLETE!';
   elMsgS.textContent = last ? 'Back around to FIRST STEPS...' : 'Next: ' + LEVELS[levelIndex + 1].name + ' \u2192';
-  elRestart.style.display = 'none';
-  elNextBtn.style.display = '';
-  elNextBtn.textContent = last ? 'PLAY AGAIN' : 'NEXT LEVEL \u2192';
+   elRestart.style.display = 'none';
+   elNextBtn.style.display = '';
+   elNextBtn.textContent = last ? 'PLAY AGAIN' : 'NEXT LEVEL \u2192';
+   document.getElementById('menuBtnMsg').style.display = '';
 }
 
 function lose() {
@@ -1170,6 +1206,7 @@ function lose() {
   elMsgS.textContent = 'Tap the screen to retry';
   elRestart.style.display = '';
   elNextBtn.style.display = 'none';
+  document.getElementById('menuBtnMsg').style.display = '';
   loseCause = '';
 }
 
@@ -1383,6 +1420,25 @@ function drawBounds() {
   g.strokeStyle = 'rgba(190,44,34,0.55)';
   g.lineWidth = 3;
   g.strokeRect(1, 1, W - 2, H - 2);
+
+  // painter's tape: diagonal hatch marks along each edge
+  g.strokeStyle = 'rgba(190,44,34,0.25)';
+  g.lineWidth = 1.2;
+  const hatchStep = 14;
+  // top + bottom edges (horizontal hatching)
+  for (let x = -22; x < W + 22; x += hatchStep) {
+    g.beginPath(); g.moveTo(x, 0); g.lineTo(x + 22, 22); g.stroke();
+    g.beginPath(); g.moveTo(x, 22); g.lineTo(x + 22, 0); g.stroke();
+    g.beginPath(); g.moveTo(x, H - 22); g.lineTo(x + 22, H); g.stroke();
+    g.beginPath(); g.moveTo(x, H); g.lineTo(x + 22, H - 22); g.stroke();
+  }
+  // left + right edges (vertical hatching)
+  for (let y = -22; y < H + 22; y += hatchStep) {
+    g.beginPath(); g.moveTo(0, y); g.lineTo(22, y + 22); g.stroke();
+    g.beginPath(); g.moveTo(22, y); g.lineTo(0, y + 22); g.stroke();
+    g.beginPath(); g.moveTo(W - 22, y); g.lineTo(W, y + 22); g.stroke();
+    g.beginPath(); g.moveTo(W, y); g.lineTo(W - 22, y + 22); g.stroke();
+  }
 
   // inward chevrons along each edge (steady, subtle)
   g.strokeStyle = 'rgba(190,44,34,0.5)';
@@ -2225,13 +2281,11 @@ function fitLayout() {
     boundsOverlay.style.height = ch + 'px';
     const r = canvas.getBoundingClientRect();
     const topPad = Math.max(0, r.top - wrapRect.top);
-    const botPad = Math.max(0, wrapRect.bottom - r.bottom);
     const sidePad = Math.max(0, wrapRect.right - r.right);   // letterbox bars beside the canvas
     elHud.style.top = (topPad + 6) + 'px';
     elHud.style.right = (sidePad + 8) + 'px';
     elHudInfo.style.top = (topPad + 6) + 'px';
     elHudInfo.style.left = (r.left - wrapRect.left + 10) + 'px';
-    elFooter.style.bottom = (botPad + 6) + 'px';
     elToast.style.top = (topPad + 14) + 'px';
   } catch (e) { /* layout is not critical to gameplay */ }
 }
@@ -2325,7 +2379,7 @@ function returnToMenu() {
   document.getElementById('title').style.display = '';
   elMenu.classList.remove('hidden');
 }
-bindButton(document.getElementById('menuBtn'), () => { ensureAudio(); playTick(); returnToMenu(); });
+bindButton(document.getElementById('menuBtnMsg'), () => { ensureAudio(); playTick(); returnToMenu(); });
 
 // ---------- Level Select overlay ----------
 const elLevelSelect = document.getElementById('levelSelect');
