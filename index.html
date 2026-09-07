@@ -64,6 +64,13 @@
     text-shadow: 0 0 10px var(--neon-cyan), 0 0 22px rgba(34, 211, 238, 0.6);
     white-space: nowrap;
   }
+  #hudTimer {
+    font-size: 12px;
+    color: var(--neon-yellow);
+    text-shadow: 0 0 8px rgba(253, 224, 71, 0.6);
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
   #levelLabel {
     flex: 1;
     text-align: center;
@@ -142,6 +149,21 @@
     text-shadow: 0 0 18px var(--neon-cyan), 0 0 40px rgba(34, 211, 238, 0.55);
   }
   #message.lost #msgTitle { color: #fca5a5; text-shadow: 0 0 18px var(--neon-red), 0 0 40px rgba(239, 68, 68, 0.6); }
+  #msgStars {
+    font-size: clamp(30px, 7vmin, 56px);
+    letter-spacing: 0.3em;
+    line-height: 1;
+    color: #fef08a;
+    text-shadow: 0 0 18px rgba(253, 224, 71, 0.8), 0 0 40px rgba(250, 204, 21, 0.5);
+  }
+  #msgScore {
+    font-size: 14px;
+    letter-spacing: 0.14em;
+    color: #cbd5e1;
+    text-shadow: 0 0 8px rgba(203, 213, 225, 0.4);
+  }
+  #msgScore .best { color: #86efac; text-shadow: 0 0 8px rgba(134, 239, 172, 0.6); }
+  #msgScore .newbest { color: #fde047; text-shadow: 0 0 8px rgba(253, 224, 71, 0.6); }
   #msgSub {
     font-size: 15px;
     letter-spacing: 0.15em;
@@ -303,6 +325,7 @@
     <!-- Top bar overlay -->
     <div id="hud">
       <div id="title">NEON&nbsp;ORBIT</div>
+      <div id="hudTimer">0:00</div>
       <div id="levelLabel">LEVEL 1 &mdash; FIRST STEPS</div>
       <button class="hud-btn" id="hudRestartBtn">RESTART</button>
       <button class="hud-btn" id="pauseBtn">PAUSE</button>
@@ -317,11 +340,16 @@
     <div id="levelSelect" class="hidden">
       <h3 style="font-size:clamp(24px,5vmin,48px);font-weight:bold;letter-spacing:0.2em;margin-bottom:16px;">Select Level</h3>
       <div id="levelSelectGrid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(80px,1fr));gap:8px;width:100%;max-width:400px;"></div>
-      <button class="menuBtn" id="levelSelectClose" style="margin-top:16px;">Close</button>
+      <div style="display:flex;gap:12px;margin-top:16px;">
+        <button class="menuBtn" id="levelSelectClose">Close</button>
+        <button class="menuBtn" id="resetProgressBtn" style="border-color:rgba(239,68,68,0.7);color:#fca5a5;text-shadow:0 0 8px rgba(248,113,113,0.7);">Reset Progress</button>
+      </div>
     </div>
 
     <div id="message" class="hidden">
       <div id="msgTitle"></div>
+      <div id="msgStars"></div>
+      <div id="msgScore"></div>
       <div id="msgObj"></div>
       <div id="msgSub"></div>
       <button id="restartBtn">RESTART LEVEL</button>
@@ -458,6 +486,17 @@ const LEVELS = [
 function orb(x, y, type) { return { x: x, y: y, r: 16, type: type }; }
 function wall(x, y, w, h) { return { x: x, y: y, w: w, h: h }; }
 
+// ---- Mastery par table (seconds) ----
+// 3-star par for each level. 2-star = par * 1.6, 1-star = par * 3.0.
+const PAR3 = [6, 7, 7, 7, 8, 8, 8, 9, 10, 10, 11, 11, 12, 12, 13, 13, 14, 14, 15, 15];
+function starsForTime(li, t) {
+  const p = PAR3[li];
+  if (t <= p) return 3;
+  if (t <= p * 1.6) return 2;
+  if (t <= p * 3.0) return 1;
+  return 0;
+}
+
 // ---------- Runtime state ----------
 let levelIndex = 0;
 let level = null;                 // current level data reference
@@ -468,6 +507,7 @@ let pathFadeAt = -1;              // game-time when the path hint starts fading
 let player = { x: 0, y: 0, vx: 0, vy: 0 };
 let tethered = false;
 let tether = null;                // { orb, angVel(rad/frame), dist, angle, repel, turbo }
+let runTime = 0;                  // seconds spent in 'playing' on the current level
 let trail = [];
 let snap = 0;         // attach "pop" 0..1, decays out
 let stretchEase = 1;  // smoothed player stretch (1 = round)
@@ -492,11 +532,44 @@ const orbColors = {
 // ---------- DOM handles ----------
 const elMsg    = document.getElementById('message');
 const elMsgT   = document.getElementById('msgTitle');
+const elMsgStars = document.getElementById('msgStars');
+const elMsgScore = document.getElementById('msgScore');
 const elMsgObj = document.getElementById('msgObj');
 const elMsgS   = document.getElementById('msgSub');
 const elRestart= document.getElementById('restartBtn');
 const elLevel  = document.getElementById('levelLabel');
+const elHudTimer = document.getElementById('hudTimer');
 const elPause  = document.getElementById('pauseBtn');
+
+function fmtTime(s) {
+  if (!isFinite(s) || s < 0) s = 0;
+  const m = Math.floor(s / 60);
+  const sec = s - m * 60;
+  return m > 0 ? m + ':' + String(sec.toFixed(1)).padStart(4, '0') : sec.toFixed(1) + 's';
+}
+
+// ---- Persisted progress & best times ----
+// save = { unlocked: [0,3,...] (indices the player may enter), best: { "3": {stars, time}, ... } }
+function loadSave() {
+  try {
+    if (typeof localStorage === 'undefined') return { unlocked: [0], best: {} };
+    const raw = localStorage.getItem('neonOrbitSave');
+    if (raw) {
+      const s = JSON.parse(raw);
+      if (Array.isArray(s.unlocked)) return { unlocked: s.unlocked, best: s.best || {} };
+    }
+    // migrate legacy neonOrbitCompleted array -> unlocked list
+    const legacy = localStorage.getItem('neonOrbitCompleted');
+    if (legacy) {
+      const arr = JSON.parse(legacy);
+      if (Array.isArray(arr)) return { unlocked: arr, best: {} };
+    }
+  } catch (e) { /* storage unavailable */ }
+  return { unlocked: [0], best: {} };
+}
+function writeSave(s) {
+  try { if (typeof localStorage !== 'undefined') localStorage.setItem('neonOrbitSave', JSON.stringify(s)); } catch (e) {}
+}
 
 const elToast  = document.getElementById('toast');
 let toastTimer = 0;
@@ -575,12 +648,16 @@ function loadLevel(idx) {
   winLabelT = 0;
   status = 'ready';
   statusTimer = 0;
+  runTime = 0;
+  elHudTimer.textContent = fmtTime(0);
   pathFadeAt = -1;                        // fresh route hint each level
   if (level.walls && level.walls.length) toast('Dive under the red bars!');
   showReadyUI(true);
   // close level select overlay if open
   closeLevelSelect();
   elLevel.textContent = 'LEVEL ' + (idx + 1) + ' \u2014 ' + level.name;
+  elMsgStars.textContent = '';
+  elMsgScore.textContent = '';
 }
 
 /* ============================================================
@@ -710,6 +787,9 @@ function update(dt) {
     return;   // freeze physics, keep background animating
   }
 
+  runTime += dt / 60;   // wall-clock seconds spent in play
+  elHudTimer.textContent = fmtTime(runTime);
+
   if (!tethered) {
     // ---- free flight ----
     player.vx *= Math.pow(DRAG, dt);
@@ -838,23 +918,31 @@ function spawnGoalBurst(tier) {
 }
 
 function win() {
-  // ---- save progress ----
+  const last = levelIndex === LEVELS.length - 1;
+  const speed = Math.hypot(player.vx, player.vy);
+  landTier = speed >= WIN_SPEED_POWER ? 2 : speed >= WIN_SPEED_SOFT ? 1 : 0;
+  const fx = WIN_FX[landTier];
+
+  // ---- mastery result: stars (by time) + track best ----
+  const t = runTime;
+  const stars = starsForTime(levelIndex, t);
+  let wasNewBest = false;
+  let prevBest = null;
   try {
-    const completed = typeof localStorage !== 'undefined' ? JSON.parse(localStorage.getItem('neonOrbitCompleted')) || [] : [];
+    const save = loadSave();
+    const rec = save.best[levelIndex];
+    prevBest = rec && isFinite(rec.time) ? rec.time : null;
+    if (!rec || t < rec.time) { save.best[levelIndex] = { stars, time: t }; wasNewBest = true; }
+    // pre-unlock the next level
     const nextIdx = levelIndex + 1;
-    if (!completed.includes(levelIndex)) completed.push(levelIndex);
-    if (nextIdx < 20 && !completed.includes(nextIdx)) completed.push(nextIdx); // pre-unlock next
-    localStorage.setItem('neonOrbitCompleted', JSON.stringify(completed));
+    if (nextIdx < LEVELS.length && !save.unlocked.includes(nextIdx)) save.unlocked.push(nextIdx);
+    if (!save.unlocked.includes(levelIndex)) save.unlocked.push(levelIndex);
+    writeSave(save);
   } catch (e) { /* storage unavailable */ }
 
   // ---- hide game title during play ----
   const wasTitleVisible = document.getElementById('title').style.display !== 'none';
   if (wasTitleVisible) document.getElementById('title').style.display = 'none';
-
-  const last = levelIndex === LEVELS.length - 1;
-  const speed = Math.hypot(player.vx, player.vy);
-  landTier = speed >= WIN_SPEED_POWER ? 2 : speed >= WIN_SPEED_SOFT ? 1 : 0;
-  const fx = WIN_FX[landTier];
 
   status = 'won';
   statusTimer = 2.4 + fx.slow;
@@ -868,7 +956,13 @@ function win() {
   elMsg.classList.remove('lost');
   elMsg.classList.remove('hidden');
   elMsgObj.style.display = 'none';
-  elMsgT.textContent = last ? 'ORBIT MASTERED!' : 'LEVEL COMPLETE!';
+
+  // ---- results on the win overlay ----
+  elMsgStars.textContent = '\u2605\u2605\u2605'.slice(0, stars) + '\u2606\u2606\u2606'.slice(0, 3 - stars);
+  const bestTxt = wasNewBest ? 'NEW BEST!' : (prevBest != null ? 'best ' + fmtTime(prevBest) : '');
+  elMsgScore.textContent = fmtTime(t) + (bestTxt ? '  \u00b7  ' + bestTxt : '');
+  elMsgScore.className = wasNewBest ? 'newbest' : '';
+  elMsgT.textContent = stars === 3 ? 'FLAWLESS!' : last ? 'ORBIT MASTERED!' : 'LEVEL COMPLETE!';
   elMsgS.textContent = last ? 'Back around to FIRST STEPS...' : 'Next: ' + LEVELS[levelIndex + 1].name + ' \u2192';
   elRestart.style.display = 'none';
 }
@@ -1493,12 +1587,14 @@ const elLevelSelectGrid = document.getElementById('levelSelectGrid');
 const elLevelSelectClose = document.getElementById('levelSelectClose');
 
 function renderLevelSelect() {
-  const completed = typeof localStorage !== 'undefined' && localStorage.getItem('neonOrbitCompleted') ?
-    JSON.parse(localStorage.getItem('neonOrbitCompleted')) : [];
+  const save = loadSave();
   let html = '';
   for (let i = 1; i <= LEVELS.length; i++) {
-    const unlocked = completed.includes(i - 1);
-    html += `<button class="menuBtn" style="padding:12px;font-size:14px;" ${unlocked ? '' : 'disabled'} data-level="${i - 1}">Level ${i}${unlocked ? ' ✓' : ' 🔒'}</button>`;
+    const idx = i - 1;
+    const unlocked = save.unlocked.includes(idx);
+    const rec = save.best[idx];
+    const stars = rec ? '\u2605'.repeat(rec.stars) : (unlocked ? '' : '');
+    html += `<button class="menuBtn" style="padding:12px;font-size:14px;" ${unlocked ? '' : 'disabled'} data-level="${idx}">${i}${unlocked ? ' ' + stars : ' \uD83D\uDD12'}</button>`;
   }
   elLevelSelectGrid.innerHTML = html;
   elLevelSelectGrid.querySelectorAll('button').forEach(btn => {
@@ -1524,6 +1620,20 @@ function closeLevelSelect() {
 elLevelSelectClose.addEventListener('click', () => {
   closeLevelSelect();
   elMenu.classList.remove('hidden');
+});
+
+// ---------- Reset saved progress ----------
+const elResetProgress = document.getElementById('resetProgressBtn');
+elResetProgress.addEventListener('mousedown', (e) => e.stopPropagation());
+elResetProgress.addEventListener('touchstart', (e) => { e.stopPropagation(); e.preventDefault(); }, { passive: false });
+elResetProgress.addEventListener('click', () => {
+  let ok = true;
+  if (typeof confirm === 'function') ok = confirm('Reset all progress and best times? This cannot be undone.');
+  if (ok) {
+    writeSave({ unlocked: [0], best: {} });
+    toast('Progress reset');
+    renderLevelSelect();
+  }
 });
 
 // ---------- Menu screen ----------
