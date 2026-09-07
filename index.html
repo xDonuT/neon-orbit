@@ -355,6 +355,7 @@
       <button class="hud-btn" id="hudRestartBtn">RESTART</button>
       <button class="hud-btn" id="pauseBtn">PAUSE</button>
       <button class="hud-btn" id="sndBtn">SOUND ON</button>
+      <button class="hud-btn" id="menuBtn">MENU</button>
       <div id="admin" style="margin-left:auto;display:flex;gap:4px;">
         <button class="hud-btn" id="adminPrev" title="Previous level" style="padding:7px 10px;font-size:14px;">⏮</button>
         <button class="hud-btn" id="adminNext" title="Next level" style="padding:7px 10px;font-size:14px;">⏭</button>
@@ -2158,6 +2159,21 @@ elSnd.addEventListener('click', () => {
   if (!sndOn) stopTurboBed();
 });
 
+// ---------- Back to menu ----------
+function returnToMenu() {
+  status = 'paused';
+  setRush(0);
+  stopTurboBed();
+  elMsg.classList.add('hidden');
+  closeLevelSelect();
+  document.getElementById('title').style.display = '';
+  elMenu.classList.remove('hidden');
+}
+const elMenuBtn = document.getElementById('menuBtn');
+elMenuBtn.addEventListener('mousedown', (e) => e.stopPropagation());
+elMenuBtn.addEventListener('touchstart', (e) => { e.stopPropagation(); }, { passive: false });
+elMenuBtn.addEventListener('click', () => { ensureAudio(); playTick(); returnToMenu(); });
+
 // ---------- Admin level skip ----------
 const elAdminPrev = document.getElementById('adminPrev');
 const elAdminNext = document.getElementById('adminNext');
@@ -2234,7 +2250,15 @@ elMenuStart.addEventListener('click', () => {
   document.getElementById('title').style.display = 'none';
   showReadyUI(true);
   status = 'ready';
-  levelIndex = 0;
+  // resume at the furthest level reached, else level 1
+  let resumeIdx = 0;
+  try {
+    const save = loadSave();
+    if (save.unlocked && save.unlocked.length) {
+      resumeIdx = Math.max(0, Math.min(LEVELS.length - 1, Math.max.apply(null, save.unlocked)));
+    }
+  } catch (e) { /* storage unavailable */ }
+  levelIndex = resumeIdx;
   loadLevel(levelIndex);
   // first-time onboarding
   let fresh = false;
