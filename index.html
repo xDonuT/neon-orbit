@@ -217,6 +217,43 @@
     border-radius: 6px;
     pointer-events: none;
   }
+  /* ------- Menu screen (start screen) ------- */
+  #menu {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(5, 5, 12, 0.7);
+    color: #fff;
+    gap: 24px;
+    overflow: hidden;
+  }
+  #menu.hidden { display: none; }
+  #menuTitle { font-size: clamp(32px, 8vmin, 72px); font-weight: bold; letter-spacing: 0.3em; color: #fff; text-shadow: 0 0 20px var(--neon-cyan), 0 0 40px rgba(34, 211, 238, 0.6); }
+  #menuSub { font-size: 14px; color: #94a3b8; letter-spacing: 0.15em; margin-bottom: 32px; }
+  .menuBtn { font-family: inherit; font-size: 16px; letter-spacing: 0.2em; color: #fff; background: rgba(34, 211, 238, 0.2); border: 1px solid var(--neon-cyan); padding: 12px 28px; border-radius: 6px; cursor: pointer; text-shadow: 0 0 8px rgba(34, 211, 238, 0.7); transition: background 0.15s; }
+  .menuBtn:hover { background: rgba(34, 211, 238, 0.4); }
+  .menuBtn:active { transform: scale(0.98); }
+  .levelsInfo { font-size: 12px; color: #94a3b8; letter-spacing: 0.1em; }
+  /* ------- Level Select overlay ------- */
+  #levelSelect {
+    position: absolute;
+    inset: 0;
+    z-index: 20;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: #fff;
+    padding: 20px;
+    overflow-y: auto;
+    background: rgba(5, 5, 12, 0.9);
+  }
+  #levelSelect:not(.hidden) { display: flex; }
   .dot {
     display: inline-block;
     width: 9px;
@@ -250,6 +287,15 @@
 </head>
 <body>
 <div id="app">
+  <!-- Menu screen (start screen, hidden after tap) -->
+  <div id="menu">
+    <div id="menuTitle">NEON&nbsp;ORBIT</div>
+    <div id="menuSub">Tap to Start</div>
+    <button class="menuBtn" id="menuStartBtn">Play</button>
+    <button class="menuBtn" id="menuLevelSelectBtn">Level Select</button>
+    <div class="levelsInfo">Levels 1–20</div>
+  </div>
+
   <!-- Game: full screen, canvas + overlays -->
   <div id="wrap">
     <canvas id="game" width="1400" height="850"></canvas>
@@ -261,6 +307,17 @@
       <button class="hud-btn" id="hudRestartBtn">RESTART</button>
       <button class="hud-btn" id="pauseBtn">PAUSE</button>
       <button class="hud-btn" id="sndBtn">SOUND ON</button>
+      <div id="admin" style="margin-left:auto;display:flex;gap:4px;">
+        <button class="hud-btn" id="adminPrev" title="Previous level" style="padding:7px 10px;font-size:14px;">⏮</button>
+        <button class="hud-btn" id="adminNext" title="Next level" style="padding:7px 10px;font-size:14px;">⏭</button>
+      </div>
+    </div>
+
+    <!-- Level Select overlay (hidden by default) -->
+    <div id="levelSelect" class="hidden">
+      <h3 style="font-size:clamp(24px,5vmin,48px);font-weight:bold;letter-spacing:0.2em;margin-bottom:16px;">Select Level</h3>
+      <div id="levelSelectGrid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(80px,1fr));gap:8px;width:100%;max-width:400px;"></div>
+      <button class="menuBtn" id="levelSelectClose" style="margin-top:16px;">Close</button>
     </div>
 
     <div id="message" class="hidden">
@@ -504,12 +561,13 @@ function loadLevel(idx) {
   goalGrad = null;
   tethered = false;
   tether = null;
-trail = [];
+  trail = [];
   snap = 0;
   stretchEase = 1;
   sparks.length = 0;
   rings.length = 0;
   beams.length = 0;
+  tetherParticles.length = 0;
   winHalt = 0;
   winSlow = 0;
   flashAlpha = 0;
@@ -520,6 +578,8 @@ trail = [];
   pathFadeAt = -1;                        // fresh route hint each level
   if (level.walls && level.walls.length) toast('Dive under the red bars!');
   showReadyUI(true);
+  // close level select overlay if open
+  closeLevelSelect();
   elLevel.textContent = 'LEVEL ' + (idx + 1) + ' \u2014 ' + level.name;
 }
 
@@ -639,8 +699,13 @@ function update(dt) {
   if (status !== 'playing') {
     statusTimer -= dt * ts;
     if (statusTimer <= 0) {
-      if (status === 'won') loadLevel(levelIndex + 1);
-      else                  loadLevel(levelIndex);       // restart current
+      if (status === 'won') {
+        // advance to the next level (or wrap around at the end)
+        const nextIdx = levelIndex + 1;
+        loadLevel(nextIdx >= LEVELS.length ? 0 : nextIdx);
+      } else {
+        loadLevel(levelIndex);       // restart current
+      }
     }
     return;   // freeze physics, keep background animating
   }
@@ -679,6 +744,30 @@ function update(dt) {
     if (dt > 0) {
       player.vx = (player.x - prevX) / dt;
       player.vy = (player.y - prevY) / dt;
+    }
+
+    // ---- tether paint-splatter (subtle drips from the orb) ----
+    if (Math.random() < 0.18) {
+      const color = t.repel ? '252,80,80' : (t.turbo ? '255,240,60' : '34,230,255');
+      tetherParticles.push({
+        x: o.x + (Math.random() - 0.5) * 10,
+        y: o.y + (Math.random() - 0.5) * 10,
+        vx: (Math.random() - 0.5) * 2,
+        vy: 1.5 + Math.random() * 2.5,
+        r: 2 + Math.random() * 3,
+        life: 0.6 + Math.random() * 0.4,
+        color: color
+      });
+    }
+
+    // keep tetherParticles alive
+    for (let i = tetherParticles.length - 1; i >= 0; i--) {
+      const p = tetherParticles[i];
+      p.life -= dt / 60;
+      p.y += p.vy * dt;
+      p.x += p.vx * dt;
+      p.vy += 0.04 * dt; // gravity pull
+      if (p.life <= 0) tetherParticles.splice(i, 1);
     }
   }
 
@@ -749,6 +838,19 @@ function spawnGoalBurst(tier) {
 }
 
 function win() {
+  // ---- save progress ----
+  try {
+    const completed = typeof localStorage !== 'undefined' ? JSON.parse(localStorage.getItem('neonOrbitCompleted')) || [] : [];
+    const nextIdx = levelIndex + 1;
+    if (!completed.includes(levelIndex)) completed.push(levelIndex);
+    if (nextIdx < 20 && !completed.includes(nextIdx)) completed.push(nextIdx); // pre-unlock next
+    localStorage.setItem('neonOrbitCompleted', JSON.stringify(completed));
+  } catch (e) { /* storage unavailable */ }
+
+  // ---- hide game title during play ----
+  const wasTitleVisible = document.getElementById('title').style.display !== 'none';
+  if (wasTitleVisible) document.getElementById('title').style.display = 'none';
+
   const last = levelIndex === LEVELS.length - 1;
   const speed = Math.hypot(player.vx, player.vy);
   landTier = speed >= WIN_SPEED_POWER ? 2 : speed >= WIN_SPEED_SOFT ? 1 : 0;
@@ -796,6 +898,9 @@ for (let i = 0; i < 44; i++) {
     c: Math.random() < 0.5 ? '34,211,238' : '232,121,249'
   });
 }
+
+// Tether paint-splatter particles (one per frame while attached)
+let tetherParticles = [];
 
 // static gradients are built once and reused (no per-frame allocations)
 let bgGrad = null;
@@ -1160,6 +1265,18 @@ function drawVignette() {
   ctx.fillRect(0, 0, W, H);
 }
 
+function drawTetherParticles() {
+  for (const p of tetherParticles) {
+    const alpha = Math.min(1, p.life * 1.5);
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle = 'rgb(' + p.color + ')';
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r * p.life, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+}
+
 function draw() {
   drawBackground();
   drawBounds();
@@ -1170,6 +1287,7 @@ function draw() {
   drawBeacon();
   drawTether();
   drawTrail();
+  drawTetherParticles();
   drawPlayer();
   drawGoalBurst();
   if (flashAlpha > 0) {
@@ -1357,7 +1475,82 @@ elSnd.addEventListener('click', () => {
   ensureAudio();
   sndOn = !sndOn;
   elSnd.textContent = sndOn ? 'SOUND ON' : 'SOUND OFF';
-  if (sndOn) playTick();
+});
+
+// ---------- Admin level skip ----------
+const elAdminPrev = document.getElementById('adminPrev');
+const elAdminNext = document.getElementById('adminNext');
+elAdminPrev.addEventListener('mousedown', (e) => e.stopPropagation());
+elAdminPrev.addEventListener('touchstart', (e) => { e.stopPropagation(); e.preventDefault(); }, { passive: false });
+elAdminPrev.addEventListener('click', () => { ensureAudio(); playTick(); levelIndex = Math.max(0, levelIndex - 1); loadLevel(levelIndex); });
+elAdminNext.addEventListener('mousedown', (e) => e.stopPropagation());
+elAdminNext.addEventListener('touchstart', (e) => { e.stopPropagation(); e.preventDefault(); }, { passive: false });
+elAdminNext.addEventListener('click', () => { ensureAudio(); playTick(); levelIndex = Math.min(LEVELS.length - 1, levelIndex + 1); loadLevel(levelIndex); });
+
+// ---------- Level Select overlay ----------
+const elLevelSelect = document.getElementById('levelSelect');
+const elLevelSelectGrid = document.getElementById('levelSelectGrid');
+const elLevelSelectClose = document.getElementById('levelSelectClose');
+
+function renderLevelSelect() {
+  const completed = typeof localStorage !== 'undefined' && localStorage.getItem('neonOrbitCompleted') ?
+    JSON.parse(localStorage.getItem('neonOrbitCompleted')) : [];
+  let html = '';
+  for (let i = 1; i <= LEVELS.length; i++) {
+    const unlocked = completed.includes(i - 1);
+    html += `<button class="menuBtn" style="padding:12px;font-size:14px;" ${unlocked ? '' : 'disabled'} data-level="${i - 1}">Level ${i}${unlocked ? ' ✓' : ' 🔒'}</button>`;
+  }
+  elLevelSelectGrid.innerHTML = html;
+  elLevelSelectGrid.querySelectorAll('button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const lvl = parseInt(btn.dataset.level, 10);
+      if (!isNaN(lvl)) {
+        closeLevelSelect();
+        loadLevel(lvl);
+      }
+    });
+  });
+}
+
+function openLevelSelect() {
+  renderLevelSelect();
+  elLevelSelect.classList.remove('hidden');
+}
+
+function closeLevelSelect() {
+  elLevelSelect.classList.add('hidden');
+}
+
+elLevelSelectClose.addEventListener('click', () => {
+  closeLevelSelect();
+  elMenu.classList.remove('hidden');
+});
+
+// ---------- Menu screen ----------
+const elMenu = document.getElementById('menu');
+const elMenuStart = document.getElementById('menuStartBtn');
+const elMenuLevelSelect = document.getElementById('menuLevelSelectBtn');
+
+elMenuStart.addEventListener('click', () => {
+  elMenu.classList.add('hidden');
+  // hide game title during gameplay
+  document.getElementById('title').style.display = 'none';
+  showReadyUI(true);
+  status = 'ready';
+  levelIndex = 0;
+  loadLevel(levelIndex);
+  // first-time onboarding
+  let fresh = false;
+  try { fresh = typeof localStorage !== 'undefined' && !localStorage.getItem('neonOrbitSeen'); } catch (e) {}
+  if (fresh) {
+    try { localStorage.setItem('neonOrbitSeen', '1'); } catch (e) {}
+    setTimeout(() => toast('HOLD to attach & swing · RELEASE to fly'), 800);
+  }
+});
+
+elMenuLevelSelect.addEventListener('click', () => {
+  elMenu.classList.add('hidden');
+  openLevelSelect();
 });
 
 /* ============================================================
