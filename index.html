@@ -667,6 +667,10 @@ function loadLevel(idx) {
   trail = [];
   snap = 0;
   stretchEase = 1;
+  stopTurboBed();
+  lastBelow = null;
+  creakCd = 0;
+  dripAcc = 0;
   sparks.length = 0;
   rings.length = 0;
   beams.length = 0;
@@ -747,7 +751,7 @@ if (best.type === 'turbo') {
     turbo: best.type === 'turbo',
     repel: best.type === 'repel'
   };
-  playAttach(best.type);
+  playAttach(best.type, bestD);
 }
 
 // Release: convert the circular motion back into linear velocity.
@@ -756,11 +760,15 @@ if (best.type === 'turbo') {
 function release() {
   if (!tethered) return;
   if (pathFadeAt < 0) pathFadeAt = time;
-  playRelease();
+  const spd = Math.hypot(player.vx, player.vy);   // pre-boost, drives the whoosh pitch
+  playRelease(spd);
   if (tether.repel) { player.vx *= 0.9; player.vy *= 0.9; }
   else              { player.vx *= RELEASE_BOOST; player.vy *= RELEASE_BOOST; }
   tethered = false;
   tether = null;
+  lastBelow = null;
+  creakCd = 0;
+  dripAcc = 0;
 }
 
 function update(dt) {
@@ -803,6 +811,9 @@ function update(dt) {
   }
   if (winLabelT > 0) winLabelT -= dt / 60;
 
+  // sound: silence the beds the moment play stops
+  if (status !== 'playing') { setRush(0); stopTurboBed(); }
+
   if (status === 'paused' || status === 'ready') return;   // freeze physics while paused/ready
 
   if (status !== 'playing') {
@@ -816,6 +827,15 @@ function update(dt) {
 
   runTime += dt / 60;   // wall-clock seconds spent in play
   elHudTimer.textContent = fmtTime(runTime);
+
+  // air-rush bed follows the spin: whisper -> screaming at turbo cap
+  if (tethered) {
+    const tspd = Math.abs(tether.angVel) * tether.dist;
+    setRush(Math.min(1, Math.max(0, (tspd - 3) / 14)));
+  } else {
+    const fspd = Math.hypot(player.vx, player.vy);
+    setRush(Math.min(0.3, Math.max(0, (fspd - 6) / 40)));
+  }
 
   if (!tethered) {
     // ---- free flight ----
@@ -831,6 +851,7 @@ function update(dt) {
     if (t.turbo) {
       // turbo: continuous speed-up while held, capped
       t.angVel = Math.min(t.angVel * Math.pow(TURBO_ACCEL, dt), TURBO_CAP);
+      updateTurboBed(Math.abs(t.angVel) / TURBO_CAP);   // "I'm building speed" tell
     }
     if (t.repel) {
       // repel: slowly push the tether radius outward...
@@ -865,6 +886,22 @@ function update(dt) {
         life: 0.6 + Math.random() * 0.4,
         color: color
       });
+    }
+
+    // rope tension creak at the bottom of the arc (once per half-orbit)
+    const below = player.y > o.y + 6;
+    if (below && !lastBelow && creakCd <= 0 && Math.abs(t.angVel) * t.dist > 5) {
+      playCreak();
+      creakCd = 0.4;
+    }
+    lastBelow = below;
+    if (creakCd > 0) creakCd -= dt / 60;
+
+    // faint drip ticks while held - denser the faster you go
+    dripAcc -= dt;
+    if (dripAcc <= 0) {
+      dripAcc = Math.max(0.12, 1.1 - Math.abs(t.angVel) * t.dist * 0.05);
+      if (Math.random() < 0.55) playDrip(0.032);
     }
 
     // keep tetherParticles alive
@@ -983,12 +1020,14 @@ function win() {
   winLabelT = 0.9;
   spawnGoalBurst(landTier);
   playWin(landTier);
+  stopTurboBed();
   elMsg.classList.remove('lost');
   elMsg.classList.remove('hidden');
   elMsgObj.style.display = 'none';
 
   // ---- results on the win overlay ----
   elMsgStars.textContent = '\u2605\u2605\u2605'.slice(0, stars) + '\u2606\u2606\u2606'.slice(0, 3 - stars);
+  playStarPop(stars);
   const bestTxt = wasNewBest ? 'NEW BEST!' : (prevBest != null ? 'best ' + fmtTime(prevBest) : '');
   elMsgScore.textContent = fmtTime(t) + (bestTxt ? '  \u00b7  ' + bestTxt : '');
   elMsgScore.className = wasNewBest ? 'newbest' : '';
@@ -1002,7 +1041,8 @@ function win() {
 function lose() {
   status = 'lost';
   statusTimer = 1.5;
-  playLose();
+  stopTurboBed();
+  playLose(loseCause);
   elMsg.classList.add('lost');
   elMsg.classList.remove('hidden');
   elMsgObj.style.display = 'none';
@@ -1613,6 +1653,14 @@ let masterGain = null;
 let noiseBuf = null;
 let sndOn = true;
 
+// looping air-rush bed (whoosh that tracks spin) and turbo climbing bed
+let rushSrc = null, rushFilter = null, rushGain = null, rushTarget = 0;
+let turboOsc = null, turboLp = null, turboGain = null;
+let creakCd = 0, lastBelow = null, dripAcc = 0;
+
+// small pitch jitter so repeated hits never sound like a ringtone
+const det = () => 1 + (Math.random() * 0.07 - 0.035);
+
 function ensureAudio() {
   if (!audioCtx) {
     try {
@@ -1622,11 +1670,36 @@ function ensureAudio() {
       masterGain = audioCtx.createGain();
       masterGain.gain.value = 0.32;
       masterGain.connect(audioCtx.destination);
+
+      // looping air-rush bed: quiet always-on noise, swept toward motion
+      rushSrc = audioCtx.createBufferSource();
+      rushSrc.buffer = noise();
+      rushSrc.loop = true;
+      rushFilter = audioCtx.createBiquadFilter();
+      rushFilter.type = 'bandpass';
+      rushFilter.Q.value = 0.8;
+      rushFilter.frequency.value = 260;
+      rushGain = audioCtx.createGain();
+      rushGain.gain.value = 0;
+      rushSrc.connect(rushFilter);
+      rushFilter.connect(rushGain);
+      rushGain.connect(masterGain);
+      rushSrc.start(0);
     } catch (e) { /* audio unavailable */ }
   }
   if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
 }
 
+// sweep the air-rush bed:  x in [0..1], quiet at 0, screaming at 1
+function setRush(x) {
+  if (!audioCtx || !rushFilter || !rushGain) return;
+  rushTarget = sndOn ? x : 0;
+  const t0 = audioCtx.currentTime;
+  rushFilter.frequency.setTargetAtTime(240 + rushTarget * 2800, t0, 0.07);
+  rushGain.gain.setTargetAtTime(0.055 * rushTarget, t0, 0.07);
+}
+
+// combining tone: attach attack-slide-release envelope
 function tone(freq, dur, type, vol, slideTo) {
   if (!sndOn || !audioCtx || !masterGain) return;
   const t0 = audioCtx.currentTime;
@@ -1655,19 +1728,20 @@ function noise() {
   return noiseBuf;
 }
 
-function swoosh(dur, freqFrom, freqTo, vol) {
+// filtered noise burst: the "air/paper/fabric" layer of every sound
+function filteredNoise(dur, ftype, freqFrom, freqTo, q, vol) {
   if (!sndOn || !audioCtx || !masterGain) return;
   const t0 = audioCtx.currentTime;
   const src = audioCtx.createBufferSource();
   src.buffer = noise();
   const filt = audioCtx.createBiquadFilter();
-  filt.type = 'bandpass';
-  filt.Q.value = 1.2;
+  filt.type = ftype;
+  filt.Q.value = q || 1.2;
   filt.frequency.setValueAtTime(freqFrom, t0);
-  filt.frequency.exponentialRampToValueAtTime(freqTo, t0 + dur);
+  filt.frequency.exponentialRampToValueAtTime(Math.max(1, freqTo), t0 + dur);
   const g = audioCtx.createGain();
   g.gain.setValueAtTime(0.0001, t0);
-  g.gain.linearRampToValueAtTime(vol, t0 + 0.02);
+  g.gain.linearRampToValueAtTime(vol, t0 + 0.01);
   g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
   src.connect(filt);
   filt.connect(g);
@@ -1676,42 +1750,290 @@ function swoosh(dur, freqFrom, freqTo, vol) {
   src.stop(t0 + dur + 0.05);
 }
 
-function playAttach(type) {
-  if (!audioCtx) return;
-  if (type === 'turbo')   { tone(520, 0.14, 'square', 0.10, 880); }
-  else if (type === 'repel') { tone(300, 0.22, 'sawtooth', 0.10, 150); }
-  else                     { tone(360, 0.10, 'triangle', 0.12, 520); swoosh(0.12, 600, 1400, 0.05); }
+function swoosh(dur, freqFrom, freqTo, vol) {
+  filteredNoise(dur, 'bandpass', freqFrom, freqTo, 1.2, vol);
 }
-function playRelease() { if (!audioCtx) return; swoosh(0.16, 1800, 500, 0.06); }
-function playKick()    { if (!audioCtx) return; tone(140, 0.18, 'triangle', 0.22, 60); }
+
+// low sine drop: canvas thump / wood knock / wet body
+function thump(freq, dur, vol) {
+  if (!sndOn || !audioCtx || !masterGain) return;
+  const t0 = audioCtx.currentTime;
+  const o = audioCtx.createOscillator();
+  const g = audioCtx.createGain();
+  o.type = 'sine';
+  o.frequency.setValueAtTime(freq, t0);
+  o.frequency.exponentialRampToValueAtTime(Math.max(20, freq * 0.4), t0 + dur);
+  g.gain.setValueAtTime(vol, t0);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+  o.connect(g); g.connect(masterGain);
+  o.start(t0); o.stop(t0 + dur + 0.02);
+}
+
+// single water/drip plip (main + rebound)
+function playDrip(vol) {
+  if (!sndOn || !audioCtx || !masterGain) return;
+  const t0 = audioCtx.currentTime;
+  const f = (480 + Math.random() * 380) * det();
+  const o = audioCtx.createOscillator();
+  const g = audioCtx.createGain();
+  o.type = 'sine';
+  o.frequency.setValueAtTime(f * 1.4, t0);
+  o.frequency.exponentialRampToValueAtTime(f * 0.4, t0 + 0.065);
+  g.gain.setValueAtTime(0.0001, t0);
+  g.gain.linearRampToValueAtTime(vol || 0.06, t0 + 0.008);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.09);
+  o.connect(g); g.connect(masterGain);
+  o.start(t0); o.stop(t0 + 0.1);
+}
+
+// attach: rope catch (cloth thock + metal tick), wet kiss when close,
+// turbo starts the climbing bed, repel sounds wrong and drops in pitch
+function playAttach(type, dist) {
+  if (!audioCtx) return;
+  filteredNoise(0.07, 'bandpass', 170, 110, 1.7, 0.05);            // cloth thock
+  tone((2000 + Math.random() * 500) * det(), 0.03, 'triangle', 0.045); // metal tick
+  if (dist < 130) {
+    tone(180 * det(), 0.09, 'sine', 0.09, 70);                     // suction body
+    filteredNoise(0.10, 'bandpass', 950, 320, 1.0, 0.035);         // wet kiss
+  }
+  if (type === 'turbo') {
+    startTurboBed();
+  } else if (type === 'repel') {
+    tone(260 * det(), 0.14, 'sawtooth', 0.06, 110);                // rubber snap, down
+    filteredNoise(0.10, 'bandpass', 1400, 600, 2.2, 0.04);
+    setTimeout(() => filteredNoise(0.08, 'bandpass', 900, 500, 1.5, 0.03), 60); // sticky peel
+  }
+}
+
+// turbo: rising whoosh bed that keeps climbing while held
+function startTurboBed() {
+  if (!audioCtx) return;
+  stopTurboBed();
+  turboOsc = audioCtx.createOscillator();
+  turboOsc.type = 'sine';
+  turboOsc.frequency.value = 80;
+  turboLp = audioCtx.createBiquadFilter();
+  turboLp.type = 'lowpass';
+  turboLp.frequency.value = 240;
+  turboGain = audioCtx.createGain();
+  turboGain.gain.value = 0;
+  turboOsc.connect(turboLp);
+  turboLp.connect(turboGain);
+  turboGain.connect(masterGain);
+  turboOsc.start();
+}
+function updateTurboBed(frac) {
+  if (!audioCtx || !turboOsc || !turboGain) return;
+  const t0 = audioCtx.currentTime;
+  turboOsc.frequency.setTargetAtTime(80 + frac * 150, t0, 0.12);
+  turboLp.frequency.setTargetAtTime(240 + frac * 980, t0, 0.12);
+  turboGain.gain.setTargetAtTime(0.05 * frac, t0, 0.12);
+}
+function stopTurboBed() {
+  if (turboGain && audioCtx) {
+    const osc = turboOsc, g = turboGain;
+    const t0 = audioCtx.currentTime;
+    g.gain.setTargetAtTime(0, t0, 0.08);
+    setTimeout(() => { try { osc.stop(); osc.disconnect(); g.disconnect(); } catch (e) {} }, 450);
+    turboOsc = null; turboLp = null; turboGain = null;
+  } else {
+    turboOsc = turboLp = turboGain = null;
+  }
+}
+
+// rope tension creak at the bottom of the arc (gated, per half-orbit)
+function playCreak() {
+  if (!audioCtx) return;
+  filteredNoise(0.12, 'bandpass', 300, 150, 4, 0.045);
+  tone(90 * det(), 0.12, 'sawtooth', 0.03, 120);
+}
+
+// release: the money sound. string snap + smosh whoosh + slosh + drips;
+// fast = high & short, slow = low & wet
+function playRelease(speed) {
+  if (!audioCtx) return;
+  stopTurboBed();
+  const fast = speed > 14, slow = speed < 6;
+  filteredNoise(0.05, 'highpass', 1800, 2600, 1.6, 0.05);               // string snap
+  swoosh(fast ? 0.13 : slow ? 0.24 : 0.17,
+         fast ? 1200 : slow ? 480 : 820,
+         fast ? 2400 : slow ? 900 : 1500,
+         fast ? 0.05 : 0.045);                                          // forward whoosh
+  filteredNoise(0.11, 'bandpass', 420, 700, 0.9, 0.035);                // slosh as it tips
+  for (let i = 0; i < (fast ? 5 : 3); i++) {
+    setTimeout(() => playDrip(0.04), 20 + i * 28);                      // droplet spray
+  }
+  tone(140 * det(), 0.10, 'sine', 0.09, 60);                            // pop on the boost
+}
+
+// repel auto-release: rubber slap
+function playKick() {
+  if (!audioCtx) return;
+  filteredNoise(0.08, 'bandpass', 1200, 400, 2, 0.06);
+  tone(160 * det(), 0.12, 'sawtooth', 0.08, 70);
+  swoosh(0.25, 320, 80, 0.05);
+}
+
 function playWin(tier) {
   if (!audioCtx) return;
   if (tier === 2) {
-    // MASSIVE: low boom + bright extended arpeggio
-    const now = audioCtx.currentTime;
-    const thump = audioCtx.createOscillator();
-    const tg = audioCtx.createGain();
-    thump.type = 'sine';
-    thump.frequency.setValueAtTime(200, now);
-    thump.frequency.exponentialRampToValueAtTime(55, now + 0.4);
-    tg.gain.setValueAtTime(0.3, now);
-    tg.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
-    thump.connect(tg);
-    tg.connect(masterGain || audioCtx.destination);
-    thump.start(); thump.stop(now + 0.5);
-    const notes = [[523, 0.10, 0], [659, 0.10, 70], [784, 0.10, 140], [1047, 0.30, 210], [1319, 0.45, 300]];
-    for (const [f, d, delay] of notes) setTimeout(() => tone(f, d, 'square', 0.10), delay);
+    // MASSIVE: feel it in the chest, then hear rain
+    thumpEvent(150, 55, 0.35, 0.30);           // thump, starts a bit lower
+    splatNoise(0.18, 400, 1800, 2.6, 0.085);   // loud, wider Q
+    setTimeout(() => {                          // +40ms: canvas skin + a hair of wood
+      canvasSkin(220, 90, 0.12, 0.05);
+      canvasSkin(140, 70, 0.10, 0.035);
+    }, 40);
+    smearNoise(0.40, 0.05);                    // wet falling smear, under the drips
+    rippleDrips(8, 80);
   } else if (tier === 1) {
-    const notes = [[523, 0.12, 0], [659, 0.12, 110], [784, 0.12, 220], [1047, 0.30, 330]];
-    for (const [f, d, delay] of notes) setTimeout(() => tone(f, d, 'square', 0.10), delay);
+    // POWER: plop + donk + a few drips
+    thumpEvent(180, 55, 0.20, 0.22);
+    splatNoise(0.12, 400, 1800, 1.8, 0.06);
+    setTimeout(() => canvasSkin(220, 90, 0.08, 0.04), 40);
+    smearNoise(0.20, 0.035);
+    rippleDrips(4, 80);
   } else {
-    // SOFT: gentle two-note chime
-    const notes = [[523, 0.20, 0], [659, 0.28, 140]];
-    for (const [f, d, delay] of notes) setTimeout(() => tone(f, d, 'sine', 0.08), delay);
+    // SOFT: one comic plop
+    thumpEvent(180, 55, 0.08, 0.13);
+    splatNoise(0.07, 400, 1600, 1.4, 0.05);
+    rippleDrips(2, 80);
   }
 }
-function playLose() { if (!audioCtx) return; tone(220, 0.30, 'sawtooth', 0.12, 90); swoosh(0.3, 1200, 300, 0.05); }
-function playTick() { if (!audioCtx) return; tone(880, 0.05, 'square', 0.07); }
+
+// sine thump: 180->55 type bucket-mass drop (skewed per-tier below)
+function thumpEvent(f0, f1, dur, vol) {
+  if (!sndOn || !audioCtx || !masterGain) return;
+  const t0 = audioCtx.currentTime;
+  const o = audioCtx.createOscillator();
+  const g = audioCtx.createGain();
+  o.type = 'sine';
+  o.frequency.setValueAtTime(f0, t0);
+  o.frequency.exponentialRampToValueAtTime(Math.max(1, f1), t0 + dur);
+  g.gain.setValueAtTime(vol, t0);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+  o.connect(g); g.connect(masterGain);
+  o.start(t0); o.stop(t0 + dur + 0.02);
+}
+
+// wet splash of bandpass noise, 400->1800 Hz then slam shut. Instant attack:
+// if this fades in it becomes a whoosh, not a hit.
+function splatNoise(dur, fLo, fHi, q, vol) {
+  if (!sndOn || !audioCtx || !masterGain) return;
+  const t0 = audioCtx.currentTime;
+  const src = audioCtx.createBufferSource();
+  src.buffer = noise();
+  const filt = audioCtx.createBiquadFilter();
+  filt.type = 'bandpass';
+  filt.Q.value = q || 1.6;
+  filt.frequency.setValueAtTime(fLo, t0);
+  filt.frequency.exponentialRampToValueAtTime(fHi, t0 + dur * 0.55);
+  const g = audioCtx.createGain();
+  g.gain.setValueAtTime(0.0001, t0);
+  g.gain.linearRampToValueAtTime(vol, t0 + 0.006);
+  g.gain.exponentialRampToValueAtTime(vol * 0.6, t0 + dur * 0.5);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+  src.connect(filt); filt.connect(g); g.connect(masterGain);
+  src.start(t0); src.stop(t0 + dur + 0.02);
+}
+
+// stretched-cloth donk: short triangle 220->90, plus a hair of wood at ~140
+function canvasSkin(f0, f1, dur, vol) {
+  if (!sndOn || !audioCtx || !masterGain) return;
+  const t0 = audioCtx.currentTime;
+  const o = audioCtx.createOscillator();
+  const g = audioCtx.createGain();
+  o.type = 'triangle';
+  o.frequency.setValueAtTime(f0, t0);
+  o.frequency.exponentialRampToValueAtTime(Math.max(1, f1), t0 + dur);
+  g.gain.setValueAtTime(0.0001, t0);
+  g.gain.linearRampToValueAtTime(vol, t0 + 0.004);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+  o.connect(g); g.connect(masterGain);
+  o.start(t0); o.stop(t0 + dur + 0.02);
+}
+
+// lowpassed noise, 900->200 - the wet smear, kept underneath the drips
+function smearNoise(dur, vol) {
+  if (!sndOn || !audioCtx || !masterGain) return;
+  const t0 = audioCtx.currentTime;
+  const src = audioCtx.createBufferSource();
+  src.buffer = noise();
+  const filt = audioCtx.createBiquadFilter();
+  filt.type = 'lowpass';
+  filt.frequency.setValueAtTime(900, t0);
+  filt.frequency.exponentialRampToValueAtTime(200, t0 + dur);
+  const g = audioCtx.createGain();
+  g.gain.setValueAtTime(0.0001, t0);
+  g.gain.linearRampToValueAtTime(vol, t0 + 0.01);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+  src.connect(filt); filt.connect(g); g.connect(masterGain);
+  src.start(t0); src.stop(t0 + dur + 0.02);
+}
+
+// fine droplets: sine blips 2-4 kHz, 20-40ms, random pitch (+-15%), staggered
+function rippleDrips(count, startMs) {
+  const base = [2200, 2600, 3000, 3400, 2400, 2800, 3200, 3600];
+  for (let i = 0; i < count; i++) {
+    const f = base[Math.min(i, base.length - 1)] * (0.85 + Math.random() * 0.30);
+    const delay = startMs + i * (30 + Math.random() * 60);
+    setTimeout(() => {
+      if (!sndOn || !audioCtx || !masterGain) return;
+      const t0 = audioCtx.currentTime;
+      const o = audioCtx.createOscillator();
+      const g = audioCtx.createGain();
+      o.type = 'sine';
+      o.frequency.setValueAtTime(f, t0);
+      g.gain.setValueAtTime(0.0001, t0);
+      g.gain.linearRampToValueAtTime(0.035, t0 + 0.004);
+      g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.02 + Math.random() * 0.02);
+      o.connect(g); g.connect(masterGain);
+      o.start(t0); o.stop(t0 + 0.06);
+    }, delay);
+  }
+}
+
+function playLose(cause) {
+  if (!audioCtx) return;
+  if (cause === 'OUT OF BOUNDS!') {
+    filteredNoise(0.4, 'lowpass', 1600, 300, 1.0, 0.05);                // whoosh falls off, dull
+  } else {
+    thump(140, 0.09, 0.1);                                              // dry wood knock
+    setTimeout(() => { thump(110, 0.10, 0.08); filteredNoise(0.12, 'bandpass', 1000, 500, 1.5, 0.04); }, 70); // tape rip
+  }
+  // sad two-note, tiny
+  tone(330 * det(), 0.22, 'sine', 0.055, 300);
+  setTimeout(() => tone(262 * det(), 0.28, 'sine', 0.045, 220), 180);
+}
+
+// UI: paper page-turn / pencil tap (NEVER the attach sound)
+function playTick() {
+  if (!audioCtx) return;
+  filteredNoise(0.035, 'bandpass', 1700, 1500, 2.6, 0.05);
+  tone(1400 * det(), 0.025, 'triangle', 0.03);
+}
+
+// star result: three staggered paint drips (not slot-machine coins)
+function playStarPop(stars) {
+  if (!audioCtx) return;
+  const fs = [640, 840, 1100];
+  for (let i = 0; i < stars; i++) {
+    setTimeout(() => {
+      if (!audioCtx) return;
+      const t0 = audioCtx.currentTime;
+      const o = audioCtx.createOscillator();
+      const g = audioCtx.createGain();
+      o.type = 'sine';
+      o.frequency.setValueAtTime(fs[i] * 1.35, t0);
+      o.frequency.exponentialRampToValueAtTime(fs[i] * 0.5, t0 + 0.07);
+      g.gain.setValueAtTime(0.0001, t0);
+      g.gain.linearRampToValueAtTime(0.07, t0 + 0.008);
+      g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.09);
+      o.connect(g); g.connect(masterGain);
+      o.start(t0); o.stop(t0 + 0.1);
+    }, i * 110);
+  }
+}
 
 /* ============================================================
    INPUT (mouse + touch)
@@ -1735,33 +2057,38 @@ wrap.addEventListener('mousedown', mouseDown);
 document.addEventListener('mouseup', mouseUp);
 
 wrap.addEventListener('touchstart', (e) => {
-  e.preventDefault();
   lastTouch = Date.now();
+  // hands off while the level-select overlay is open
+  if (elLevelSelect && !elLevelSelect.classList.contains('hidden')) return;
+  const t = e.target;
+  if (t && t.closest && t.closest('button')) return;   // presses on controls aren't gameplay
+  if (t === canvas) e.preventDefault();                // stop scroll/zoom on the game surface
   ensureAudio();
   if (status === 'lost') { loadLevel(levelIndex); return; }  // tap screen to restart
   if (status === 'ready') { launchBall(); return; }          // tap launches (no grab yet)
   tryAttach();
 }, { passive: false });
 
-wrap.addEventListener('touchmove', (e) => { e.preventDefault(); }, { passive: false });
+wrap.addEventListener('touchmove', (e) => { if (e.target === canvas) e.preventDefault(); }, { passive: false });
 
+// NO preventDefault here: canceling touchend swallows the synthetic click,
+// which is what made every button dead on phones.
 document.addEventListener('touchend', (e) => {
-  e.preventDefault();
   lastTouch = Date.now();
   release();
-}, { passive: false });
-document.addEventListener('touchcancel', (e) => { e.preventDefault(); lastTouch = Date.now(); release(); }, { passive: false });
+}, { passive: true });
+document.addEventListener('touchcancel', (e) => { lastTouch = Date.now(); release(); }, { passive: true });
 
 wrap.addEventListener('contextmenu', (e) => e.preventDefault());
 
 // Restart button (also stop it from triggering an attach)
 elRestart.addEventListener('mousedown', (e) => e.stopPropagation());
-elRestart.addEventListener('touchstart', (e) => { e.stopPropagation(); e.preventDefault(); }, { passive: false });
+elRestart.addEventListener('touchstart', (e) => { e.stopPropagation(); }, { passive: false });
 elRestart.addEventListener('click', () => { ensureAudio(); playTick(); loadLevel(levelIndex); });
 
 // NEXT LEVEL: advance (or wrap to level 1 after the last)
 elNextBtn.addEventListener('mousedown', (e) => e.stopPropagation());
-elNextBtn.addEventListener('touchstart', (e) => { e.stopPropagation(); e.preventDefault(); }, { passive: false });
+elNextBtn.addEventListener('touchstart', (e) => { e.stopPropagation(); }, { passive: false });
 elNextBtn.addEventListener('click', () => {
   ensureAudio(); playTick();
   const nextIdx = levelIndex + 1;
@@ -1771,7 +2098,7 @@ elNextBtn.addEventListener('click', () => {
 // ---------- HUD buttons ----------
 const elHudRestart = document.getElementById('hudRestartBtn');
 elHudRestart.addEventListener('mousedown', (e) => e.stopPropagation());
-elHudRestart.addEventListener('touchstart', (e) => { e.stopPropagation(); e.preventDefault(); }, { passive: false });
+elHudRestart.addEventListener('touchstart', (e) => { e.stopPropagation(); }, { passive: false });
 elHudRestart.addEventListener('click', () => { ensureAudio(); playTick(); loadLevel(levelIndex); });
 
 function togglePause() {
@@ -1781,26 +2108,28 @@ function togglePause() {
   playTick();
 }
 elPause.addEventListener('mousedown', (e) => e.stopPropagation());
-elPause.addEventListener('touchstart', (e) => { e.stopPropagation(); e.preventDefault(); }, { passive: false });
+elPause.addEventListener('touchstart', (e) => { e.stopPropagation(); }, { passive: false });
 elPause.addEventListener('click', togglePause);
 
 // ---------- Sound toggle ----------
 elSnd.addEventListener('mousedown', (e) => e.stopPropagation());
-elSnd.addEventListener('touchstart', (e) => { e.stopPropagation(); e.preventDefault(); }, { passive: false });
+elSnd.addEventListener('touchstart', (e) => { e.stopPropagation(); }, { passive: false });
 elSnd.addEventListener('click', () => {
   ensureAudio();
   sndOn = !sndOn;
   elSnd.textContent = sndOn ? 'SOUND ON' : 'SOUND OFF';
+  setRush(sndOn ? rushTarget : 0);
+  if (!sndOn) stopTurboBed();
 });
 
 // ---------- Admin level skip ----------
 const elAdminPrev = document.getElementById('adminPrev');
 const elAdminNext = document.getElementById('adminNext');
 elAdminPrev.addEventListener('mousedown', (e) => e.stopPropagation());
-elAdminPrev.addEventListener('touchstart', (e) => { e.stopPropagation(); e.preventDefault(); }, { passive: false });
+elAdminPrev.addEventListener('touchstart', (e) => { e.stopPropagation(); }, { passive: false });
 elAdminPrev.addEventListener('click', () => { ensureAudio(); playTick(); levelIndex = Math.max(0, levelIndex - 1); loadLevel(levelIndex); });
 elAdminNext.addEventListener('mousedown', (e) => e.stopPropagation());
-elAdminNext.addEventListener('touchstart', (e) => { e.stopPropagation(); e.preventDefault(); }, { passive: false });
+elAdminNext.addEventListener('touchstart', (e) => { e.stopPropagation(); }, { passive: false });
 elAdminNext.addEventListener('click', () => { ensureAudio(); playTick(); levelIndex = Math.min(LEVELS.length - 1, levelIndex + 1); loadLevel(levelIndex); });
 
 // ---------- Level Select overlay ----------
@@ -1847,7 +2176,7 @@ elLevelSelectClose.addEventListener('click', () => {
 // ---------- Reset saved progress ----------
 const elResetProgress = document.getElementById('resetProgressBtn');
 elResetProgress.addEventListener('mousedown', (e) => e.stopPropagation());
-elResetProgress.addEventListener('touchstart', (e) => { e.stopPropagation(); e.preventDefault(); }, { passive: false });
+elResetProgress.addEventListener('touchstart', (e) => { e.stopPropagation(); }, { passive: false });
 elResetProgress.addEventListener('click', () => {
   let ok = true;
   if (typeof confirm === 'function') ok = confirm('Reset all progress and best times? This cannot be undone.');
