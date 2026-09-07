@@ -156,7 +156,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 18px;
+    gap: 24px;
     background: rgba(70, 52, 34, 0.35);
     text-align: center;
     z-index: 5;
@@ -164,7 +164,7 @@
   }
   #message.hidden { display: none; }
   #msgTitle {
-    font-size: clamp(24px, 5vmin, 52px);
+    font-size: clamp(36px, 8vmin, 84px);
     font-weight: bold;
     letter-spacing: 0.25em;
     color: var(--ink);
@@ -172,7 +172,7 @@
   }
   #message.lost #msgTitle { color: #a23c2c; text-shadow: 0 1px 0 rgba(255, 255, 255, 0.55), 0 2px 6px rgba(80, 60, 30, 0.3); }
   #msgStars {
-    font-size: clamp(30px, 7vmin, 56px);
+    font-size: clamp(48px, 12vmin, 96px);
     letter-spacing: 0.3em;
     line-height: 1;
     color: #b57f16;
@@ -188,7 +188,7 @@
     100% { transform: scale(1)   rotate(0deg);  opacity: 1; }
   }
   #msgScore {
-    font-size: 14px;
+    font-size: 18px;
     letter-spacing: 0.14em;
     color: #4a4038;
     text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
@@ -196,7 +196,7 @@
   #msgScore .best { color: #1f7a55; text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5); }
   #msgScore .newbest { color: #b57f16; text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5); }
   #msgSub {
-    font-size: 15px;
+    font-size: 18px;
     letter-spacing: 0.15em;
     color: #5a4a3a;
     text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
@@ -211,7 +211,7 @@
   }
   #restartBtn {
     font-family: inherit;
-    font-size: 15px;
+    font-size: 17px;
     letter-spacing: 0.18em;
     color: var(--ink);
     background: #f7f2e4;
@@ -219,9 +219,10 @@
     border-bottom-width: 3px;
     border-bottom-color: var(--neon-red);
     box-shadow: 0 2px 0 rgba(80, 60, 30, 0.18);
-    padding: 10px 26px;
+    padding: 14px 36px;
     border-radius: 6px;
     cursor: pointer;
+    min-height: 44px;
   }
   #restartBtn:hover { background: #fdf9ee; }
   #restartBtn:active { transform: scale(0.97); }
@@ -233,7 +234,7 @@
   }
   #nextLevelBtn {
     font-family: inherit;
-    font-size: 16px;
+    font-size: 18px;
     letter-spacing: 0.18em;
     color: var(--ink);
     background: #f7f2e4;
@@ -241,9 +242,10 @@
     border-bottom-width: 3px;
     border-bottom-color: var(--neon-cyan);
     box-shadow: 0 2px 0 rgba(80, 60, 30, 0.18);
-    padding: 11px 30px;
+    padding: 15px 40px;
     border-radius: 6px;
     cursor: pointer;
+    min-height: 44px;
   }
   #nextLevelBtn:hover { background: #fdf9ee; }
   #nextLevelBtn:active { transform: scale(0.97); }
