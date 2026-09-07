@@ -2175,15 +2175,17 @@ document.addEventListener('touchcancel', (e) => { lastTouch = Date.now(); releas
 
 wrap.addEventListener('contextmenu', (e) => e.preventDefault());
 
+function bindButton(el, handler) {
+  el.addEventListener('mousedown', (e) => e.stopPropagation());
+  el.addEventListener('touchstart', (e) => { e.stopPropagation(); }, { passive: false });
+  el.addEventListener('click', handler);
+}
+
 // Restart button (also stop it from triggering an attach)
-elRestart.addEventListener('mousedown', (e) => e.stopPropagation());
-elRestart.addEventListener('touchstart', (e) => { e.stopPropagation(); }, { passive: false });
-elRestart.addEventListener('click', () => { ensureAudio(); playTick(); loadLevel(levelIndex); });
+bindButton(elRestart, () => { ensureAudio(); playTick(); loadLevel(levelIndex); });
 
 // NEXT LEVEL: advance (or wrap to level 1 after the last)
-elNextBtn.addEventListener('mousedown', (e) => e.stopPropagation());
-elNextBtn.addEventListener('touchstart', (e) => { e.stopPropagation(); }, { passive: false });
-elNextBtn.addEventListener('click', () => {
+bindButton(elNextBtn, () => {
   ensureAudio(); playTick();
   const nextIdx = levelIndex + 1;
   loadLevel(nextIdx >= LEVELS.length ? 0 : nextIdx);
@@ -2196,14 +2198,10 @@ function togglePause() {
   else if (status === 'paused')  { status = 'playing'; showPauseUI(false); }
   playTick();
 }
-elPause.addEventListener('mousedown', (e) => e.stopPropagation());
-elPause.addEventListener('touchstart', (e) => { e.stopPropagation(); }, { passive: false });
-elPause.addEventListener('click', togglePause);
+bindButton(elPause, togglePause);
 
 // ---------- Sound toggle ----------
-elSnd.addEventListener('mousedown', (e) => e.stopPropagation());
-elSnd.addEventListener('touchstart', (e) => { e.stopPropagation(); }, { passive: false });
-elSnd.addEventListener('click', () => {
+bindButton(elSnd, () => {
   ensureAudio();
   sndOn = !sndOn;
   elSnd.textContent = sndOn ? 'SOUND ON' : 'SOUND OFF';
@@ -2221,10 +2219,7 @@ function returnToMenu() {
   document.getElementById('title').style.display = '';
   elMenu.classList.remove('hidden');
 }
-const elMenuBtn = document.getElementById('menuBtn');
-elMenuBtn.addEventListener('mousedown', (e) => e.stopPropagation());
-elMenuBtn.addEventListener('touchstart', (e) => { e.stopPropagation(); }, { passive: false });
-elMenuBtn.addEventListener('click', () => { ensureAudio(); playTick(); returnToMenu(); });
+bindButton(document.getElementById('menuBtn'), () => { ensureAudio(); playTick(); returnToMenu(); });
 
 // ---------- Level Select overlay ----------
 const elLevelSelect = document.getElementById('levelSelect');
