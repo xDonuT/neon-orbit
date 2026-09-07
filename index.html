@@ -360,17 +360,17 @@
   <div id="menu">
     <div id="menuTitle">PAINT&nbsp;ORBIT</div>
     <div id="menuSub">Keep a bucket, ruin a canvas.</div>
-    <button class="menuBtn" id="menuStartBtn">Play</button>
-    <button class="menuBtn" id="menuLevelSelectBtn">Level Select</button>
+<button class="menuBtn" id="menuStartBtn" aria-label="Start game">Play</button>
+<button class="menuBtn" id="menuLevelSelectBtn" aria-label="Level select">Level Select</button>
     <div class="levelsInfo">Levels 1–25</div>
   </div>
 
   <!-- Game: full screen, canvas + overlays -->
   <div id="wrap">
-    <canvas id="game" width="1400" height="850"></canvas>
+<canvas id="game" width="1400" height="850" aria-label="Game canvas"></canvas>
 
-    <!-- Red danger edge overlay: sits ABOVE the HUD so nothing covers it -->
-    <canvas id="bounds" width="1400" height="850"></canvas>
+<!-- Red danger edge overlay: sits ABOVE the HUD so nothing covers it -->
+<canvas id="bounds" width="1400" height="850" aria-hidden="true"></canvas>
     <div id="hudInfo">
       <div id="title">PAINT&nbsp;ORBIT</div>
       <div id="hudInfoRow">
@@ -379,9 +379,9 @@
       </div>
     </div>
     <div id="hud">
-      <button class="hud-btn" id="pauseBtn">PAUSE</button>
-      <button class="hud-btn" id="sndBtn">SOUND ON</button>
-      <button class="hud-btn" id="menuBtn">MENU</button>
+<button class="hud-btn" id="pauseBtn" aria-label="Pause">PAUSE</button>
+<button class="hud-btn" id="sndBtn" aria-label="Sound on">SOUND ON</button>
+<button class="hud-btn" id="menuBtn" aria-label="Menu">MENU</button>
     </div>
 
     <!-- Level Select overlay (hidden by default) -->
@@ -389,23 +389,23 @@
       <h3 style="font-size:clamp(24px,5vmin,48px);font-weight:bold;letter-spacing:0.2em;margin-bottom:16px;">PICK A CANVAS</h3>
       <div id="levelSelectGrid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(80px,1fr));gap:8px;width:100%;max-width:400px;"></div>
       <div style="display:flex;gap:12px;margin-top:16px;">
-        <button class="menuBtn" id="levelSelectClose">Close</button>
-        <button class="menuBtn" id="resetProgressBtn" style="border-color:rgba(154,58,40,0.6);color:#7a2c22;">Reset Progress</button>
+<button class="menuBtn" id="levelSelectClose" aria-label="Close level select">Close</button>
+<button class="menuBtn" id="resetProgressBtn" style="border-color:rgba(154,58,40,0.6);color:#7a2c22;" aria-label="Reset progress">Reset Progress</button>
       </div>
     </div>
 
-    <div id="message" class="hidden">
+    <div id="message" class="hidden" aria-live="assertive">
       <div id="msgTitle"></div>
       <div id="msgStars"></div>
       <div id="msgScore"></div>
       <div id="msgObj"></div>
       <div id="msgSub"></div>
       <div id="msgBtns">
-        <button id="restartBtn">RESTART LEVEL</button>
-        <button id="nextLevelBtn">NEXT LEVEL &#8594;</button>
+<button id="restartBtn" aria-label="Restart level">RESTART LEVEL</button>
+<button id="nextLevelBtn" aria-label="Next level">NEXT LEVEL &#8594;</button>
       </div>
     </div>
-    <div id="toast"></div>
+    <div id="toast" aria-live="polite"></div>
 
     <!-- Bottom instructions overlay -->
     <div id="footer">
@@ -2205,6 +2205,7 @@ bindButton(elSnd, () => {
   ensureAudio();
   sndOn = !sndOn;
   elSnd.textContent = sndOn ? 'SOUND ON' : 'SOUND OFF';
+  elSnd.setAttribute('aria-label', sndOn ? 'Sound on' : 'Sound off');
   setRush(sndOn ? rushTarget : 0);
   if (!sndOn) stopTurboBed();
 });
@@ -2238,11 +2239,16 @@ function renderLevelSelect() {
   }
   elLevelSelectGrid.innerHTML = html;
   elLevelSelectGrid.querySelectorAll('button').forEach(btn => {
+    const lvl = parseInt(btn.dataset.level, 10);
+    const unlocked = save.unlocked.includes(lvl);
+    const rec = save.best[lvl];
+    const stars = rec ? rec.stars : 0;
+    btn.setAttribute('aria-label', unlocked ? `Level ${lvl + 1}, ${stars} stars` : `Level ${lvl + 1}, locked`);
     btn.addEventListener('click', () => {
-      const lvl = parseInt(btn.dataset.level, 10);
-      if (!isNaN(lvl)) {
+      const lvl2 = parseInt(btn.dataset.level, 10);
+      if (!isNaN(lvl2)) {
         closeLevelSelect();
-        loadLevel(lvl);
+        loadLevel(lvl2);
       }
     });
   });
