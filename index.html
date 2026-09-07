@@ -49,15 +49,14 @@
     display: flex;
     flex-direction: column;
     align-items: stretch;
-    gap: 10px;
+    gap: 4px;
     width: max-content;
     max-width: calc(100% - 12px);
-    padding: 8px 9px;
+    padding: 5px 5px;
     background: rgba(247, 242, 228, 0.92);
     border: 1px solid rgba(120, 90, 50, 0.35);
     border-radius: 6px;
     box-shadow: 0 1px 0 rgba(255, 255, 255, 0.6) inset, 0 2px 5px rgba(80, 60, 30, 0.18);
-    letter-spacing: 0.12em;
     pointer-events: auto;
   }
   #hudInfo {
@@ -110,13 +109,16 @@
     border: 1px solid rgba(97, 76, 48, 0.4);
     color: #4a4038;
     font-family: inherit;
-    font-size: 11px;
-    letter-spacing: 0.14em;
-    padding: 7px 12px;
     border-radius: 5px;
     cursor: pointer;
     white-space: nowrap;
     text-shadow: 0 1px 0 rgba(255, 255, 255, 0.4);
+    font-size: 18px;
+    padding: 4px 10px;
+    line-height: 1;
+    min-width: 38px;
+    min-height: 38px;
+    text-align: center;
   }
   .hud-btn:hover { background: rgba(255, 250, 235, 0.9); }
   .hud-btn:active { transform: scale(0.97); }
@@ -432,9 +434,9 @@
       </div>
     </div>
     <div id="hud">
-<button class="hud-btn" id="pauseBtn" aria-label="Pause">PAUSE</button>
-<button class="hud-btn" id="sndBtn" aria-label="Sound on">SOUND ON</button>
-<button class="hud-btn" id="menuBtn" aria-label="Menu">MENU</button>
+<button class="hud-btn" id="pauseBtn" aria-label="Pause">⏸</button>
+<button class="hud-btn" id="sndBtn" aria-label="Sound on">🔊</button>
+<button class="hud-btn" id="menuBtn" aria-label="Menu">☰</button>
     </div>
 
     <!-- Level Select overlay (hidden by default) -->
@@ -2307,7 +2309,7 @@ bindButton(elPause, togglePause);
 bindButton(elSnd, () => {
   ensureAudio();
   sndOn = !sndOn;
-  elSnd.textContent = sndOn ? 'SOUND ON' : 'SOUND OFF';
+  elSnd.textContent = sndOn ? '🔊' : '🔇';
   elSnd.setAttribute('aria-label', sndOn ? 'Sound on' : 'Sound off');
   setRush(sndOn ? rushTarget : 0);
   if (!sndOn) stopTurboBed();
