@@ -1090,6 +1090,7 @@ function win() {
 }
 
 function lose() {
+  deathSplatter(player.x, player.y);
   status = 'lost';
   statusTimer = 1.5;
   stopTurboBed();
@@ -1226,6 +1227,33 @@ function addPaintStroke(x, y, spd, rgb) {
 function clearPaintLayer() {
   if (paintCtx) paintCtx.clearRect(0, 0, W, H);
   lastPaintX = lastPaintY = null;
+}
+
+// stamp a paint splat where the player died — visual consequence, no gameplay effect
+function deathSplatter(x, y) {
+  ensurePaintLayer();
+  if (!paintCtx) return;
+  const rgb = paintRGB;
+  const count = 8 + Math.floor(Math.random() * 5);
+  paintCtx.lineCap = 'round';
+  for (let i = 0; i < count; i++) {
+    const a = Math.random() * Math.PI * 2;
+    const len = 15 + Math.random() * 35;
+    const thick = 2 + Math.random() * 4;
+    paintCtx.globalAlpha = 0.4 + Math.random() * 0.5;
+    paintCtx.strokeStyle = 'rgb(' + rgb + ')';
+    paintCtx.lineWidth = thick;
+    paintCtx.beginPath();
+    paintCtx.moveTo(x, y);
+    paintCtx.lineTo(x + Math.cos(a) * len, y + Math.sin(a) * len);
+    paintCtx.stroke();
+  }
+  paintCtx.globalAlpha = 0.8;
+  paintCtx.fillStyle = 'rgb(' + rgb + ')';
+  paintCtx.beginPath();
+  paintCtx.arc(x, y, 6 + Math.random() * 4, 0, Math.PI * 2);
+  paintCtx.fill();
+  paintCtx.globalAlpha = 1;
 }
 
 function drawBackground() {
