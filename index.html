@@ -98,12 +98,6 @@
   }
   .hud-btn:hover { background: rgba(255, 250, 235, 0.9); }
   .hud-btn:active { transform: scale(0.97); }
-  #hudRestartBtn {
-    border-color: rgba(166, 60, 42, 0.55);
-    color: #9a3a28;
-    background: rgba(166, 60, 42, 0.08);
-  }
-  #hudRestartBtn:hover { background: rgba(166, 60, 42, 0.16); }
 
   /* ------- Canvas wrapper (full screen; canvas letterbox-fit via JS) ------- */
   #wrap {
@@ -352,14 +346,9 @@
       <div id="title">PAINT&nbsp;ORBIT</div>
       <div id="hudTimer">0:00</div>
       <div id="levelLabel">LEVEL 1 &mdash; FIRST STEPS</div>
-      <button class="hud-btn" id="hudRestartBtn">RESTART</button>
       <button class="hud-btn" id="pauseBtn">PAUSE</button>
       <button class="hud-btn" id="sndBtn">SOUND ON</button>
       <button class="hud-btn" id="menuBtn">MENU</button>
-      <div id="admin" style="margin-left:auto;display:flex;gap:4px;">
-        <button class="hud-btn" id="adminPrev" title="Previous level" style="padding:7px 10px;font-size:14px;">⏮</button>
-        <button class="hud-btn" id="adminNext" title="Next level" style="padding:7px 10px;font-size:14px;">⏭</button>
-      </div>
     </div>
 
     <!-- Level Select overlay (hidden by default) -->
@@ -654,7 +643,7 @@ function showPauseUI(on) {
     elMsg.classList.remove('hidden');
     elMsgT.textContent = 'PAUSED';
     elMsgObj.style.display = 'none';
-    elMsgS.textContent = 'press PAUSE (top bar) to resume';
+    elMsgS.textContent = 'tap anywhere to resume';
     elRestart.style.display = 'none';
     elNextBtn.style.display = 'none';
   } else {
@@ -2083,6 +2072,7 @@ function mouseDown() {
   ensureAudio();
   if (status === 'lost') { loadLevel(levelIndex); return; }  // tap to restart after game over
   if (status === 'ready') { launchBall(); return; }          // tap launches (no grab yet)
+  if (status === 'paused') { togglePause(); return; }        // tap anywhere to resume
   tryAttach();
 }
 function mouseUp() {
@@ -2103,6 +2093,7 @@ wrap.addEventListener('touchstart', (e) => {
   ensureAudio();
   if (status === 'lost') { loadLevel(levelIndex); return; }  // tap screen to restart
   if (status === 'ready') { launchBall(); return; }          // tap launches (no grab yet)
+  if (status === 'paused') { togglePause(); return; }        // tap anywhere to resume
   tryAttach();
 }, { passive: false });
 
@@ -2133,11 +2124,6 @@ elNextBtn.addEventListener('click', () => {
 });
 
 // ---------- HUD buttons ----------
-const elHudRestart = document.getElementById('hudRestartBtn');
-elHudRestart.addEventListener('mousedown', (e) => e.stopPropagation());
-elHudRestart.addEventListener('touchstart', (e) => { e.stopPropagation(); }, { passive: false });
-elHudRestart.addEventListener('click', () => { ensureAudio(); playTick(); loadLevel(levelIndex); });
-
 function togglePause() {
   ensureAudio();
   if (status === 'playing')      { status = 'paused';  showPauseUI(true);  }
@@ -2173,16 +2159,6 @@ const elMenuBtn = document.getElementById('menuBtn');
 elMenuBtn.addEventListener('mousedown', (e) => e.stopPropagation());
 elMenuBtn.addEventListener('touchstart', (e) => { e.stopPropagation(); }, { passive: false });
 elMenuBtn.addEventListener('click', () => { ensureAudio(); playTick(); returnToMenu(); });
-
-// ---------- Admin level skip ----------
-const elAdminPrev = document.getElementById('adminPrev');
-const elAdminNext = document.getElementById('adminNext');
-elAdminPrev.addEventListener('mousedown', (e) => e.stopPropagation());
-elAdminPrev.addEventListener('touchstart', (e) => { e.stopPropagation(); }, { passive: false });
-elAdminPrev.addEventListener('click', () => { ensureAudio(); playTick(); levelIndex = Math.max(0, levelIndex - 1); loadLevel(levelIndex); });
-elAdminNext.addEventListener('mousedown', (e) => e.stopPropagation());
-elAdminNext.addEventListener('touchstart', (e) => { e.stopPropagation(); }, { passive: false });
-elAdminNext.addEventListener('click', () => { ensureAudio(); playTick(); levelIndex = Math.min(LEVELS.length - 1, levelIndex + 1); loadLevel(levelIndex); });
 
 // ---------- Level Select overlay ----------
 const elLevelSelect = document.getElementById('levelSelect');
