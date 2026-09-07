@@ -513,7 +513,7 @@ const BURST_CFG = [
   { sparks: 24, spMin: 1.6,  spMax: 5.5, sizeMin: 1.6, sizeMax: 3.2, rings: [{ r: 8,  vr: 9,  life: 0.65 }, { r: 4, vr: 6.5, life: 0.45 }] },
   { sparks: 80, spMin: 2.5,  spMax: 9.5, sizeMin: 2.0, sizeMax: 4.5, rings: [{ r: 10, vr: 12, life: 0.8 }, { r: 6, vr: 9, life: 0.6 }, { r: 3, vr: 7, life: 0.5 }] },
 ];
-const OUT_MARGIN    = 50;      // death buffer beyond canvas edges
+const OUT_MARGIN    = 10;      // death buffer beyond canvas edges (matches visible red band)
 
 // ---------- Levels ----------
 const LEVELS = [
