@@ -1187,10 +1187,10 @@ function win() {
   elMsgScore.className = wasNewBest ? 'newbest' : '';
   elMsgT.textContent = stars === 3 ? 'FLAWLESS!' : last ? 'ALL 25 SIGNED!' : 'LEVEL COMPLETE!';
   elMsgS.textContent = last ? 'Back around to FIRST STEPS...' : 'Next: ' + LEVELS[levelIndex + 1].name + ' \u2192';
-   elRestart.style.display = 'none';
-   elNextBtn.style.display = '';
-   elNextBtn.textContent = last ? 'PLAY AGAIN' : 'NEXT LEVEL \u2192';
-   document.getElementById('menuBtnMsg').style.display = '';
+  elRestart.style.display = 'none';
+  elNextBtn.style.display = '';
+  elNextBtn.textContent = last ? 'PLAY AGAIN' : 'NEXT LEVEL \u2192';
+  document.getElementById('menuBtnMsg').style.display = '';
 }
 
 function lose() {
