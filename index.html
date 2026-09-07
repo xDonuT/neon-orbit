@@ -52,24 +52,24 @@
     width: max-content;
     max-width: calc(100% - 12px);
     padding: 6px 14px;
-    background: rgba(240, 234, 218, 0.92);
+    background: rgba(247, 242, 228, 0.92);
     border: 1px solid rgba(120, 90, 50, 0.35);
-    border-radius: 8px;
-    box-shadow: 0 1px 6px rgba(80, 60, 30, 0.25);
-    letter-spacing: 0.2em;
+    border-radius: 6px;
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.6) inset, 0 2px 5px rgba(80, 60, 30, 0.18);
+    letter-spacing: 0.12em;
     pointer-events: auto;
   }
   #title {
     font-size: 15px;
     font-weight: bold;
     color: var(--ink);
-    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6), 0 0 10px rgba(31, 138, 156, 0.35);
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.75);
     white-space: nowrap;
   }
   #hudTimer {
     font-size: 12px;
-    color: var(--neon-yellow);
-    text-shadow: 0 0 8px rgba(201, 154, 46, 0.45);
+    color: #8a6a1c;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
     white-space: nowrap;
     font-variant-numeric: tabular-nums;
   }
@@ -77,36 +77,35 @@
     flex: 1;
     text-align: center;
     font-size: 12px;
-    color: var(--neon-magenta);
-    text-shadow: 0 0 8px rgba(160, 77, 140, 0.4);
+    color: #5a4a3a;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
   .hud-btn {
-    background: rgba(31, 138, 156, 0.12);
-    border: 1px solid rgba(31, 138, 156, 0.6);
-    color: var(--neon-cyan);
+    background: rgba(255, 250, 235, 0.6);
+    border: 1px solid rgba(97, 76, 48, 0.4);
+    color: #4a4038;
     font-family: inherit;
     font-size: 11px;
-    letter-spacing: 0.18em;
+    letter-spacing: 0.14em;
     padding: 7px 12px;
     border-radius: 5px;
     cursor: pointer;
     white-space: nowrap;
-    text-shadow: 0 0 6px rgba(31, 138, 156, 0.5);
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.4);
   }
-  .hud-btn:hover { background: rgba(31, 138, 156, 0.28); }
+  .hud-btn:hover { background: rgba(255, 250, 235, 0.9); }
   .hud-btn:active { transform: scale(0.97); }
   #hudRestartBtn {
-    border-color: rgba(214, 79, 63, 0.7);
-    color: var(--neon-red);
-    background: rgba(214, 79, 63, 0.12);
-    text-shadow: 0 0 6px rgba(214, 79, 63, 0.5);
+    border-color: rgba(166, 60, 42, 0.55);
+    color: #9a3a28;
+    background: rgba(166, 60, 42, 0.08);
   }
-  #hudRestartBtn:hover { background: rgba(214, 79, 63, 0.3); }
+  #hudRestartBtn:hover { background: rgba(166, 60, 42, 0.16); }
 
-  /* ------- Canvas wrapper (full screen, letterboxed canvas) ------- */
+  /* ------- Canvas wrapper (full screen; canvas is JS-sized to fill) ------- */
   #wrap {
     position: relative;
     width: 100%;
@@ -116,13 +115,13 @@
   }
   canvas {
     position: absolute;
-    inset: 0;
-    margin: auto;
-    width: auto;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 100vw;
     height: auto;
-    max-width: 100%;
-    max-height: 100%;
-    aspect-ratio: 1400 / 850;
+    max-width: none;
+    max-height: none;
     touch-action: none;
     cursor: crosshair;
     display: block;
@@ -148,51 +147,53 @@
     font-weight: bold;
     letter-spacing: 0.25em;
     color: var(--ink);
-    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5), 0 0 18px rgba(31, 138, 156, 0.4), 0 0 40px rgba(31, 138, 156, 0.25);
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6), 0 2px 6px rgba(80, 60, 30, 0.28);
   }
-  #message.lost #msgTitle { color: var(--neon-red); text-shadow: 0 0 18px rgba(214, 79, 63, 0.5), 0 0 40px rgba(214, 79, 63, 0.3); }
+  #message.lost #msgTitle { color: #a23c2c; text-shadow: 0 1px 0 rgba(255, 255, 255, 0.55), 0 2px 6px rgba(80, 60, 30, 0.3); }
   #msgStars {
     font-size: clamp(30px, 7vmin, 56px);
     letter-spacing: 0.3em;
     line-height: 1;
     color: #b57f16;
-    text-shadow: 0 0 18px rgba(192, 138, 30, 0.55), 0 0 40px rgba(201, 154, 46, 0.4);
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6), 0 2px 8px rgba(150, 110, 40, 0.35);
   }
   #msgScore {
     font-size: 14px;
     letter-spacing: 0.14em;
     color: #4a4038;
-    text-shadow: 0 0 8px rgba(74, 64, 56, 0.35);
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
   }
-  #msgScore .best { color: #1f7a55; text-shadow: 0 0 8px rgba(47, 158, 112, 0.5); }
-  #msgScore .newbest { color: #b57f16; text-shadow: 0 0 8px rgba(201, 154, 46, 0.5); }
+  #msgScore .best { color: #1f7a55; text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5); }
+  #msgScore .newbest { color: #b57f16; text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5); }
   #msgSub {
     font-size: 15px;
     letter-spacing: 0.15em;
-    color: var(--neon-purple);
-    text-shadow: 0 0 10px rgba(138, 85, 184, 0.45);
+    color: #5a4a3a;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
   }
-  #message.lost #msgSub { color: var(--neon-yellow); text-shadow: 0 0 10px rgba(201, 154, 46, 0.45); }
+  #message.lost #msgSub { color: #8a6a1c; text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5); }
   #msgObj {
     display: none;
     font-size: 16px;
     letter-spacing: 0.18em;
-    color: var(--neon-cyan);
-    text-shadow: 0 0 12px rgba(31, 138, 156, 0.45);
+    color: #1f6a7d;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
   }
   #restartBtn {
     font-family: inherit;
     font-size: 15px;
-    letter-spacing: 0.2em;
+    letter-spacing: 0.18em;
     color: var(--ink);
-    background: rgba(214, 79, 63, 0.14);
-    border: 1.5px solid var(--neon-red);
+    background: #f7f2e4;
+    border: 1.5px solid rgba(97, 76, 48, 0.4);
+    border-bottom-width: 3px;
+    border-bottom-color: var(--neon-red);
+    box-shadow: 0 2px 0 rgba(80, 60, 30, 0.18);
     padding: 10px 26px;
     border-radius: 6px;
     cursor: pointer;
-    box-shadow: 0 0 18px rgba(214, 79, 63, 0.25);
   }
-  #restartBtn:hover { background: rgba(214, 79, 63, 0.3); }
+  #restartBtn:hover { background: #fdf9ee; }
   #restartBtn:active { transform: scale(0.97); }
   #msgBtns {
     display: flex;
@@ -203,16 +204,18 @@
   #nextLevelBtn {
     font-family: inherit;
     font-size: 16px;
-    letter-spacing: 0.2em;
+    letter-spacing: 0.18em;
     color: var(--ink);
-    background: rgba(31, 138, 156, 0.14);
-    border: 1.5px solid var(--neon-cyan);
+    background: #f7f2e4;
+    border: 1.5px solid rgba(97, 76, 48, 0.4);
+    border-bottom-width: 3px;
+    border-bottom-color: var(--neon-cyan);
+    box-shadow: 0 2px 0 rgba(80, 60, 30, 0.18);
     padding: 11px 30px;
     border-radius: 6px;
     cursor: pointer;
-    box-shadow: 0 0 18px rgba(31, 138, 156, 0.25);
   }
-  #nextLevelBtn:hover { background: rgba(31, 138, 156, 0.32); }
+  #nextLevelBtn:hover { background: #fdf9ee; }
   #nextLevelBtn:active { transform: scale(0.97); }
 
   #toast {
@@ -223,7 +226,7 @@
     z-index: 6;
     max-width: 86%;
     background: rgba(60, 45, 30, 0.88);
-    border: 1px solid rgba(31, 138, 156, 0.6);
+    border: 1px solid rgba(230, 205, 150, 0.55);
     color: #f7f1e3;
     font-size: 13px;
     letter-spacing: 0.16em;
@@ -275,10 +278,10 @@
     overflow: hidden;
   }
   #menu.hidden { display: none; }
-  #menuTitle { font-size: clamp(32px, 8vmin, 72px); font-weight: bold; letter-spacing: 0.3em; color: var(--ink); text-shadow: 0 2px 0 rgba(255,255,255,0.7), 0 0 20px rgba(31, 138, 156, 0.4), 0 0 40px rgba(31, 138, 156, 0.25); }
+  #menuTitle { font-size: clamp(32px, 8vmin, 72px); font-weight: bold; letter-spacing: 0.3em; color: var(--ink); text-shadow: 0 2px 0 rgba(255,255,255,0.85), 0 3px 10px rgba(80, 60, 30, 0.3); }
   #menuSub { font-size: 14px; color: #6b5f4f; letter-spacing: 0.15em; margin-bottom: 32px; }
-  .menuBtn { font-family: inherit; font-size: 16px; letter-spacing: 0.2em; color: var(--ink); background: rgba(31, 138, 156, 0.14); border: 1px solid var(--neon-cyan); padding: 12px 28px; border-radius: 6px; cursor: pointer; transition: background 0.15s; }
-  .menuBtn:hover { background: rgba(31, 138, 156, 0.3); }
+  .menuBtn { font-family: inherit; font-size: 16px; letter-spacing: 0.2em; color: var(--ink); background: rgba(255, 250, 235, 0.6); border: 1px solid rgba(97, 76, 48, 0.4); padding: 12px 28px; border-radius: 6px; cursor: pointer; transition: background 0.15s; }
+  .menuBtn:hover { background: rgba(255, 250, 235, 0.9); }
   .menuBtn:active { transform: scale(0.98); }
   .levelsInfo { font-size: 12px; color: #6b5f4f; letter-spacing: 0.1em; }
   /* ------- Level Select overlay ------- */
@@ -304,7 +307,7 @@
     border-radius: 50%;
     vertical-align: middle;
     margin-right: 4px;
-    box-shadow: 0 0 8px currentColor;
+    box-shadow: 0 1px 2px rgba(60, 40, 20, 0.35);
   }
   .d-green  { background: var(--neon-green);  color: var(--neon-green); }
   .d-yellow { background: var(--neon-yellow); color: var(--neon-yellow); }
@@ -359,11 +362,11 @@
 
     <!-- Level Select overlay (hidden by default) -->
     <div id="levelSelect" class="hidden">
-      <h3 style="font-size:clamp(24px,5vmin,48px);font-weight:bold;letter-spacing:0.2em;margin-bottom:16px;">Select Level</h3>
+      <h3 style="font-size:clamp(24px,5vmin,48px);font-weight:bold;letter-spacing:0.2em;margin-bottom:16px;">PICK A CANVAS</h3>
       <div id="levelSelectGrid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(80px,1fr));gap:8px;width:100%;max-width:400px;"></div>
       <div style="display:flex;gap:12px;margin-top:16px;">
         <button class="menuBtn" id="levelSelectClose">Close</button>
-        <button class="menuBtn" id="resetProgressBtn" style="border-color:rgba(214,79,63,0.7);color:#7a2c22;text-shadow:0 0 8px rgba(214,79,63,0.4);">Reset Progress</button>
+        <button class="menuBtn" id="resetProgressBtn" style="border-color:rgba(154,58,40,0.6);color:#7a2c22;">Reset Progress</button>
       </div>
     </div>
 
@@ -382,11 +385,11 @@
 
     <!-- Bottom instructions overlay -->
     <div id="footer">
-      <span class="instr-item">HOLD to attach &amp; swing &middot; RELEASE to fly</span>
+      <span class="instr-item">HOLD to grab &amp; swing &middot; RELEASE to fly</span>
       <span class="instr-item"><span class="dot d-green"></span>swing</span>
-      <span class="instr-item"><span class="dot d-yellow"></span>turbo</span>
-      <span class="instr-item"><span class="dot d-red"></span>repel &mdash; avoid</span>
-      <span class="instr-item"><span class="dot d-purple"></span>goal</span>
+      <span class="instr-item"><span class="dot d-yellow"></span>cadmium</span>
+      <span class="instr-item"><span class="dot d-red"></span>alizarin &mdash; avoid</span>
+      <span class="instr-item"><span class="dot d-purple"></span>sign spot</span>
     </div>
   </div>
 </div>
@@ -444,65 +447,65 @@ const LEVELS = [
   { name: 'DIAGONAL SWING',player: {x:110, y:660, vx:0, vy:0}, goal: {x:1080, y:480, r:48},
     orbs:  [ orb(330, 610, 'normal'), orb(570, 520, 'normal'), orb(800, 620, 'normal') ], walls: [] },
 
-  { name: 'MEET TURBO',    player: {x:120, y:580, vx:0, vy:0}, goal: {x:1020, y:520, r:45},
+  { name: 'MEET CADMIUM',   player: {x:120, y:580, vx:0, vy:0}, goal: {x:1020, y:520, r:45},
     orbs:  [ orb(330, 580, 'turbo'), orb(650, 460, 'normal') ], walls: [] },
 
-  { name: 'TURBO TIME',    player: {x:110, y:250, vx:0, vy:0}, goal: {x:1260, y:450, r:45},
+  { name: 'CADMIUM SPIN',   player: {x:110, y:250, vx:0, vy:0}, goal: {x:1260, y:450, r:45},
     orbs:  [ orb(300, 420, 'turbo'), orb(560, 250, 'normal'), orb(820, 420, 'turbo'), orb(1080, 250, 'normal') ], walls: [] },
 
-  { name: 'FIRST WALLS',   player: {x:110, y:480, vx:0, vy:0}, goal: {x:1140, y:600, r:48},
+  { name: 'TAPED OFF',   player: {x:110, y:480, vx:0, vy:0}, goal: {x:1140, y:600, r:48},
     orbs:  [ orb(300, 480, 'normal'), orb(640, 680, 'normal') ],
     walls: [ wall(430, 300, 260, 60) ] },
 
-  { name: 'PUSH BACK',     player: {x:120, y:500, vx:0, vy:0}, goal: {x:1230, y:500, r:50},
+  { name: 'SPLASH BACK',     player: {x:120, y:500, vx:0, vy:0}, goal: {x:1230, y:500, r:50},
     orbs:  [ orb(320, 500, 'normal'), orb(640, 500, 'normal'), orb(910, 500, 'repel') ], walls: [] },
 
-  { name: 'PUSH AND GO',   player: {x:110, y:500, vx:0, vy:0}, goal: {x:1140, y:700, r:48},
+  { name: 'SOAK AND GO',   player: {x:110, y:500, vx:0, vy:0}, goal: {x:1140, y:700, r:48},
     orbs:  [ orb(300, 560, 'turbo'), orb(520, 620, 'normal'), orb(740, 260, 'repel'), orb(860, 660, 'turbo') ], walls: [] },
 
-  { name: 'RISING GAUNTLET', player: {x:100, y:700, vx:0, vy:0}, goal: {x:1210, y:500, r:44},
+  { name: 'THE CATWALK', player: {x:100, y:700, vx:0, vy:0}, goal: {x:1210, y:500, r:44},
     orbs:  [ orb(280, 640, 'normal'), orb(520, 500, 'turbo'), orb(760, 620, 'normal'), orb(960, 400, 'turbo') ], walls: [] },
 
   { name: 'THE BRIDGE',    player: {x:100, y:450, vx:0, vy:0}, goal: {x:1080, y:600, r:48},
     orbs:  [ orb(280, 450, 'normal'), orb(620, 450, 'normal') ],
     walls: [ wall(400, 300, 260, 40), wall(400, 560, 260, 60) ] },
 
-  { name: 'SQUEEZE PLAY',  player: {x:120, y:720, vx:0, vy:0}, goal: {x:1240, y:480, r:44},
+  { name: 'SQUEEZE IN',  player: {x:120, y:720, vx:0, vy:0}, goal: {x:1240, y:480, r:44},
     orbs:  [ orb(280, 660, 'normal'), orb(640, 560, 'normal'), orb(860, 600, 'turbo'), orb(1080, 500, 'normal') ],
     walls: [ wall(400, 380, 220, 36) ] },
 
-  { name: 'TURBO CASCADE', player: {x:100, y:640, vx:0, vy:0}, goal: {x:1330, y:500, r:42},
+  { name: 'CADMIUM CASCADE', player: {x:100, y:640, vx:0, vy:0}, goal: {x:1330, y:500, r:42},
     orbs:  [ orb(300, 640, 'turbo'), orb(540, 500, 'normal'), orb(780, 640, 'turbo'), orb(1000, 460, 'normal'), orb(1200, 600, 'turbo') ], walls: [] },
 
-  { name: 'REPEL RUN',     player: {x:100, y:550, vx:0, vy:0}, goal: {x:1330, y:550, r:42},
+  { name: 'ALIZARIN RUN',     player: {x:100, y:550, vx:0, vy:0}, goal: {x:1330, y:550, r:42},
     orbs:  [ orb(300, 550, 'normal'), orb(520, 380, 'repel'), orb(520, 720, 'repel'), orb(680, 550, 'normal'), orb(1040, 550, 'turbo') ], walls: [] },
 
-  { name: 'THE SERPENT',   player: {x:110, y:500, vx:0, vy:0}, goal: {x:1300, y:300, r:40},
+  { name: 'THE RIBBON',   player: {x:110, y:500, vx:0, vy:0}, goal: {x:1300, y:300, r:40},
     orbs:  [ orb(280, 500, 'normal'), orb(560, 320, 'turbo'), orb(870, 520, 'normal'), orb(1120, 320, 'turbo') ],
     walls: [ wall(400, 400, 60, 250), wall(720, 150, 60, 250), wall(1040, 400, 60, 250) ] },
 
-  { name: 'DOUBLE DANGER', player: {x:110, y:450, vx:0, vy:0}, goal: {x:1280, y:450, r:40},
+  { name: 'DOUBLE DIP', player: {x:110, y:450, vx:0, vy:0}, goal: {x:1280, y:450, r:40},
     orbs:  [ orb(280, 450, 'normal'), orb(480, 300, 'repel'), orb(480, 600, 'repel'), orb(660, 450, 'normal'),
              orb(860, 300, 'repel'), orb(860, 600, 'repel'), orb(1040, 450, 'turbo') ],
     walls: [ wall(700, 120, 200, 40), wall(700, 690, 200, 40) ] },
 
-  { name: 'TWISTED PATH',  player: {x:110, y:250, vx:0, vy:0}, goal: {x:1200, y:220, r:40},
+  { name: 'ROPE TWIST',  player: {x:110, y:250, vx:0, vy:0}, goal: {x:1200, y:220, r:40},
     orbs:  [ orb(300, 250, 'turbo'), orb(480, 600, 'normal'), orb(760, 340, 'normal') ],
     walls: [ wall(420, 350, 220, 40), wall(700, 450, 220, 40) ] },
 
-  { name: 'TUNNEL VISION', player: {x:110, y:400, vx:0, vy:0}, goal: {x:1260, y:400, r:42},
+  { name: 'THE FUNNEL', player: {x:110, y:400, vx:0, vy:0}, goal: {x:1260, y:400, r:42},
     orbs:  [ orb(280, 400, 'normal'), orb(480, 330, 'repel'), orb(660, 470, 'normal'), orb(840, 350, 'repel'), orb(1020, 430, 'turbo') ],
     walls: [ wall(300, 180, 800, 40), wall(300, 580, 800, 40) ] },
 
-  { name: 'REACTOR CORE',  player: {x:110, y:700, vx:0, vy:0}, goal: {x:1290, y:690, r:42},
+  { name: 'VARNISH ROOM',  player: {x:110, y:700, vx:0, vy:0}, goal: {x:1290, y:690, r:42},
     orbs:  [ orb(300, 620, 'normal'), orb(660, 450, 'turbo'), orb(660, 310, 'repel'), orb(660, 590, 'repel'), orb(1040, 440, 'normal') ],
     walls: [ wall(600, 220, 260, 40), wall(600, 600, 260, 40) ] },
 
-  { name: 'RACE THE CLOCK', player: {x:110, y:700, vx:0, vy:0}, goal: {x:1340, y:500, r:40},
+  { name: 'DRYING TIME', player: {x:110, y:700, vx:0, vy:0}, goal: {x:1340, y:500, r:40},
     orbs:  [ orb(300, 600, 'turbo'), orb(560, 720, 'normal'), orb(800, 500, 'turbo'), orb(1020, 580, 'normal'), orb(1220, 400, 'turbo') ],
     walls: [ wall(540, 460, 220, 36), wall(920, 240, 36, 200), wall(1180, 420, 160, 36) ] },
 
-  { name: 'ULTIMATE CHALLENGE', player: {x:100, y:700, vx:0, vy:0}, goal: {x:1330, y:540, r:40},
+  { name: 'MASTERPIECE', player: {x:100, y:700, vx:0, vy:0}, goal: {x:1330, y:540, r:40},
     orbs:  [ orb(300, 620, 'turbo'), orb(560, 500, 'normal'), orb(840, 340, 'turbo'), orb(1040, 460, 'normal'), orb(900, 540, 'repel') ],
     walls: [ wall(700, 360, 40, 220), wall(1180, 240, 150, 40) ] }
 ];
@@ -565,6 +568,7 @@ const elMsgS   = document.getElementById('msgSub');
 const elRestart= document.getElementById('restartBtn');
 const elNextBtn = document.getElementById('nextLevelBtn');
 const elLevel  = document.getElementById('levelLabel');
+const elHud    = document.getElementById('hud');
 const elHudTimer = document.getElementById('hudTimer');
 const elPause  = document.getElementById('pauseBtn');
 
@@ -599,6 +603,7 @@ function writeSave(s) {
 }
 
 const elToast  = document.getElementById('toast');
+const elFooter = document.getElementById('footer');
 let toastTimer = 0;
 const shownToasts = new Set();
 
@@ -720,14 +725,14 @@ function tryAttach() {
   let angVel = signedTangSpeed / dist;      // rad/frame
 if (best.type === 'turbo') {
     angVel *= TURBO_MULT;                   // turbo: double the spin on attach
-    toast('TURBO \u2014 keep holding to build speed!');
+    toast('CADMIUM \u2014 keep holding to pile on the spin!');
   } else if (best.type === 'repel') {
 
     if (dist > REPEL_LIMIT) {               // too far out: just a gentle shove
       const rx = dx / dist, ry = dy / dist;
       player.vx += rx * 2.5;
       player.vy += ry * 2.5;
-      toast('\u26A0 ALIZARIN \u2014 beware, it flips you loose!');
+      toast('\u26A0 ALIZARIN \u2014 beware, it flips the bucket loose!');
       return;
     }
     // repel forces the OPPOSITE spin direction
@@ -917,8 +922,8 @@ function update(dt) {
 
   // ---- collisions / win-lose checks ----
   if (checkGoal())                  { win();  return; }
-  if (checkWalls())                 { loseCause = 'CRASHED!';         lose(); return; }
-  if (checkBounds())                { loseCause = 'OUT OF BOUNDS!';   lose(); return; }
+  if (checkWalls())                 { loseCause = 'SMACKED THE TAPE!'; lose(); return; }
+  if (checkBounds())                { loseCause = 'LEFT THE STUDIO!';   lose(); return; }
 
   // trail history - longer/denser the faster you go
   trail.unshift({ x: player.x, y: player.y });
@@ -1031,7 +1036,7 @@ function win() {
   const bestTxt = wasNewBest ? 'NEW BEST!' : (prevBest != null ? 'best ' + fmtTime(prevBest) : '');
   elMsgScore.textContent = fmtTime(t) + (bestTxt ? '  \u00b7  ' + bestTxt : '');
   elMsgScore.className = wasNewBest ? 'newbest' : '';
-  elMsgT.textContent = stars === 3 ? 'FLAWLESS!' : last ? 'ORBIT MASTERED!' : 'LEVEL COMPLETE!';
+  elMsgT.textContent = stars === 3 ? 'FLAWLESS!' : last ? 'ALL 20 SIGNED!' : 'LEVEL COMPLETE!';
   elMsgS.textContent = last ? 'Back around to FIRST STEPS...' : 'Next: ' + LEVELS[levelIndex + 1].name + ' \u2192';
   elRestart.style.display = 'none';
   elNextBtn.style.display = '';
@@ -1046,7 +1051,7 @@ function lose() {
   elMsg.classList.add('lost');
   elMsg.classList.remove('hidden');
   elMsgObj.style.display = 'none';
-  elMsgT.textContent = loseCause || 'LOST IN THE VOID!';
+  elMsgT.textContent = loseCause || 'BACK TO THE ROOM!';
   elMsgS.textContent = 'Tap the screen to retry';
   elRestart.style.display = '';
   elNextBtn.style.display = 'none';
@@ -1995,7 +2000,7 @@ function rippleDrips(count, startMs) {
 
 function playLose(cause) {
   if (!audioCtx) return;
-  if (cause === 'OUT OF BOUNDS!') {
+  if (cause === 'LEFT THE STUDIO!') {
     filteredNoise(0.4, 'lowpass', 1600, 300, 1.0, 0.05);                // whoosh falls off, dull
   } else {
     thump(140, 0.09, 0.1);                                              // dry wood knock
@@ -2040,6 +2045,33 @@ function playStarPop(stars) {
    ============================================================ */
 const wrap = document.getElementById('wrap');
 let lastTouch = 0;
+
+/* ============================================================
+   FULL-SCREEN FIT
+   The canvas always spans the wrap width. On wide (landscape)
+   screens the 1400x850 arena is taller than the viewport, so the
+   overflow is cropped symmetrically and the whole screen becomes
+   the canvas. In portrait it letterboxes top/bottom (the game
+   stays landscape-first). HUD / footer / toast are re-pinned to
+   the canvas box so they never float over the desk area.
+   ============================================================ */
+function fitLayout() {
+  try {
+    const wrapRect = wrap.getBoundingClientRect();
+    const vw = wrap.clientWidth > 0 ? wrap.clientWidth : wrapRect.width;
+    const ch = vw / (W / H);
+    canvas.style.width = vw + 'px';
+    canvas.style.height = ch + 'px';
+    const r = canvas.getBoundingClientRect();
+    const topPad = Math.max(0, r.top - wrapRect.top);
+    const botPad = Math.max(0, wrapRect.bottom - r.bottom);
+    elHud.style.top = (topPad + 6) + 'px';
+    elFooter.style.bottom = (botPad + 6) + 'px';
+    elToast.style.top = (topPad + 14) + 'px';
+  } catch (e) { /* layout is not critical to gameplay */ }
+}
+window.addEventListener('resize', fitLayout);
+window.addEventListener('orientationchange', fitLayout);
 
 function mouseDown() {
   if (Date.now() - lastTouch < 500) return;  // ignore synthetic mouse after touch
@@ -2205,7 +2237,7 @@ elMenuStart.addEventListener('click', () => {
   try { fresh = typeof localStorage !== 'undefined' && !localStorage.getItem('neonOrbitSeen'); } catch (e) {}
   if (fresh) {
     try { localStorage.setItem('neonOrbitSeen', '1'); } catch (e) {}
-    setTimeout(() => toast('HOLD to attach & swing · RELEASE to fly'), 800);
+    setTimeout(() => toast('HOLD to grab & swing · RELEASE to fly'), 800);
   }
 });
 
@@ -2230,6 +2262,7 @@ function loop(now) {
   requestAnimationFrame(loop);
 }
 
+fitLayout();
 loadLevel(0);
 requestAnimationFrame(loop);
 </script>
