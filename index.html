@@ -2502,6 +2502,25 @@ elRotateDismiss.addEventListener('click', () => {
   elRotatePrompt.classList.add('dismissed');
 });
 
+// best-effort: try to lock to landscape when the user starts the game
+// (works on Android Chrome fullscreen + PWA; silently fails elsewhere)
+async function tryLockLandscape() {
+  try {
+    if (screen.orientation && screen.orientation.lock) {
+      await screen.orientation.lock('landscape');
+    }
+  } catch (e) { /* not supported or denied — prompt will guide the user */ }
+}
+// re-show the prompt if the user rotates back to portrait (unless dismissed)
+function checkOrientation() {
+  const isPortrait = window.matchMedia('(orientation: portrait)').matches;
+  const isNarrow = window.innerWidth <= 900;
+  if (isPortrait && isNarrow) {
+    elRotatePrompt.classList.remove('dismissed');
+  }
+}
+window.addEventListener('orientationchange', () => setTimeout(checkOrientation, 200));
+
 // ---------- Reset saved progress ----------
 const elResetProgress = document.getElementById('resetProgressBtn');
 elResetProgress.addEventListener('mousedown', (e) => e.stopPropagation());
@@ -2522,6 +2541,7 @@ const elMenuStart = document.getElementById('menuStartBtn');
 const elMenuLevelSelect = document.getElementById('menuLevelSelectBtn');
 
 elMenuStart.addEventListener('click', () => {
+  tryLockLandscape();
   elMenu.classList.add('hidden');
   // hide game title during gameplay
   document.getElementById('title').style.display = 'none';
