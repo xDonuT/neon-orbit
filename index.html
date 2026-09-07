@@ -1224,22 +1224,22 @@ function drawBounds() {
   ctx.fillStyle = boundsGrads.right;  ctx.fillRect(W - 22, 0, 22, H);
 
   ctx.save();
-  ctx.strokeStyle = 'rgba(190,44,34,0.5)';
-  ctx.lineWidth = 2;
+  ctx.strokeStyle = 'rgba(190,44,34,0.55)';
+  ctx.lineWidth = 3;
   ctx.strokeRect(1, 1, W - 2, H - 2);
 
   // inward chevrons along each edge (steady, subtle)
-  ctx.strokeStyle = 'rgba(190,44,34,0.45)';
-  ctx.lineWidth = 2;
+  ctx.strokeStyle = 'rgba(190,44,34,0.5)';
+  ctx.lineWidth = 3;
   ctx.lineCap = 'round';
   const step = 200;
   for (let x = 46; x < W - 30; x += step) {
-    ctx.beginPath(); ctx.moveTo(x - 7, 5); ctx.lineTo(x, 13); ctx.lineTo(x + 7, 5); ctx.stroke();          // top: points down
-    ctx.beginPath(); ctx.moveTo(x - 7, H - 5); ctx.lineTo(x, H - 13); ctx.lineTo(x + 7, H - 5); ctx.stroke(); // bottom: points up
+    ctx.beginPath(); ctx.moveTo(x - 8, 5); ctx.lineTo(x, 14); ctx.lineTo(x + 8, 5); ctx.stroke();          // top: points down
+    ctx.beginPath(); ctx.moveTo(x - 8, H - 5); ctx.lineTo(x, H - 14); ctx.lineTo(x + 8, H - 5); ctx.stroke(); // bottom: points up
   }
   for (let y = 46; y < H - 30; y += step) {
-    ctx.beginPath(); ctx.moveTo(5, y - 7); ctx.lineTo(13, y); ctx.lineTo(5, y + 7); ctx.stroke();          // left: points right
-    ctx.beginPath(); ctx.moveTo(W - 5, y - 7); ctx.lineTo(W - 13, y); ctx.lineTo(W - 5, y + 7); ctx.stroke(); // right: points left
+    ctx.beginPath(); ctx.moveTo(5, y - 8); ctx.lineTo(14, y); ctx.lineTo(5, y + 8); ctx.stroke();          // left: points right
+    ctx.beginPath(); ctx.moveTo(W - 5, y - 8); ctx.lineTo(W - 14, y); ctx.lineTo(W - 5, y + 8); ctx.stroke(); // right: points left
   }
   ctx.restore();
 }
