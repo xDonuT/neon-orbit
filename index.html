@@ -352,9 +352,51 @@
     .hud-btn { padding: 4px 9px; font-size: 10px; }
     #footer { padding: 3px 6px; font-size: 10px; gap: 10px; }
   }
+  /* ------- Portrait rotate prompt ------- */
+  #rotatePrompt {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: rgba(242, 236, 221, 0.97);
+    color: var(--ink);
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    text-align: center;
+    padding: 24px;
+  }
+  #rotatePrompt.show { display: flex; }
+  #rotateIcon { font-size: 64px; animation: rotateHint 2.4s ease-in-out infinite; }
+  @keyframes rotateHint {
+    0%, 100% { transform: rotate(0deg); }
+    50% { transform: rotate(90deg); }
+  }
+  #rotateText { font-size: 18px; letter-spacing: 0.1em; max-width: 280px; }
+  #rotateDismiss {
+    font-family: inherit;
+    font-size: 12px;
+    letter-spacing: 0.15em;
+    color: var(--ink);
+    background: rgba(255, 250, 235, 0.6);
+    border: 1px solid rgba(97, 76, 48, 0.4);
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  @media (orientation: portrait) and (max-width: 900px) {
+    #rotatePrompt { display: flex; }
+    #rotatePrompt.dismissed { display: none; }
+  }
 </style>
 </head>
 <body>
+<div id="rotatePrompt">
+  <div id="rotateIcon">📱↻</div>
+  <div id="rotateText">Rotate your phone to landscape for the best experience</div>
+  <button id="rotateDismiss" aria-label="Dismiss rotate prompt">PLAY ANYWAY</button>
+</div>
 <div id="app">
   <!-- Menu screen (start screen, hidden after tap) -->
   <div id="menu">
@@ -2294,6 +2336,17 @@ function closeLevelSelect() {
 elLevelSelectClose.addEventListener('click', () => {
   closeLevelSelect();
   elMenu.classList.remove('hidden');
+});
+
+// ---------- Portrait rotate prompt ----------
+const elRotatePrompt = document.getElementById('rotatePrompt');
+const elRotateDismiss = document.getElementById('rotateDismiss');
+if (localStorage.getItem('paintOrbitRotateDismissed') === '1') {
+  elRotatePrompt.classList.add('dismissed');
+}
+elRotateDismiss.addEventListener('click', () => {
+  localStorage.setItem('paintOrbitRotateDismissed', '1');
+  elRotatePrompt.classList.add('dismissed');
 });
 
 // ---------- Reset saved progress ----------
