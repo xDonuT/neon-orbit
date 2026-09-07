@@ -535,23 +535,24 @@ const LEVELS = [
     orbs:  [ orb(300, 620, 'turbo'), orb(560, 500, 'normal'), orb(840, 340, 'turbo'), orb(1040, 460, 'normal'), orb(900, 540, 'repel') ],
     walls: [ wall(700, 360, 40, 220), wall(1180, 240, 150, 40) ] },
 
-  { name: 'THE EASEL', player: {x:112, y:620, vx:0, vy:0}, goal: {x:1300, y:560, r:44},
-    orbs:  [ orb(300, 600, 'normal'), orb(560, 480, 'turbo'), orb(830, 620, 'normal'), orb(1080, 460, 'turbo'), orb(1240, 620, 'normal') ], walls: [] },
+  { name: 'THE DROP', player: {x:150, y:80, vx:0, vy:0}, goal: {x:1230, y:720, r:40},
+    orbs:  [ orb(320, 170, 'normal'), orb(520, 240, 'turbo'), orb(720, 340, 'normal'), orb(900, 420, 'turbo'), orb(1080, 520, 'normal'), orb(1240, 640, 'turbo') ], walls: [] },
 
-  { name: 'CUT IN', player: {x:110, y:500, vx:0, vy:0}, goal: {x:1300, y:300, r:38},
-    orbs:  [ orb(280, 500, 'normal'), orb(560, 320, 'turbo'), orb(870, 520, 'normal'), orb(1120, 320, 'turbo') ],
-    walls: [ wall(400, 400, 60, 250), wall(720, 150, 60, 250), wall(1040, 400, 60, 250) ] },
+  { name: 'THE U-TURN', player: {x:130, y:700, vx:0, vy:0}, goal: {x:340, y:160, r:38},
+    orbs:  [ orb(300, 660, 'normal'), orb(590, 700, 'turbo'), orb(900, 660, 'normal'), orb(1180, 700, 'turbo'), orb(1180, 460, 'normal'), orb(900, 320, 'turbo'), orb(590, 240, 'normal') ], walls: [] },
 
-  { name: 'THINNER', player: {x:112, y:620, vx:0, vy:0}, goal: {x:1330, y:440, r:40},
-    orbs:  [ orb(300, 600, 'normal'), orb(470, 320, 'repel'), orb(660, 520, 'normal'), orb(830, 220, 'repel'), orb(1040, 560, 'turbo'), orb(1240, 460, 'normal') ], walls: [] },
+  { name: 'CORKSCREW', player: {x:140, y:90, vx:0, vy:0}, goal: {x:260, y:740, r:36},
+    orbs:  [ orb(300, 150, 'normal'), orb(560, 300, 'turbo'), orb(820, 180, 'normal'), orb(1080, 340, 'turbo'), orb(900, 520, 'normal'), orb(560, 660, 'turbo') ],
+    walls: [ wall(50, 90, 60, 660), wall(1250, 90, 60, 660) ] },
 
-  { name: 'WET ON WET', player: {x:110, y:400, vx:0, vy:0}, goal: {x:1320, y:400, r:36},
-    orbs:  [ orb(280, 400, 'normal'), orb(480, 330, 'turbo'), orb(660, 470, 'normal'), orb(840, 350, 'repel'), orb(1020, 430, 'turbo'), orb(1200, 400, 'normal') ],
-    walls: [ wall(300, 180, 800, 40), wall(300, 580, 800, 40) ] },
+  { name: 'OVER THE DRIPS', player: {x:120, y:720, vx:0, vy:0}, goal: {x:1320, y:600, r:36},
+    orbs:  [ orb(300, 660, 'normal'), orb(620, 660, 'turbo'), orb(920, 660, 'normal'), orb(1220, 620, 'turbo') ],
+    walls: [ wall(430, 690, 50, 160), wall(780, 690, 50, 160), wall(1090, 690, 50, 160) ] },
 
-  { name: 'FLAT AND GLOSS', player: {x:100, y:720, vx:0, vy:0}, goal: {x:1330, y:500, r:34},
-    orbs:  [ orb(300, 640, 'turbo'), orb(560, 500, 'normal'), orb(780, 610, 'turbo'), orb(910, 560, 'repel'), orb(1040, 440, 'normal'), orb(1220, 560, 'turbo') ],
-    walls: [ wall(700, 360, 40, 220), wall(1180, 240, 150, 40) ] }
+  { name: 'FULL GLOSS', player: {x:110, y:500, vx:0, vy:0}, goal: {x:1335, y:440, r:30},
+    orbs:  [ orb(320, 400, 'turbo'), orb(500, 260, 'repel'), orb(520, 400, 'repel'), orb(540, 560, 'repel'),
+             orb(700, 400, 'normal'), orb(900, 260, 'repel'), orb(920, 400, 'repel'), orb(940, 560, 'repel'),
+             orb(1060, 400, 'turbo'), orb(1200, 360, 'repel') ], walls: [] }
 ];
 
 function orb(x, y, type) { return { x: x, y: y, r: 16, type: type }; }
@@ -559,7 +560,7 @@ function wall(x, y, w, h) { return { x: x, y: y, w: w, h: h }; }
 
 // ---- Mastery par table (seconds) ----
 // 3-star par for each level. 2-star = par * 1.6, 1-star = par * 3.0.
-const PAR3 = [6, 7, 7, 7, 8, 8, 8, 9, 10, 10, 11, 11, 12, 12, 13, 13, 14, 14, 15, 15, 16, 16, 17, 17, 18];
+const PAR3 = [6, 7, 7, 7, 8, 8, 8, 9, 10, 10, 11, 11, 12, 12, 13, 13, 14, 14, 15, 15, 16, 17, 17, 18, 19];
 function starsForTime(li, t) {
   const p = PAR3[li];
   if (t <= p) return 3;
