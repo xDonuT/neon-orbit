@@ -1155,7 +1155,7 @@ function win() {
   } catch (e) { /* storage unavailable */ }
 
   // ---- hide game title during play ----
-  const wasTitleVisible = document.getElementById('title').style.display !== 'none';
+  const wasTitleVisible = document.getElementById('title')?.style.display !== 'none';
   if (wasTitleVisible) document.getElementById('title').style.display = 'none';
 
   status = 'won';
