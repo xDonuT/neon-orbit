@@ -1334,25 +1334,24 @@ function update(dt) {
     }
   }
 
-  // ---- paint buckets drip & splatter ----
-  for (let i = 0; i < level.orbs.length; i++) {
-    const o = level.orbs[i];
-    const attached = tethered && tether && tether.orb === o;
+  // ---- paint buckets drip & splatter (only while touched) ----
+  if (tethered && tether) {
+    const o = tether.orb;
     const c = orbColors[o.type];
     o.bucketDrip = (o.bucketDrip || 0) - dt;
     if (o.bucketDrip <= 0) {
-      o.bucketDrip = attached ? 0.16 + Math.random() * 0.12 : 0.7 + Math.random() * 0.8;
+      o.bucketDrip = 0.16 + Math.random() * 0.12;
       const a = Math.random() * Math.PI * 2;
       tetherParticles.push({
         x: o.x + Math.cos(a) * o.r * 0.8,
         y: o.y - o.r * 0.5 + Math.random() * o.r * 0.3,
-        vx: (Math.random() - 0.5) * (attached ? 2.6 : 0.7),
-        vy: 1 + Math.random() * (attached ? 3.2 : 1.4),
+        vx: (Math.random() - 0.5) * 2.6,
+        vy: 1 + Math.random() * 3.2,
         r: 1.8 + Math.random() * 3,
         life: 0.6 + Math.random() * 0.6,
         color: c.paint
       });
-      if (attached && Math.random() < 0.65) {
+      if (Math.random() < 0.65) {
         // splash a glob of the bucket's paint toward the brush
         const dx = player.x - o.x, dy = player.y - o.y;
         const d = Math.hypot(dx, dy) || 1;
