@@ -769,8 +769,8 @@ const PLAYER_R      = 6;   // collision radius (physics stays fixed)
 
 // ---------- Brush visual size (kept separate from collision) ----------
 // final radius = BRUSH_BASE * viewportScale * speedFactor, capped.
-const BRUSH_BASE   = 14;   // visual radius at rest
-const BRUSH_MAX    = 24;   // visual radius cap (pre-viewport)
+const BRUSH_BASE   = 8;    // visual radius at rest
+const BRUSH_MAX    = 14;   // visual radius cap (pre-viewport)
 const BRUSH_SPEED_K = 0.02; // +1% size per (speed / 50)
 const BRUSH_SPEED_CAP = 0.5; // speed bonus up to +50%
 let viewportScale = 1.6;   // set by fitLayout: canvas width / 400 (clamped 1.5-3)
