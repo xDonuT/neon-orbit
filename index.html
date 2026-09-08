@@ -400,6 +400,9 @@
     background: rgba(242, 236, 221, 0.94);
   }
   #levelSelect:not(.hidden) { display: flex; }
+  @media (max-width: 500px) {
+    #levelSelect { justify-content: flex-start; align-items: center; padding-top: 30px; }
+  }
   .dot {
     display: inline-block;
     width: 9px;
