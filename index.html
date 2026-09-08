@@ -1324,14 +1324,18 @@ function update(dt) {
       if (Math.random() < 0.55) playDrip(0.032);
     }
 
-    // keep tetherParticles alive
-    for (let i = tetherParticles.length - 1; i >= 0; i--) {
-      const p = tetherParticles[i];
-      p.life -= dt / 60;
-      p.y += p.vy * dt;
-      p.x += p.vx * dt;
-      p.vy += 0.04 * dt; // gravity pull
-      if (p.life <= 0) tetherParticles.splice(i, 1);
+    }
+
+  // keep tetherParticles alive: drips keep falling and land permanently
+  for (let i = tetherParticles.length - 1; i >= 0; i--) {
+    const p = tetherParticles[i];
+    p.life -= dt / 60;
+    p.y += p.vy * dt;
+    p.x += p.vx * dt;
+    p.vy += 0.04 * dt; // gravity pull
+    if (p.life <= 0) {
+      stampPaintSplat(p.x, p.y, 1.6 + p.r * 0.4, p.color);
+      tetherParticles.splice(i, 1);
     }
   }
 
