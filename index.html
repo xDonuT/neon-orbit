@@ -2044,34 +2044,15 @@ function drawPlayer() {
   ctx.arc(0, -R * 1.05, R * 0.3, 0, Math.PI * 2);
   ctx.stroke();
 
-  // gooey blob body - gentle jiggle while moving, frozen when idle
-  const wob = moving ? Math.min(1, spd * 0.09) : 0;
-  const P = 11;
-  const pts = [];
-  for (let i = 0; i < P; i++) {
-    const a = (i / P) * Math.PI * 2;
-    const rr = R * (1
-      + wob * 0.10 * Math.sin(a * 3 + time * 2.1)
-      + wob * 0.06 * Math.sin(a * 5 - time * 1.6)
-      + wob * 0.04 * Math.sin(a * 2 + time * 3.2));
-    pts.push({ x: Math.cos(a) * rr, y: Math.sin(a) * rr });
-  }
-  ctx.beginPath();
-  ctx.moveTo(pts[0].x, pts[0].y);
-  for (let i = 0; i < P; i++) {
-    const cur = pts[i];
-    const nxt = pts[(i + 1) % P];
-    ctx.quadraticCurveTo(cur.x, cur.y, (cur.x + nxt.x) / 2, (cur.y + nxt.y) / 2);
-  }
-  ctx.closePath();
-
-  // body is made of the paint the brush is loaded with
+  // glossy ball body - clean sphere, no wobbly silhouette
   const rgb = (paintRGB + '').split(/,\s*/).map(Number);
   const hi = rgb.map(Math.floor);
   const grad = ctx.createRadialGradient(-R * 0.35, -R * 0.4, R * 0.15, 0, 0, R * 1.25);
   grad.addColorStop(0, 'rgb(' + Math.min(255, hi[0] + 70) + ',' + Math.min(255, hi[1] + 70) + ',' + Math.min(255, hi[2] + 70) + ')');
   grad.addColorStop(0.55, 'rgb(' + hi.join(',') + ')');
   grad.addColorStop(1, 'rgb(' + Math.max(0, hi[0] - 55) + ',' + Math.max(0, hi[1] - 55) + ',' + Math.max(0, hi[2] - 55) + ')');
+  ctx.beginPath();
+  ctx.arc(0, 0, R, 0, Math.PI * 2);
   ctx.fillStyle = grad;
   ctx.fill();
   ctx.strokeStyle = 'rgba(20,16,12,0.35)';
@@ -2079,9 +2060,9 @@ function drawPlayer() {
   ctx.stroke();
 
   // wet gloss sitting on the top-left
-  ctx.fillStyle = 'rgba(255,255,255,0.35)';
+  ctx.fillStyle = 'rgba(255,255,255,0.4)';
   ctx.beginPath();
-  ctx.ellipse(-R * 0.34, -R * 0.42, R * 0.4, R * 0.22, -0.6, 0, Math.PI * 2);
+  ctx.ellipse(-R * 0.36, -R * 0.44, R * 0.42, R * 0.24, -0.6, 0, Math.PI * 2);
   ctx.fill();
 
   // bean eyes
@@ -2092,6 +2073,17 @@ function drawPlayer() {
   ctx.fillStyle = 'rgba(255,255,255,0.85)';
   ctx.beginPath(); ctx.arc(-eyeDX - eyeR * 0.28, eyeY - eyeR * 0.32, eyeR * 0.3, 0, Math.PI * 2); ctx.fill();
   ctx.beginPath(); ctx.arc(eyeDX - eyeR * 0.28, eyeY - eyeR * 0.32, eyeR * 0.3, 0, Math.PI * 2); ctx.fill();
+
+  // little smile while moving fast (ball-guy energy)
+  if (moving) {
+    ctx.strokeStyle = '#1a1510';
+    ctx.lineWidth = Math.max(1, R * 0.08);
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.arc(0, R * 0.32, R * 0.28, 0.25, Math.PI - 0.25);
+    ctx.stroke();
+    ctx.lineCap = 'butt';
+  }
 
   ctx.restore();
 }
