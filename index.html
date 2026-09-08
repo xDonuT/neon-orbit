@@ -392,17 +392,13 @@
     display: none;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     gap: 8px;
     color: var(--ink);
     padding: 20px;
-    overflow-y: auto;
     background: rgba(242, 236, 221, 0.94);
   }
   #levelSelect:not(.hidden) { display: flex; }
-  @media (max-width: 500px) {
-    #levelSelect { justify-content: flex-start; align-items: center; padding-top: 30px; }
-  }
   .dot {
     display: inline-block;
     width: 9px;
@@ -679,7 +675,9 @@
       <!-- Level Select overlay (hidden by default) -->
       <div id="levelSelect" class="hidden">
         <h3 style="font-size:clamp(24px,5vmin,48px);font-weight:bold;letter-spacing:0.2em;margin-bottom:16px;">PICK A CANVAS</h3>
-        <div id="levelSelectGrid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(80px,1fr));gap:8px;width:100%;max-width:400px;"></div>
+        <div id="levelSelectScroll" style="flex:1 1 auto;min-height:0;overflow-y:auto;width:100%;max-width:420px;padding:4px 10px;-webkit-overflow-scrolling:touch;">
+          <div id="levelSelectGrid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(80px,1fr));gap:8px;width:100%;"></div>
+        </div>
         <div style="display:flex;gap:12px;margin-top:16px;">
 <button class="menuBtn" id="levelSelectClose" aria-label="Close level select">Close</button>
 <button class="menuBtn" id="resetProgressBtn" style="border-color:rgba(154,58,40,0.6);color:#7a2c22;" aria-label="Reset progress">Reset Progress</button>
