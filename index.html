@@ -1040,7 +1040,6 @@ function showReadyUI(on) {
     elMsgS.textContent = 'tap to start \u00b7 then hold to swing, release to fly';
     elRestart.style.display = 'none';
     elNextBtn.style.display = 'none';
-    document.getElementById('menuBtnMsg').style.display = '';
     elMsgBtns.classList.add('ready');
   } else {
     elMsg.classList.add('hidden');
@@ -1497,7 +1496,6 @@ function lose() {
   elMsgS.textContent = 'Tap the screen to retry';
   elRestart.style.display = '';
   elNextBtn.style.display = 'none';
-  document.getElementById('menuBtnMsg').style.display = '';
   loseCause = '';
 }
 
@@ -2049,6 +2047,80 @@ function drawTrail() {
     ctx.lineTo(trail[i + 1].x, trail[i + 1].y);
     ctx.stroke();
   }
+}
+
+// expressive face shared by the blob and the buckets.
+// emo: neutral | happy | excited | joy | sad | grumpy | fear
+function drawFace(r, emo, look) {
+  look = look || 0;
+  const eyeY = -r * 0.24, eyeDX = r * 0.44, eR = r * 0.34;
+  const wide = (emo === 'excited' || emo === 'fear' || emo === 'joy') ? 1.12 : 1;
+  const wr = eR * wide;
+  ctx.fillStyle = '#f6f3ea';
+  ctx.strokeStyle = '#1a1510';
+  ctx.lineWidth = 1;
+  for (const s of [-1, 1]) {
+    ctx.beginPath(); ctx.arc(s * eyeDX, eyeY, wr, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+  }
+  const pupR = wr * (emo === 'sad' ? 0.5 : 0.55);
+  ctx.fillStyle = '#1a1510';
+  for (const s of [-1, 1]) {
+    ctx.beginPath(); ctx.arc(s * eyeDX + look * eyeR, eyeY, pupR, 0, Math.PI * 2); ctx.fill();
+  }
+  ctx.fillStyle = 'rgba(255,255,255,0.9)';
+  for (const s of [-1, 1]) {
+    ctx.beginPath();
+    ctx.arc(s * eyeDX - pupR * 0.3 + look * eyeR, eyeY - pupR * 0.3, pupR * 0.3, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.strokeStyle = '#1a1510';
+  ctx.lineWidth = Math.max(1, r * 0.09);
+  ctx.lineCap = 'round';
+  if (emo === 'grumpy') {
+    // angry brows slanting in
+    for (const s of [-1, 1]) {
+      ctx.beginPath();
+      ctx.moveTo(s * eyeDX - wr * 0.8, eyeY - wr * 1.6);
+      ctx.lineTo(s * eyeDX + wr * 0.8, eyeY - wr * 0.8);
+      ctx.stroke();
+    }
+  } else if (emo === 'fear') {
+    // raised brows
+    for (const s of [-1, 1]) {
+      ctx.beginPath();
+      ctx.moveTo(s * eyeDX - wr * 0.8, eyeY - wr * 1.4);
+      ctx.lineTo(s * eyeDX + wr * 0.8, eyeY - wr * 1.0);
+      ctx.stroke();
+    }
+  }
+  const my = r * 0.3, mw = r * 0.28;
+  ctx.lineWidth = Math.max(1.2, r * 0.1);
+  if (emo === 'joy' || emo === 'excited') {
+    ctx.fillStyle = '#1a1510';
+    ctx.beginPath();
+    ctx.arc(0, my + mw * 0.2, mw, 0, Math.PI);
+    ctx.closePath();
+    ctx.fill();
+  } else if (emo === 'sad' || emo === 'grumpy') {
+    ctx.beginPath();
+    ctx.arc(0, my, mw, Math.PI + 0.35, Math.PI * 2 - 0.35);
+    ctx.stroke();
+  } else if (emo === 'fear') {
+    ctx.fillStyle = '#1a1510';
+    ctx.beginPath();
+    ctx.arc(0, my + mw * 0.2, mw * 0.6, 0, Math.PI * 2);
+    ctx.fill();
+  } else if (emo === 'neutral') {
+    ctx.beginPath();
+    ctx.moveTo(-mw * 0.7, my);
+    ctx.lineTo(mw * 0.7, my);
+    ctx.stroke();
+  } else if (emo === 'happy') {
+    ctx.beginPath();
+    ctx.arc(0, my, mw, 0.3, Math.PI - 0.3);
+    ctx.stroke();
+  }
+  ctx.lineCap = 'butt';
 }
 
 function drawPlayer() {
