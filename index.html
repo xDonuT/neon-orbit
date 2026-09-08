@@ -1082,7 +1082,6 @@ function loadLevel(idx) {
   sparks.length = 0;
   rings.length = 0;
   beams.length = 0;
-  tetherParticles.length = 0;
   winHalt = 0;
   winSlow = 0;
   flashAlpha = 0;
@@ -1291,23 +1290,6 @@ function update(dt) {
       player.vy = (player.y - prevY) / dt;
     }
 
-    // ---- wet nib: drips fall from the brush tip as it swings ----
-    const nibX = player.x + (Math.random() - 0.5) * 6;
-    const nibY = player.y + PLAYER_R * 1.5;
-    if (Math.random() < 0.22) {
-      const color = t.repel ? orbColors.repel.paint : (t.turbo ? orbColors.turbo.paint : orbColors.normal.paint);
-      tetherParticles.push({
-        x: nibX,
-        y: nibY,
-        vx: (Math.random() - 0.5) * 2,
-        vy: 1.5 + Math.random() * 2.5,
-        r: 2 + Math.random() * 3,
-        life: 0.6 + Math.random() * 0.4,
-        color: color
-      });
-      stampPaintSplat(nibX, nibY, 1.4 + Math.random() * 1.6, color);
-    }
-
     // rope tension creak at the bottom of the arc (once per half-orbit)
     const below = player.y > o.y + 6;
     if (below && !lastBelow && creakCd <= 0 && Math.abs(t.angVel) * t.dist > 5) {
@@ -1322,66 +1304,6 @@ function update(dt) {
     if (dripAcc <= 0) {
       dripAcc = Math.max(0.12, 1.1 - Math.abs(t.angVel) * t.dist * 0.05);
       if (Math.random() < 0.55) playDrip(0.032);
-    }
-
-    }
-
-  // keep tetherParticles alive: drips keep falling and land permanently
-  for (let i = tetherParticles.length - 1; i >= 0; i--) {
-    const p = tetherParticles[i];
-    p.life -= dt / 60;
-    p.y += p.vy * dt;
-    p.x += p.vx * dt;
-    p.vy += 0.04 * dt; // gravity pull
-    if (p.life <= 0) {
-      stampPaintSplat(p.x, p.y, 1.6 + p.r * 0.4, p.color);
-      tetherParticles.splice(i, 1);
-    }
-  }
-
-  // ---- paint buckets drip & splatter (only while touched) ----
-  if (tethered && tether) {
-    const o = tether.orb;
-    const c = orbColors[o.type];
-    o.bucketDrip = (o.bucketDrip || 0) - dt;
-    if (o.bucketDrip <= 0) {
-      o.bucketDrip = 0.16 + Math.random() * 0.12;
-      const a = Math.random() * Math.PI * 2;
-      tetherParticles.push({
-        x: o.x + Math.cos(a) * o.r * 0.8,
-        y: o.y - o.r * 0.5 + Math.random() * o.r * 0.3,
-        vx: (Math.random() - 0.5) * 2.6,
-        vy: 1 + Math.random() * 3.2,
-        r: 1.8 + Math.random() * 3,
-        life: 0.6 + Math.random() * 0.6,
-        color: c.paint
-      });
-      const drain = {
-        x: o.x + Math.cos(a + (Math.random() - 0.5) * 1.2) * o.r * 1.05,
-        y: o.y - o.r * 0.2 + Math.random() * o.r * 0.4,
-        r: 1.6 + Math.random() * 2.4
-      };
-      stampPaintSplat(drain.x, drain.y, drain.r, c.paint);
-      if (Math.random() < 0.65) {
-        // splash a glob of the bucket's paint toward the brush
-        const dx = player.x - o.x, dy = player.y - o.y;
-        const d = Math.hypot(dx, dy) || 1;
-        tetherParticles.push({
-          x: o.x + dx / d * o.r,
-          y: o.y + dy / d * o.r * 0.4,
-          vx: dx / d * 2.2 + (Math.random() - 0.5),
-          vy: dy / d * 2.2 + (Math.random() - 0.6),
-          r: 3 + Math.random() * 3,
-          life: 0.5 + Math.random() * 0.35,
-          color: c.paint
-        });
-        stampPaintSplat(
-          o.x + dx / d * o.r * 1.2 + (Math.random() - 0.5) * 6,
-          o.y + dy / d * o.r * 0.5 + (Math.random() - 0.5) * 4,
-          2.4 + Math.random() * 2.6,
-          c.paint
-        );
-      }
     }
   }
 
@@ -1547,9 +1469,6 @@ for (let i = 0; i < 44; i++) {
   });
 }
 
-// Tether paint-splatter particles (one per frame while attached)
-let tetherParticles = [];
-
 // static gradients are built once and reused (no per-frame allocations)
 let bgGrad = null;
 let vignetteGrad = null;
@@ -1651,34 +1570,6 @@ function addPaintStroke(x, y, spd, rgb) {
   }
   lastPaintX = x;
   lastPaintY = y;
-}
-
-// stamp one permanent paint droplet/splat onto the paint layer
-function stampPaintSplat(x, y, r, rgb) {
-  ensurePaintLayer();
-  if (!paintCtx) return;
-  paintCtx.save();
-  // soft wet fringe
-  paintCtx.globalAlpha = 0.14;
-  paintCtx.fillStyle = 'rgb(' + rgb + ')';
-  paintCtx.beginPath();
-  paintCtx.arc(x, y, r * 2.3, 0, Math.PI * 2);
-  paintCtx.fill();
-  // hard droplet core
-  paintCtx.globalAlpha = 0.5 + Math.random() * 0.25;
-  paintCtx.beginPath();
-  paintCtx.arc(x, y, r * 0.8, 0, Math.PI * 2);
-  paintCtx.fill();
-  // a few flung specks
-  paintCtx.globalAlpha = 0.35;
-  for (let k = 0; k < 3; k++) {
-    const a = Math.random() * Math.PI * 2;
-    const d = r * (1 + Math.random() * 2.4);
-    paintCtx.beginPath();
-    paintCtx.arc(x + Math.cos(a) * d, y + Math.sin(a) * d * 0.7, r * (0.18 + Math.random() * 0.22), 0, Math.PI * 2);
-    paintCtx.fill();
-  }
-  paintCtx.restore();
 }
 
 function clearPaintLayer() {
@@ -2135,99 +2026,61 @@ function drawPlayer() {
   ctx.scale(pop * str, pop * (2 - str));
   ctx.rotate(lean);
 
-  // hanging loop at the handle top (tether knot point)
+  // hanging loop at the top (tether knot point)
   ctx.strokeStyle = 'rgba(96,70,34,0.95)';
   ctx.lineWidth = 1.4;
   ctx.beginPath();
-  ctx.arc(0, -R * 2.0, R * 0.3, 0, Math.PI * 2);
+  ctx.arc(0, -R * 1.05, R * 0.3, 0, Math.PI * 2);
   ctx.stroke();
 
-  // bamboo handle (warm, tapered)
-  const hTop = -R * 1.95, hBot = -R * 0.2;
-  const grad = ctx.createLinearGradient(0, hTop, 0, hBot);
-  grad.addColorStop(0, '#d8bd8c');
-  grad.addColorStop(0.5, '#c4a672');
-  grad.addColorStop(1, '#a98a5c');
-  ctx.fillStyle = grad;
-  ctx.strokeStyle = '#8a6f45';
-  ctx.lineWidth = 1;
+  // gooey blob body - wobbling rounded silhouette that breathes
+  const P = 11;
+  const pts = [];
+  for (let i = 0; i < P; i++) {
+    const a = (i / P) * Math.PI * 2;
+    const wob = 1
+      + 0.10 * Math.sin(a * 3 + time * 2.1)
+      + 0.06 * Math.sin(a * 5 - time * 1.6)
+      + 0.04 * Math.sin(a * 2 + time * 3.2);
+    const rr = R * wob;
+    pts.push({ x: Math.cos(a) * rr, y: Math.sin(a) * rr });
+  }
   ctx.beginPath();
-  ctx.moveTo(-R * 0.30, hTop);
-  ctx.lineTo(R * 0.30, hTop);
-  ctx.lineTo(R * 0.42, hBot);
-  ctx.lineTo(-R * 0.42, hBot);
+  ctx.moveTo(pts[0].x, pts[0].y);
+  for (let i = 0; i < P; i++) {
+    const cur = pts[i];
+    const nxt = pts[(i + 1) % P];
+    ctx.quadraticCurveTo(cur.x, cur.y, (cur.x + nxt.x) / 2, (cur.y + nxt.y) / 2);
+  }
   ctx.closePath();
+
+  // body is made of the paint the brush is loaded with
+  const rgb = (paintRGB + '').split(/,\s*/).map(Number);
+  const hi = rgb.map(Math.floor);
+  const grad = ctx.createRadialGradient(-R * 0.35, -R * 0.4, R * 0.15, 0, 0, R * 1.25);
+  grad.addColorStop(0, 'rgb(' + Math.min(255, hi[0] + 70) + ',' + Math.min(255, hi[1] + 70) + ',' + Math.min(255, hi[2] + 70) + ')');
+  grad.addColorStop(0.55, 'rgb(' + hi.join(',') + ')');
+  grad.addColorStop(1, 'rgb(' + Math.max(0, hi[0] - 55) + ',' + Math.max(0, hi[1] - 55) + ',' + Math.max(0, hi[2] - 55) + ')');
+  ctx.fillStyle = grad;
   ctx.fill();
+  ctx.strokeStyle = 'rgba(20,16,12,0.35)';
+  ctx.lineWidth = 1;
   ctx.stroke();
 
-  // bamboo joint bands
-  ctx.strokeStyle = 'rgba(122,92,52,0.55)';
-  ctx.lineWidth = 1.1;
+  // wet gloss sitting on the top-left
+  ctx.fillStyle = 'rgba(255,255,255,0.35)';
   ctx.beginPath();
-  ctx.moveTo(-R * 0.34, -R * 1.35);
-  ctx.lineTo(R * 0.34, -R * 1.35);
-  ctx.stroke();
-  ctx.beginPath();
-  ctx.moveTo(-R * 0.38, -R * 0.68);
-  ctx.lineTo(R * 0.38, -R * 0.68);
-  ctx.stroke();
+  ctx.ellipse(-R * 0.34, -R * 0.42, R * 0.4, R * 0.22, -0.6, 0, Math.PI * 2);
+  ctx.fill();
 
-  // bean eyes on the handle
-  const eyeY = -R * 1.05, eyeDX = R * 0.44, eyeR = R * 0.30;
+  // bean eyes
+  const eyeY = -R * 0.28, eyeDX = R * 0.42, eyeR = R * 0.27;
   ctx.fillStyle = '#1a1510';
   ctx.beginPath(); ctx.arc(-eyeDX, eyeY, eyeR, 0, Math.PI * 2); ctx.fill();
   ctx.beginPath(); ctx.arc(eyeDX, eyeY, eyeR, 0, Math.PI * 2); ctx.fill();
   ctx.fillStyle = 'rgba(255,255,255,0.85)';
-  ctx.beginPath(); ctx.arc(-eyeDX - eyeR * 0.3, eyeY - eyeR * 0.35, eyeR * 0.32, 0, Math.PI * 2); ctx.fill();
-  ctx.beginPath(); ctx.arc(eyeDX - eyeR * 0.3, eyeY - eyeR * 0.35, eyeR * 0.32, 0, Math.PI * 2); ctx.fill();
-
-  // ink-wrapped ferrule / binding
-  ctx.fillStyle = '#3a322b';
-  ctx.strokeStyle = '#241e18';
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.moveTo(-R * 0.44, hBot);
-  ctx.lineTo(R * 0.44, hBot);
-  ctx.lineTo(R * 0.5, R * 0.18);
-  ctx.lineTo(-R * 0.5, R * 0.18);
-  ctx.closePath();
-  ctx.fill();
-  ctx.stroke();
-
-  // bristles: fan out then taper to a fine wet nib
-  ctx.beginPath();
-  ctx.moveTo(-R * 0.5, R * 0.18);
-  ctx.lineTo(R * 0.5, R * 0.18);
-  ctx.quadraticCurveTo(R * 0.34, R * 1.05, R * 0.14, R * 1.7);
-  ctx.quadraticCurveTo(0, R * 2.15, -R * 0.14, R * 1.7);
-  ctx.quadraticCurveTo(-R * 0.34, R * 1.05, -R * 0.5, R * 0.18);
-  ctx.closePath();
-  const bristleGrad = ctx.createLinearGradient(0, R * 0.2, 0, R * 2.1);
-  bristleGrad.addColorStop(0, '#2a231c');
-  bristleGrad.addColorStop(0.55, '#221d18');
-  bristleGrad.addColorStop(0.62, 'rgb(' + paintRGB + ')');
-  bristleGrad.addColorStop(1, 'rgb(' + paintRGB + ')');
-  ctx.fillStyle = bristleGrad;
-  ctx.fill();
-  ctx.strokeStyle = 'rgba(20,16,12,0.5)';
-  ctx.lineWidth = 0.8;
-  ctx.stroke();
-
-  // wet shine along the loaded bristles
-  ctx.strokeStyle = 'rgba(255,255,255,0.35)';
-  ctx.lineWidth = 1.2;
-  ctx.beginPath();
-  ctx.moveTo(R * 0.18, R * 0.35);
-  ctx.quadraticCurveTo(R * 0.14, R * 1.2, R * 0.05, R * 1.85);
-  ctx.stroke();
-
-  // drip from the nib while swinging (brush stays wet)
-  if (tethered && tether) {
-    ctx.fillStyle = 'rgba(' + paintRGB + ',0.9)';
-    ctx.beginPath();
-    ctx.arc(0, R * 2.25, R * 0.16, 0, Math.PI * 2);
-    ctx.fill();
-  }
+  ctx.beginPath(); ctx.arc(-eyeDX - eyeR * 0.28, eyeY - eyeR * 0.32, eyeR * 0.3, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(eyeDX - eyeR * 0.28, eyeY - eyeR * 0.32, eyeR * 0.3, 0, Math.PI * 2); ctx.fill();
 
   ctx.restore();
 }
@@ -2293,18 +2146,6 @@ function drawVignette() {
   ctx.fillRect(0, 0, W, H);
 }
 
-function drawTetherParticles() {
-  for (const p of tetherParticles) {
-    const alpha = Math.min(1, p.life * 1.5);
-    ctx.globalAlpha = alpha;
-    ctx.fillStyle = 'rgb(' + p.color + ')';
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, p.r * p.life, 0, Math.PI * 2);
-    ctx.fill();
-  }
-  ctx.globalAlpha = 1;
-}
-
 function draw() {
   drawBackground();
   if (paintCanvas) ctx.drawImage(paintCanvas, 0, 0);
@@ -2316,7 +2157,6 @@ function draw() {
   drawBeacon();
   drawTether();
   drawTrail();
-  drawTetherParticles();
   drawPlayer();
   drawGoalBurst();
   if (flashAlpha > 0) {
