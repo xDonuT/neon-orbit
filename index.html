@@ -413,6 +413,10 @@
   .d-yellow { background: var(--neon-yellow); color: var(--neon-yellow); }
   .d-red    { background: var(--neon-red);    color: var(--neon-red); }
   .d-purple { background: var(--neon-purple); color: var(--neon-purple); }
+  .t-green  { color: var(--neon-green); }
+  .t-yellow { color: var(--neon-yellow); }
+  .t-red    { color: var(--neon-red); }
+  .t-purple { color: var(--neon-purple); }
   .instr-item { white-space: nowrap; }
 
   @media (min-width: 701px) {
@@ -728,10 +732,10 @@
 
       <div id="guideSection">
         <div id="guideTitle">PAINT <button id="hideCircleBtn" aria-label="Toggle control ring">&#9672;</button></div>
-        <div class="guideItem"><span class="dot d-green"></span>swing</div>
-        <div class="guideItem"><span class="dot d-yellow"></span>swing faster (2x)</div>
-        <div class="guideItem"><span class="dot d-red"></span>bounces back &mdash; avoid</div>
-        <div class="guideItem"><span class="dot d-purple"></span>goal &mdash; reach this!</div>
+        <div class="guideItem"><span class="dot d-green"></span><b class="t-green">normal</b> &mdash; swing</div>
+        <div class="guideItem"><span class="dot d-yellow"></span><b class="t-yellow">turbo</b> &mdash; swing faster (2x)</div>
+        <div class="guideItem"><span class="dot d-red"></span><b class="t-red">avoid</b> &mdash; bounces back</div>
+        <div class="guideItem"><span class="dot d-purple"></span><b class="t-purple">goal</b> &mdash; reach this!</div>
         <div class="instr-item">hold ring = grab</div>
         <div class="instr-item">release / tap = launch</div>
       </div>
