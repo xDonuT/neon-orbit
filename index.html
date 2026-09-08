@@ -475,6 +475,21 @@
     #sidePanel #levelTitle { font-size: 12px; }
   }
 
+  /* Bucket paint-well: the bean-eyed pal who holds the current color */
+  #paintWell {
+    flex: 0 0 auto;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px 0 6px;
+    filter: drop-shadow(0 1px 2px rgba(60, 40, 20, 0.2));
+    transition: transform 0.2s ease;
+  }
+  #paintWell.pop { transform: scale(1.12); }
+  #paintWell svg { display: block; }
+  #paintWellFill { transition: fill 0.25s ease; }
+
   /* ------- Control circle (striped = grab target) ------- */
   #controlCircleWrap {
     flex: 0 0 auto;
@@ -635,7 +650,7 @@
   <!-- Menu screen (start screen, hidden after tap) -->
   <div id="menu">
     <div id="menuTitle">PAINT&nbsp;ORBIT</div>
-    <div id="menuSub">Keep a bucket, ruin a canvas.</div>
+    <div id="menuSub">Keep a brush, ruin a canvas.</div>
 <button class="menuBtn" id="menuStartBtn" aria-label="Start game">Play</button>
 <button class="menuBtn" id="menuLevelSelectBtn" aria-label="Level select">Level Select</button>
     <div class="levelsInfo">Levels 1–25</div>
@@ -691,6 +706,20 @@
         </div>
       </div>
 
+      <div id="paintWell" aria-label="Paint well">
+        <svg viewBox="0 0 40 44" width="38" height="42" aria-hidden="true">
+          <path d="M7 17 L33 17 L29 37 Q20 41.5 11 37 Z" fill="#dfe6ea" stroke="#77828b" stroke-width="2"/>
+          <ellipse cx="20" cy="16.5" rx="13.5" ry="5" fill="#aeb7bd" stroke="#77828b" stroke-width="2"/>
+          <ellipse id="paintWellFill" cx="20" cy="16.5" rx="10" ry="3.2" fill="#2f9e70"/>
+          <path d="M20 17 Q29 10 38 3.5" stroke="#8c959c" stroke-width="2.2" fill="none"/>
+          <circle cx="14.5" cy="25" r="2.4" fill="#1a1510"/>
+          <circle cx="25.5" cy="25" r="2.4" fill="#1a1510"/>
+          <circle cx="15.2" cy="24.3" r="0.8" fill="#fff" opacity="0.85"/>
+          <circle cx="26.2" cy="24.3" r="0.8" fill="#fff" opacity="0.85"/>
+          <path d="M15 31 Q20 34.5 25 31" stroke="#1a1510" stroke-width="1.6" fill="none" opacity="0.7"/>
+        </svg>
+      </div>
+
       <div id="controlCircleWrap">
         <div id="controlCircle" role="button" aria-label="Tap to grab and swing">
           <span id="controlLabel">TAP TO<br>GRAB &amp; SWING</span>
@@ -714,7 +743,7 @@
 'use strict';
 
 /* ============================================================
-   PAINT ORBIT - single-file swing game (bucket & canvas)
+   PAINT ORBIT - single-file swing game (brush & canvas)
    ============================================================ */
 
 // ---------- Canvas ----------
@@ -895,7 +924,7 @@ const orbColors = {
   turbo:  { fill: '#e0af3c', stroke: '#b8871b', glow: '#b8871b', paint: '221,165,44' },
   repel:  { fill: '#e4513f', stroke: '#b5372a', glow: '#b5372a', paint: '224,76,56' }
 };
-// color of the wet paint the bucket currently pours (per attached orb)
+// color the ink brush is currently loaded with (per attached orb)
 let paintRGB = '49,150,104';
 
 // ---------- DOM handles ----------
@@ -917,6 +946,17 @@ const elSidePanel = document.getElementById('sidePanel');
 const elCtrlCircle = document.getElementById('controlCircle');
 const elHideCircleBtn = document.getElementById('hideCircleBtn');
 const elGameArea = document.getElementById('gameArea');
+const elPaintWell = document.getElementById('paintWell');
+const elPaintWellFill = document.getElementById('paintWellFill');
+
+function setPaintWell(rgb) {
+  if (elPaintWellFill) elPaintWellFill.style.fill = 'rgb(' + rgb + ')';
+  if (elPaintWell) {
+    elPaintWell.classList.remove('pop');
+    void elPaintWell.offsetWidth;   // restart animation
+    elPaintWell.classList.add('pop');
+  }
+}
 
 function fmtTime(s) {
   if (!isFinite(s) || s < 0) s = 0;
@@ -1021,6 +1061,8 @@ function loadLevel(idx) {
   snap = 0;
   stretchEase = 1;
   tetherSproing = 0;
+  paintRGB = orbColors.normal.paint;
+  setPaintWell(paintRGB);
   stopTurboBed();
   lastBelow = null;
   creakCd = 0;
@@ -1088,7 +1130,7 @@ if (best.type === 'turbo') {
       const rx = dx / dist, ry = dy / dist;
       player.vx += rx * 2.5;
       player.vy += ry * 2.5;
-      toast('\u26A0 ALIZARIN \u2014 beware, it flips the bucket loose!');
+      toast('\u26A0 ALIZARIN \u2014 beware, it shakes the brush loose!');
       return;
     }
     // repel forces the OPPOSITE spin direction
@@ -1104,6 +1146,7 @@ if (best.type === 'turbo') {
   snap = 1;
   tetherSproing = 1;
   paintRGB = orbColors[best.type].paint;
+  setPaintWell(paintRGB);
   rings.push({ x: best.x, y: best.y, r: best.r * 0.5, vr: 2.2, life: 0.30, col: '255,255,255' });
   tether = {
     orb:   best,
@@ -1236,12 +1279,14 @@ function update(dt) {
       player.vy = (player.y - prevY) / dt;
     }
 
-    // ---- tether paint-splatter (subtle drips from the orb) ----
-    if (Math.random() < 0.18) {
+    // ---- wet nib: drips fall from the brush tip as it swings ----
+    const nibX = player.x + (Math.random() - 0.5) * 6;
+    const nibY = player.y + PLAYER_R * 1.5;
+    if (Math.random() < 0.22) {
       const color = t.repel ? orbColors.repel.paint : (t.turbo ? orbColors.turbo.paint : orbColors.normal.paint);
       tetherParticles.push({
-        x: o.x + (Math.random() - 0.5) * 10,
-        y: o.y + (Math.random() - 0.5) * 10,
+        x: nibX,
+        y: nibY,
         vx: (Math.random() - 0.5) * 2,
         vy: 1.5 + Math.random() * 2.5,
         r: 2 + Math.random() * 3,
@@ -1287,7 +1332,7 @@ function update(dt) {
   const targetLen = 22 + Math.min(18, Math.hypot(player.vx, player.vy) * 2.2);
   while (trail.length > targetLen) trail.pop();
 
-  // persistent wet paint: the bucket keeps the canvas stained
+  // persistent wet paint: the brush keeps the canvas stained
   addPaintStroke(player.x, player.y, Math.hypot(player.vx, player.vy), paintRGB);
 
   snap *= Math.pow(0.84, dt);   // attach pop decays
@@ -1449,7 +1494,7 @@ let goalGrad = null;
 
 // ---- offscreen layers (baked once, blitted each frame) ----
 // paperLayer: the stretched-sheet background (grain + frame). paintLayer:
-// the wet paint the bucket leaves behind - it ACCUMULATES and persists.
+// the wet paint the brush leaves behind - it ACCUMULATES and persists.
 // Both are created lazily and skipped where document.createElement is
 // unavailable (e.g. the automated test harness), falling back to flat fills.
 let paperLayer = null;
@@ -1865,7 +1910,7 @@ function drawTether() {
   let mx = (player.x + o.x) / 2 + px * side;
   let my = (player.y + o.y) / 2 + py * side;
 
-  // tether sproing: on attach, pull the control point toward the bucket
+  // tether sproing: on attach, pull the control point toward the brush
   // so the rope looks "squashed" for a moment, then springs back
   if (tetherSproing > 0.02) {
     const s = tetherSproing;
@@ -1892,7 +1937,7 @@ function drawTether() {
   ctx.quadraticCurveTo(mx, my, o.x, o.y);
   ctx.stroke();
 
-  // knot at the bucket handle
+  // knot at the brush handle
   ctx.fillStyle = 'rgba(96,70,34,1)';
   ctx.beginPath();
   ctx.arc(player.x + px * 3, player.y + py * 3, 1.7, 0, Math.PI * 2);
@@ -1926,10 +1971,10 @@ function drawPlayer() {
   const str = stretchEase;
   const pop = 1 + 0.32 * snap;                      // attach pop
 
-  // the tin bucket leans into its flight and tips to pour
+  // the ink brush leans into its flight, nib down — sweeping paint
   const lean = tethered
-    ? Math.max(-0.18, Math.min(0.18, -player.vx * 0.006))
-    : Math.max(-0.55, Math.min(0.55, -player.vx * 0.008));
+    ? Math.max(-0.22, Math.min(0.22, -player.vx * 0.006))
+    : Math.max(-0.45, Math.min(0.45, -player.vx * 0.008));
 
   ctx.save();
   ctx.translate(player.x, player.y);
@@ -1937,47 +1982,99 @@ function drawPlayer() {
   ctx.rotate(lean);
 
   const R = PLAYER_R;
-  // tapered bucket body (wider mouth, narrow base)
-  ctx.fillStyle = '#dfe6ea';
-  ctx.strokeStyle = '#77828b';
-  ctx.lineWidth = 1.3;
+
+  // hanging loop at the handle top (tether knot point)
+  ctx.strokeStyle = 'rgba(96,70,34,0.95)';
+  ctx.lineWidth = 1.4;
   ctx.beginPath();
-  ctx.moveTo(-R * 1.05, -R * 1.5);
-  ctx.lineTo(R * 1.05, -R * 1.5);
-  ctx.lineTo(R * 0.78, R * 1.05);
-  ctx.lineTo(-R * 0.78, R * 1.05);
+  ctx.arc(0, -R * 2.0, R * 0.3, 0, Math.PI * 2);
+  ctx.stroke();
+
+  // bamboo handle (warm, tapered)
+  const hTop = -R * 1.95, hBot = -R * 0.2;
+  const grad = ctx.createLinearGradient(0, hTop, 0, hBot);
+  grad.addColorStop(0, '#d8bd8c');
+  grad.addColorStop(0.5, '#c4a672');
+  grad.addColorStop(1, '#a98a5c');
+  ctx.fillStyle = grad;
+  ctx.strokeStyle = '#8a6f45';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(-R * 0.30, hTop);
+  ctx.lineTo(R * 0.30, hTop);
+  ctx.lineTo(R * 0.42, hBot);
+  ctx.lineTo(-R * 0.42, hBot);
   ctx.closePath();
   ctx.fill();
   ctx.stroke();
 
-  // open mouth / inner paint visible at the top
-  ctx.fillStyle = '#aeb7bd';
+  // bamboo joint bands
+  ctx.strokeStyle = 'rgba(122,92,52,0.55)';
+  ctx.lineWidth = 1.1;
   ctx.beginPath();
-  ctx.ellipse(0, -R * 1.5, R * 1.05, R * 0.42, 0, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.fillStyle = 'rgba(' + paintRGB + ',0.9)';
+  ctx.moveTo(-R * 0.34, -R * 1.35);
+  ctx.lineTo(R * 0.34, -R * 1.35);
+  ctx.stroke();
   ctx.beginPath();
-  ctx.ellipse(0, -R * 1.5, R * 0.72, R * 0.28, 0, 0, Math.PI * 2);
-  ctx.fill();
-
-  // wire bail (handle) over the mouth
-  ctx.strokeStyle = '#8c959c';
-  ctx.lineWidth = 1.5;
-  ctx.beginPath();
-  ctx.arc(0, -R * 1.5, R * 1.05, Math.PI, 0, false);
+  ctx.moveTo(-R * 0.38, -R * 0.68);
+  ctx.lineTo(R * 0.38, -R * 0.68);
   ctx.stroke();
 
-  // pouring stream toward the puddle when tethered
+  // bean eyes on the handle
+  const eyeY = -R * 1.05, eyeDX = R * 0.44, eyeR = R * 0.30;
+  ctx.fillStyle = '#1a1510';
+  ctx.beginPath(); ctx.arc(-eyeDX, eyeY, eyeR, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(eyeDX, eyeY, eyeR, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = 'rgba(255,255,255,0.85)';
+  ctx.beginPath(); ctx.arc(-eyeDX - eyeR * 0.3, eyeY - eyeR * 0.35, eyeR * 0.32, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(eyeDX - eyeR * 0.3, eyeY - eyeR * 0.35, eyeR * 0.32, 0, Math.PI * 2); ctx.fill();
+
+  // ink-wrapped ferrule / binding
+  ctx.fillStyle = '#3a322b';
+  ctx.strokeStyle = '#241e18';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(-R * 0.44, hBot);
+  ctx.lineTo(R * 0.44, hBot);
+  ctx.lineTo(R * 0.5, R * 0.18);
+  ctx.lineTo(-R * 0.5, R * 0.18);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+
+  // bristles: fan out then taper to a fine wet nib
+  ctx.beginPath();
+  ctx.moveTo(-R * 0.5, R * 0.18);
+  ctx.lineTo(R * 0.5, R * 0.18);
+  ctx.quadraticCurveTo(R * 0.34, R * 1.05, R * 0.14, R * 1.7);
+  ctx.quadraticCurveTo(0, R * 2.15, -R * 0.14, R * 1.7);
+  ctx.quadraticCurveTo(-R * 0.34, R * 1.05, -R * 0.5, R * 0.18);
+  ctx.closePath();
+  const bristleGrad = ctx.createLinearGradient(0, R * 0.2, 0, R * 2.1);
+  bristleGrad.addColorStop(0, '#2a231c');
+  bristleGrad.addColorStop(0.55, '#221d18');
+  bristleGrad.addColorStop(0.62, 'rgb(' + paintRGB + ')');
+  bristleGrad.addColorStop(1, 'rgb(' + paintRGB + ')');
+  ctx.fillStyle = bristleGrad;
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(20,16,12,0.5)';
+  ctx.lineWidth = 0.8;
+  ctx.stroke();
+
+  // wet shine along the loaded bristles
+  ctx.strokeStyle = 'rgba(255,255,255,0.35)';
+  ctx.lineWidth = 1.2;
+  ctx.beginPath();
+  ctx.moveTo(R * 0.18, R * 0.35);
+  ctx.quadraticCurveTo(R * 0.14, R * 1.2, R * 0.05, R * 1.85);
+  ctx.stroke();
+
+  // drip from the nib while swinging (brush stays wet)
   if (tethered && tether) {
-    const o = tether.orb;
-    const ang = Math.atan2(o.y - player.y, o.x - player.x);
-    ctx.strokeStyle = 'rgba(' + paintRGB + ',0.9)';
-    ctx.lineWidth = 1.5;
-    ctx.lineCap = 'round';
+    ctx.fillStyle = 'rgba(' + paintRGB + ',0.9)';
     ctx.beginPath();
-    ctx.moveTo(0, R * 0.8);
-    ctx.lineTo(Math.cos(ang) * R * 2.2, R * 0.8 + Math.sin(ang) * R * 2.2);
-    ctx.stroke();
+    ctx.arc(0, R * 2.25, R * 0.16, 0, Math.PI * 2);
+    ctx.fill();
   }
 
   ctx.restore();
