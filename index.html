@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PAINT ORBIT</title>
+<title>CANVAS ESCAPE</title>
 <style>
   :root {
     --neon-cyan: #1f8a9c;
@@ -317,6 +317,50 @@
   }
   #nextLevelBtn:hover { background: #fdf9ee; }
   #nextLevelBtn:active { transform: scale(0.97); }
+
+  /* ------- Story / narrative overlay ------- */
+  #storyOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 900;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 28px 20px;
+    background: rgba(47, 38, 26, 0.42);
+    text-align: center;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  #storyOverlay:not(.hidden) { display: flex; }
+  #storyKick {
+    font-size: 13px;
+    letter-spacing: 0.4em;
+    color: #f0d9a8;
+    text-shadow: 0 1px 2px rgba(40, 25, 10, 0.6);
+    margin-bottom: 10px;
+  }
+  #storyTitle {
+    font-size: clamp(30px, 7vmin, 64px);
+    font-weight: bold;
+    letter-spacing: 0.18em;
+    color: #fdf7e8;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.25), 0 3px 12px rgba(40, 25, 10, 0.5);
+  }
+  #storyTitle.gold { color: #ffd97a; }
+  #storyBody {
+    font-size: clamp(14px, 2.6vmin, 20px);
+    line-height: 1.7;
+    letter-spacing: 0.08em;
+    color: #efe6d2;
+    white-space: pre-line;
+    max-width: 620px;
+    text-shadow: 0 1px 2px rgba(40, 25, 10, 0.55);
+    margin: 12px 0 22px;
+  }
+  #storyContinueBtn { background: rgba(255, 250, 235, 0.88); }
 
   #toast {
     position: absolute;
@@ -655,11 +699,11 @@
 <div id="app">
   <!-- Menu screen (start screen, hidden after tap) -->
   <div id="menu">
-    <div id="menuTitle">PAINT&nbsp;ORBIT</div>
-    <div id="menuSub">Keep a brush, ruin a canvas.</div>
+    <div id="menuTitle">CANVAS&nbsp;ESCAPE</div>
+    <div id="menuSub">A tiny blob of paint, trapped on an endless palette. The canvas waits beyond. Can you escape?</div>
 <button class="menuBtn" id="menuStartBtn" aria-label="Start game">Play</button>
 <button class="menuBtn" id="menuLevelSelectBtn" aria-label="Level select">Level Select</button>
-    <div class="levelsInfo">Levels 1–25</div>
+    <div class="levelsInfo">Levels 1–40</div>
   </div>
 
   <!-- Game: full screen, canvas + overlays -->
@@ -698,6 +742,15 @@
 <button id="nextLevelBtn" aria-label="Next level">NEXT LEVEL &#8594;</button>
         </div>
       </div>
+
+      <!-- Story overlay: act openers + boss checkpoint screens -->
+      <div id="storyOverlay" class="hidden">
+        <div id="storyKick"></div>
+        <div id="storyTitle"></div>
+        <div id="storyBody"></div>
+        <button class="menuBtn" id="storyContinueBtn" aria-label="Continue">CONTINUE</button>
+      </div>
+
       <div id="toast" aria-live="polite"></div>
     </div>
 
@@ -751,7 +804,7 @@
 'use strict';
 
 /* ============================================================
-   PAINT ORBIT - single-file swing game (brush & canvas)
+   CANVAS ESCAPE - single-file swing game (paint blob & canvas)
    ============================================================ */
 
 // ---------- Canvas ----------
@@ -891,7 +944,87 @@ const LEVELS = [
   { name: 'FULL GLOSS', player: {x:110, y:500, vx:0, vy:0}, goal: {x:1335, y:440, r:30},
     orbs:  [ orb(320, 400, 'turbo'), orb(500, 260, 'repel'), orb(520, 400, 'repel'), orb(540, 560, 'repel'),
              orb(700, 400, 'normal'), orb(900, 260, 'repel'), orb(920, 400, 'repel'), orb(940, 560, 'repel'),
-             orb(1060, 400, 'turbo'), orb(1200, 360, 'repel') ], walls: [] }
+             orb(1060, 400, 'turbo'), orb(1200, 360, 'repel') ], walls: [] },
+
+  { name: 'PALETTE TEARS', player: {x:110, y:640, vx:0, vy:0}, goal: {x:1300, y:600, r:26},
+    orbs:  [ orb(300, 620, 'turbo'), orb(470, 480, 'normal'), orb(640, 640, 'repel'), orb(810, 460, 'turbo'),
+             orb(990, 620, 'normal'), orb(1160, 440, 'repel'), orb(1240, 600, 'turbo') ],
+    walls: [ wall(540, 300, 40, 250) ] },
+
+  { name: 'GILDED CAGE', player: {x:110, y:700, vx:0, vy:0}, goal: {x:1300, y:180, r:26},
+    orbs:  [ orb(300, 660, 'normal'), orb(520, 700, 'turbo'), orb(700, 520, 'repel'), orb(880, 660, 'turbo'),
+             orb(1060, 360, 'normal'), orb(1200, 220, 'repel'), orb(1260, 260, 'turbo') ],
+    walls: [ wall(760, 140, 40, 200), wall(760, 520, 40, 160), wall(1020, 100, 40, 160) ] },
+
+  { name: 'PRIMER WALLS', player: {x:110, y:500, vx:0, vy:0}, goal: {x:1310, y:500, r:25},
+    orbs:  [ orb(300, 500, 'turbo'), orb(500, 360, 'normal'), orb(500, 640, 'repel'), orb(700, 500, 'turbo'),
+             orb(900, 360, 'repel'), orb(900, 640, 'turbo'), orb(1100, 500, 'normal'), orb(1200, 420, 'repel') ],
+    walls: [ wall(690, 200, 140, 30), wall(690, 620, 140, 30), wall(850, 240, 30, 120), wall(850, 500, 30, 120) ] },
+
+  { name: 'THE STORM', player: {x:120, y:200, vx:0, vy:0}, goal: {x:1290, y:680, r:24},
+    orbs:  [ orb(300, 240, 'turbo'), orb(460, 380, 'normal'), orb(620, 240, 'repel'), orb(780, 420, 'turbo'),
+             orb(940, 260, 'normal'), orb(1100, 460, 'repel'), orb(1200, 600, 'turbo'), orb(1240, 700, 'normal') ],
+    walls: [ wall(700, 120, 30, 120), wall(900, 320, 30, 120), wall(1080, 620, 30, 140) ] },
+
+  { name: 'THE MASTERWORK', player: {x:110, y:480, vx:0, vy:0}, goal: {x:1330, y:480, r:25},
+    orbs:  [ orb(300, 480, 'turbo'), orb(460, 320, 'repel'), orb(460, 640, 'repel'), orb(620, 480, 'turbo'),
+             orb(780, 320, 'normal'), orb(780, 640, 'normal'), orb(940, 480, 'repel'), orb(1100, 320, 'turbo'),
+             orb(1100, 640, 'turbo'), orb(1220, 480, 'normal') ],
+    walls: [ wall(560, 150, 160, 30), wall(560, 680, 160, 30), wall(1040, 150, 160, 30), wall(1040, 680, 160, 30) ] },
+
+  { name: 'GALLERY HALL', player: {x:110, y:500, vx:0, vy:0}, goal: {x:1330, y:500, r:25},
+    orbs:  [ orb(320, 420, 'turbo'), orb(320, 620, 'normal'), orb(560, 330, 'repel'), orb(560, 670, 'repel'),
+             orb(800, 420, 'turbo'), orb(800, 620, 'normal'), orb(1040, 330, 'repel'), orb(1040, 670, 'repel'),
+             orb(1210, 500, 'turbo') ],
+    walls: [] },
+
+  { name: 'FRAMED', player: {x:120, y:80, vx:0, vy:0}, goal: {x:1270, y:760, r:24},
+    orbs:  [ orb(300, 140, 'normal'), orb(480, 260, 'turbo'), orb(660, 180, 'repel'), orb(840, 360, 'normal'),
+             orb(1020, 300, 'turbo'), orb(1180, 480, 'repel'), orb(1260, 680, 'turbo') ],
+    walls: [ wall(400, 180, 30, 300), wall(700, 480, 30, 300), wall(1000, 120, 30, 140) ] },
+
+  { name: 'FINISHING GLAZE', player: {x:110, y:500, vx:0, vy:0}, goal: {x:1320, y:420, r:24},
+    orbs:  [ orb(300, 500, 'turbo'), orb(470, 380, 'repel'), orb(640, 560, 'turbo'), orb(810, 400, 'normal'),
+             orb(980, 560, 'normal'), orb(1160, 440, 'turbo'), orb(1240, 520, 'repel') ],
+    walls: [ wall(800, 200, 120, 30), wall(800, 620, 120, 30), wall(1010, 240, 30, 140), wall(1010, 500, 30, 140) ] },
+
+  { name: 'GILDED RUN', player: {x:120, y:700, vx:0, vy:0}, goal: {x:1300, y:180, r:24},
+    orbs:  [ orb(320, 660, 'turbo'), orb(520, 520, 'normal'), orb(720, 660, 'turbo'), orb(920, 400, 'normal'),
+             orb(1120, 660, 'turbo'), orb(1200, 320, 'repel'), orb(1250, 200, 'turbo') ],
+    walls: [ wall(480, 180, 30, 260), wall(700, 240, 30, 200), wall(900, 140, 30, 200), wall(1080, 220, 30, 260) ] },
+
+  { name: 'CASTS & CORNICES', player: {x:110, y:500, vx:0, vy:0}, goal: {x:1330, y:500, r:23},
+    orbs:  [ orb(300, 500, 'turbo'), orb(460, 360, 'repel'), orb(620, 500, 'turbo'), orb(780, 360, 'repel'),
+             orb(940, 620, 'normal'), orb(1100, 400, 'turbo'), orb(1220, 560, 'repel') ],
+    walls: [ wall(690, 140, 30, 180), wall(690, 540, 30, 180), wall(960, 180, 30, 160), wall(960, 540, 30, 140) ] },
+
+  { name: 'THE LONG GALLERY', player: {x:120, y:120, vx:0, vy:0}, goal: {x:1310, y:700, r:23},
+    orbs:  [ orb(300, 200, 'normal'), orb(480, 360, 'turbo'), orb(660, 200, 'repel'), orb(840, 400, 'turbo'),
+             orb(1020, 240, 'normal'), orb(1200, 480, 'repel'), orb(1280, 640, 'turbo') ],
+    walls: [ wall(500, 440, 30, 120), wall(700, 120, 30, 140), wall(900, 540, 30, 140), wall(1100, 160, 30, 120) ] },
+
+  { name: 'RESTORATION', player: {x:110, y:500, vx:0, vy:0}, goal: {x:1310, y:440, r:23},
+    orbs:  [ orb(300, 500, 'turbo'), orb(450, 380, 'repel'), orb(450, 620, 'repel'), orb(610, 500, 'turbo'),
+             orb(770, 380, 'normal'), orb(770, 620, 'normal'), orb(930, 500, 'repel'), orb(1090, 380, 'turbo'),
+             orb(1090, 620, 'turbo'), orb(1220, 480, 'normal') ],
+    walls: [ wall(690, 140, 30, 160), wall(690, 560, 30, 160), wall(1010, 140, 30, 160), wall(1010, 560, 30, 160) ] },
+
+  { name: 'FINAL COAT', player: {x:110, y:500, vx:0, vy:0}, goal: {x:1330, y:520, r:22},
+    orbs:  [ orb(300, 500, 'turbo'), orb(440, 360, 'repel'), orb(440, 640, 'repel'), orb(590, 500, 'turbo'),
+             orb(740, 360, 'normal'), orb(740, 640, 'normal'), orb(890, 500, 'repel'), orb(1040, 360, 'turbo'),
+             orb(1040, 640, 'turbo'), orb(1180, 500, 'normal'), orb(1260, 440, 'repel') ],
+    walls: [ wall(500, 200, 30, 130), wall(500, 520, 30, 130), wall(820, 200, 30, 130), wall(820, 520, 30, 130), wall(1140, 160, 30, 130) ] },
+
+  { name: 'THE MASTERWORKS', player: {x:120, y:600, vx:0, vy:0}, goal: {x:1310, y:320, r:22},
+    orbs:  [ orb(300, 560, 'turbo'), orb(460, 660, 'repel'), orb(620, 420, 'turbo'), orb(780, 620, 'normal'),
+             orb(940, 380, 'repel'), orb(1100, 560, 'turbo'), orb(1200, 400, 'normal'), orb(1270, 340, 'repel') ],
+    walls: [ wall(550, 160, 30, 140), wall(750, 640, 30, 140), wall(950, 160, 30, 140), wall(1150, 320, 30, 160) ] },
+
+  { name: 'THE ARTIST', player: {x:110, y:500, vx:0, vy:0}, goal: {x:1330, y:480, r:22},
+    orbs:  [ orb(290, 500, 'turbo'), orb(430, 360, 'repel'), orb(430, 640, 'repel'), orb(570, 500, 'turbo'),
+             orb(710, 360, 'normal'), orb(710, 640, 'normal'), orb(850, 500, 'repel'), orb(990, 360, 'turbo'),
+             orb(990, 640, 'turbo'), orb(1130, 500, 'normal'), orb(1240, 420, 'repel'), orb(1280, 560, 'turbo') ],
+    walls: [ wall(480, 200, 30, 130), wall(480, 520, 30, 130), wall(790, 200, 30, 130), wall(790, 520, 30, 130), wall(1100, 200, 30, 130), wall(1100, 520, 30, 130) ] }
 ];
 
 function orb(x, y, type) { return { x: x, y: y, r: 16, type: type }; }
@@ -899,7 +1032,8 @@ function wall(x, y, w, h) { return { x: x, y: y, w: w, h: h }; }
 
 // ---- Mastery par table (seconds) ----
 // 3-star par for each level. 2-star = par * 1.6, 1-star = par * 3.0.
-const PAR3 = [6, 7, 7, 7, 8, 8, 8, 9, 10, 10, 11, 11, 12, 12, 13, 13, 14, 14, 15, 15, 16, 17, 17, 18, 19];
+const PAR3 = [6, 7, 7, 7, 8, 8, 8, 9, 10, 10, 11, 11, 12, 12, 13, 13, 14, 14, 15, 15, 16, 17, 17, 18, 19,
+              20, 20, 21, 21, 22, 22, 23, 23, 24, 24, 25, 25, 26, 26, 28];
 function starsForTime(li, t) {
   const p = PAR3[li];
   if (t <= p) return 3;
@@ -1110,6 +1244,13 @@ function loadLevel(idx) {
   if (idx === 6) toast('RED orb = alizarin \u00b7 kicks you loose');
   if (level.walls && level.walls.length) toast('Dunk under the tape!');
   showReadyUI(true);
+  // show the act-opener story once per session when a new floor begins
+  const openerKey = idx + 1;   // 1-based level number
+  const opener = STORY.openers[openerKey];
+  if (opener && !storySeen[openerKey]) {
+    storySeen[openerKey] = true;
+    showStory(opener);
+  }
   // close level select overlay if open
   closeLevelSelect();
   elLevelTitle.textContent = 'LEVEL ' + (idx + 1) + ' \u2014 ' + level.name;
@@ -1430,6 +1571,61 @@ function spawnGoalBurst(tier) {
   }
 }
 
+// ---------- Story / narrative data ----------
+const STORY = {
+  intro: {
+    kick: 'ACT I',
+    title: 'TRAPPED ON THE PALETTE',
+    body: 'A tiny palette blob dreams of the canvas.',
+  },
+  // act openers shown when a new floor/act begins (keyed by 1-based level)
+  openers: {
+    1:  { kick: 'ACT I',  title: 'TRAPPED ON THE PALETTE', body: 'A tiny palette blob dreams of the canvas.' },
+    11: { kick: 'FLOOR 1', title: 'THE GREAT ESCAPE', body: 'You leap onto the empty canvas.' },
+    21: { kick: 'FLOOR 2', title: 'THE ARTIST EMERGES', body: 'You are painting, not escaping.' },
+    31: { kick: 'FLOOR 3', title: 'THE GALLERY', body: 'The Gallery awaits your masterpiece.' },
+  },
+  // boss / checkpoint screens keyed by the level just COMPLETED (1-based)
+  bosses: {
+    10: { kick: 'CHECKPOINT',      title: 'READY TO ESCAPE?',        body: 'The palette edge glows just ahead.', gold: false },
+    20: { kick: 'FLOOR 1 \u00b7 BOSS',  title: 'YOU\u2019VE ESCAPED THE PALETTE!', body: 'You have leapt onto the waiting canvas.', gold: false },
+    30: { kick: 'FLOOR 2 \u00b7 BOSS',  title: 'YOU\u2019VE PAINTED THE CANVAS!', body: 'Your art now fills the endless canvas.', gold: false },
+    40: { kick: 'FINAL BOSS',      title: 'THE GALLERY OPENS',        body: 'At last, the Gallery opens to you.', gold: true },
+  },
+};
+
+const elStory = document.getElementById('storyOverlay');
+const elStoryKick = document.getElementById('storyKick');
+const elStoryTitle = document.getElementById('storyTitle');
+const elStoryBody = document.getElementById('storyBody');
+const elStoryContinue = document.getElementById('storyContinueBtn');
+
+let storyOnContinue = null;   // optional callback after CONTINUE (boss -> next level)
+let storySeen = {};           // act openers shown once per session (keyed by level #)
+
+function showStory(entry, onContinue) {
+  if (elStoryKick) elStoryKick.textContent = entry.kick || '';
+  if (elStoryTitle) { elStoryTitle.textContent = entry.title || ''; elStoryTitle.classList.toggle('gold', !!entry.gold); }
+  if (elStoryBody) elStoryBody.textContent = entry.body || '';
+  storyOnContinue = onContinue || null;
+  if (elStory) elStory.classList.remove('hidden');
+  if (elStory) elStory.scrollTop = 0;
+  if (elStoryContinue) elStoryContinue.focus && elStoryContinue.focus();
+}
+
+function hideStory() {
+  if (elStory) elStory.classList.add('hidden');
+}
+
+// Dismiss once: overlay background tap or CONTINUE both call this.
+function dismissStory() {
+  if (!elStory || elStory.classList.contains('hidden')) return;
+  hideStory();
+  const cb = storyOnContinue;
+  storyOnContinue = null;
+  if (cb) cb();
+}
+
 function win() {
   const last = levelIndex === LEVELS.length - 1;
   const speed = Math.hypot(player.vx, player.vy);
@@ -1471,6 +1667,16 @@ function win() {
   elMsg.classList.remove('hidden');
   elMsgObj.style.display = 'none';
 
+  // ---- boss / checkpoint story screens (levels 10, 20, 30, 40) ----
+  const bossKey = levelIndex + 1;
+  const boss = STORY.bosses[bossKey];
+  if (boss) {
+    // keep the win message (stars + next) underneath; show the story on top
+    showStory(boss, () => {
+      // after Continue, the win overlay is already visible; nothing extra to do
+    });
+  }
+
   // ---- results on the win overlay ----
   const starsText = '\u2605\u2605\u2605'.slice(0, stars) + '\u2606\u2606\u2606'.slice(0, 3 - stars);
   elMsgStars.textContent = starsText;  // keep textContent as 3 chars (test + a11y)
@@ -1484,7 +1690,7 @@ function win() {
   const bestTxt = wasNewBest ? 'NEW BEST!' : (prevBest != null ? 'best ' + fmtTime(prevBest) : '');
   elMsgScore.textContent = fmtTime(t) + (bestTxt ? '  \u00b7  ' + bestTxt : '');
   elMsgScore.className = wasNewBest ? 'newbest' : '';
-  elMsgT.textContent = stars === 3 ? 'FLAWLESS!' : last ? 'ALL 25 SIGNED!' : 'LEVEL COMPLETE!';
+  elMsgT.textContent = stars === 3 ? 'FLAWLESS!' : last ? 'ALL ' + LEVELS.length + ' SIGNED!' : 'LEVEL COMPLETE!';
   elMsgS.textContent = last ? 'Back around to FIRST STEPS...' : 'Next: ' + LEVELS[levelIndex + 1].name + ' \u2192';
   elRestart.style.display = 'none';
   elNextBtn.style.display = '';
@@ -2823,6 +3029,16 @@ function bindButton(el, handler) {
 
 // Restart button (also stop it from triggering an attach)
 bindButton(elRestart, () => { ensureAudio(); playTick(); loadLevel(levelIndex); });
+
+// Story Continue: dismiss the narrative overlay, then resume flow
+bindButton(elStoryContinue, () => { ensureAudio(); playTick(); dismissStory(); });
+if (elStory) {
+  elStory.addEventListener('mousedown', (e) => e.stopPropagation());
+  elStory.addEventListener('touchstart', (e) => { e.stopPropagation(); }, { passive: false });
+  elStory.addEventListener('click', (e) => {
+    if (e.target === elStory || e.target === elStoryBody || e.target === elStoryTitle || e.target === elStoryKick) dismissStory();
+  });
+}
 
 // NEXT LEVEL: advance (or wrap to level 1 after the last)
 bindButton(elNextBtn, () => {
