@@ -1891,7 +1891,7 @@ function drawOrbs() {
       // hot brim: paint sloshes over the lip + lazy spin arcs
       ctx.fillStyle = 'rgba(' + c.paint + ',0.5)';
       ctx.beginPath();
-      ctx.ellipse(0, rimY, r * 0.98, r * 0.36, 0, Math.PI * 2);
+      ctx.ellipse(0, rimY, r * 0.98, r * 0.36, 0, 0, Math.PI * 2);
       ctx.fill();
       ctx.strokeStyle = 'rgba(184,135,27,0.75)';
       ctx.lineWidth = 2.2;
