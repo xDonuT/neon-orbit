@@ -136,6 +136,20 @@
     background: rgba(138, 106, 28, 0.4);
     border-radius: 0 0 2px 2px;
   }
+  #fps {
+    position: absolute;
+    top: calc(env(safe-area-inset-top, 0px) + 12px);
+    right: calc(env(safe-area-inset-right, 0px) + 118px);
+    z-index: 4;
+    font-size: 11px;
+    font-weight: bold;
+    letter-spacing: 0.08em;
+    color: rgba(70, 60, 46, 0.6);
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.7);
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+    pointer-events: none;
+  }
   #levelLabel {
     font-size: 12px;
     color: #5a4a3a;
@@ -425,6 +439,7 @@
   #menuTitle { font-size: clamp(32px, 8vmin, 72px); font-weight: bold; letter-spacing: 0.3em; color: var(--ink); text-shadow: 0 2px 0 rgba(255,255,255,0.85), 0 3px 10px rgba(80, 60, 30, 0.3); }
   #menuSub { font-size: 14px; color: #6b5f4f; letter-spacing: 0.15em; margin-bottom: 32px; }
   .menuBtn { font-family: inherit; font-size: 16px; letter-spacing: 0.2em; color: var(--ink); background: rgba(255, 250, 235, 0.6); border: 1px solid rgba(97, 76, 48, 0.4); padding: 12px 28px; border-radius: 6px; cursor: pointer; transition: background 0.15s; }
+  .menuBtnDisabled { opacity: 0.4; cursor: default; pointer-events: none; text-decoration: line-through; }
   .menuBtn:hover { background: rgba(255, 250, 235, 0.9); }
   .menuBtn:active { transform: scale(0.98); }
   .levelsInfo { font-size: 12px; color: #6b5f4f; letter-spacing: 0.1em; }
@@ -688,6 +703,63 @@
     #rotatePrompt { display: flex; }
     #rotatePrompt.dismissed { display: none; }
   }
+
+  /* ------- Endless Run HUD ------- */
+  #hudEndless {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 0;
+  }
+  #hudEndless.hidden { display: none; }
+  #coinCounter {
+    font-size: 15px;
+    font-weight: bold;
+    letter-spacing: 0.1em;
+    color: #8a6a1c;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
+    white-space: nowrap;
+  }
+  #ultimateWrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    max-width: 170px;
+  }
+  #ultimateTrack {
+    flex: 1;
+    height: 8px;
+    border-radius: 4px;
+    background: rgba(80, 60, 30, 0.25);
+    overflow: hidden;
+    position: relative;
+  }
+  #ultimateFill {
+    height: 100%;
+    width: 0%;
+    border-radius: 4px;
+    background: linear-gradient(90deg, #8a55b8, #c9a6e0);
+    transition: width 0.15s ease;
+  }
+  #ultimateBtn {
+    font-size: 18px;
+    color: #6a4a8a;
+    border-color: rgba(138, 85, 184, 0.5);
+    flex: 0 0 auto;
+  }
+  #ultimateBtn.active {
+    background: rgba(138, 85, 184, 0.35);
+    color: #fff;
+    border-color: #a87fc8;
+    animation: ultPulse 0.6s ease-in-out infinite;
+  }
+  @keyframes ultPulse {
+    0%, 100% { transform: scale(1); box-shadow: 0 0 0 rgba(138, 85, 184, 0); }
+    50%      { transform: scale(1.15); box-shadow: 0 0 18px rgba(138, 85, 184, 0.8); }
+  }
+  #ultimateBtn[disabled] { opacity: 0.4; }
 </style>
 </head>
 <body>
@@ -703,6 +775,7 @@
     <div id="menuSub">A tiny blob of paint, trapped on an endless palette. The canvas waits beyond. Can you escape?</div>
 <button class="menuBtn" id="menuStartBtn" aria-label="Start game">Play</button>
 <button class="menuBtn" id="menuLevelSelectBtn" aria-label="Level select">Level Select</button>
+<button class="menuBtn menuBtnDisabled" id="menuEndlessBtn" aria-label="Endless run" disabled style="border-color:rgba(138,85,184,0.5);">Endless Run</button>
     <div class="levelsInfo">Levels 1–40</div>
   </div>
 
@@ -717,6 +790,7 @@
       <div id="hudTimerWrap">
         <div id="hudTimer">0:00</div>
       </div>
+      <div id="fps" aria-hidden="true">-- fps</div>
 
       <!-- Level Select overlay (hidden by default) -->
       <div id="levelSelect" class="hidden">
@@ -796,6 +870,15 @@
         <div class="instr-item">hold ring = grab</div>
         <div class="instr-item">release / tap = launch</div>
       </div>
+
+      <!-- Endless Run HUD (hidden unless endless mode) -->
+      <div id="hudEndless" class="hidden">
+        <div id="coinCounter">🪙 0</div>
+        <div id="ultimateWrap">
+          <div id="ultimateTrack"><div id="ultimateFill"></div></div>
+          <button class="hud-btn" id="ultimateBtn" aria-label="Magic raid ultimate">&#10022;</button>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -853,6 +936,22 @@ const BURST_CFG = [
   { sparks: 80, spMin: 2.5,  spMax: 9.5, sizeMin: 2.0, sizeMax: 4.5, rings: [{ r: 10, vr: 12, life: 0.8 }, { r: 6, vr: 9, life: 0.6 }, { r: 3, vr: 7, life: 0.5 }] },
 ];
 const OUT_MARGIN    = 10;      // death buffer beyond canvas edges (matches visible red band)
+
+// ---------- Endless Run constants ----------
+const GAME_MODES = { LEVELS: 'levels', ENDLESS: 'endless' };
+const CHUNK_W         = 1500;  // horizontal width of each generated chunk
+const CHUNK_AHEAD     = 800;   // generate new chunk when player is this close to its end
+const CHUNK_CULL      = 600;   // remove chunks this far behind the camera
+const ORIGIN_RESET    = 50000; // shift world every 50k px to avoid float jitter
+const ULT_COST        = 100;   // meter cost to activate ultimate
+const ULT_DURATION    = 4.5;   // seconds of slow-mo + magnet
+const ULT_DRAIN       = 25;    // meter drain per second
+const ULT_SLOW        = 0.3;   // time scale while ultimate active
+const ULT_MAGNET_R    = 280;   // coin magnet radius
+const ULT_METER_COIN  = 6;     // meter gain per coin
+const ULT_METER_ORB   = 2;     // meter gain per orb attach
+const ULT_METER_REPEL = 3;     // meter gain per repel escape
+const SPEED_RAMP      = 0.0004; // difficulty increase per meter of distance
 
 // ---------- Levels ----------
 const LEVELS = [
@@ -1060,6 +1159,14 @@ let tetherSproing = 0; // attach sproing timer: 1.0 = just attached, decays to 0
 let sparks = [];     // goal-burst sparks
 let rings = [];       // goal-burst shockwave rings
 let beams = [];       // goal-burst radial light-beams (MASSIVE landings)
+
+// Capped particle push helpers (drop the OLDEST particle past the limit)
+const MAX_SPARKS = 50;
+const MAX_TETHER_PARTICLES = 60;
+function pushSpark(p) { sparks.push(p); if (sparks.length > MAX_SPARKS) sparks.shift(); }
+function pushRing(r)  { rings.push(r);  if (rings.length > 30) rings.shift(); }
+function pushBeam(b)  { beams.push(b);  if (beams.length > 30) beams.shift(); }
+function pushTetherParticle(p) { tetherParticles.push(p); if (tetherParticles.length > MAX_TETHER_PARTICLES) tetherParticles.shift(); }
 let winHalt = 0;      // seconds of full freeze after capturing the goal
 let winSlow = 0;      // remaining seconds of slow-motion after the freeze
 let winSlowMax = 0.7; // initial winSlow value (ramp reference)
@@ -1069,6 +1176,19 @@ let winLabelT = 0;    // remaining time for the in-world tier word
 let shakeMag = 0;     // current screen-shake magnitude (px)
 let shakeMax = 0;     // initial shake magnitude (decay reference)
 let time = 0;                     // global animation clock
+
+// ---------- Endless Run state ----------
+let gameMode = GAME_MODES.LEVELS;
+let cameraX = 0;
+let runDistance = 0;
+let runCoins = 0;
+let ultMeter = 0;
+let ultActive = false;
+let ultTimer = 0;
+let trackChunks = [];          // { startX, orbs, walls, coins }
+let parallaxLayers = [];       // { speed, w, h, canvas }
+let seedCounter = 0;
+let endlessEl = null;          // DOM handles (created once)
 
 const playerColor  = { core: '#f3f6f8', ring: '#8b99a5', glow: 'rgba(139,153,165,0.55)' };
 const orbColors = {
@@ -1308,7 +1428,7 @@ if (best.type === 'turbo') {
   tetherSproing = 1;
   paintRGB = orbColors[best.type].paint;
   setPaintWell(paintRGB);
-  rings.push({ x: best.x, y: best.y, r: best.r * 0.5, vr: 2.2, life: 0.30, col: '255,255,255' });
+  pushRing({ x: best.x, y: best.y, r: best.r * 0.5, vr: 2.2, life: 0.30, col: '255,255,255' });
   tether = {
     orb:   best,
     angVel: angVel,
@@ -1338,6 +1458,7 @@ function release() {
 }
 
 function update(dt) {
+  if (gameMode === GAME_MODES.ENDLESS) { EndlessRun.update(dt); return; }
   time += dt;
   if (toastTimer > 0) {
     toastTimer -= dt;
@@ -1465,7 +1586,7 @@ function update(dt) {
     if (o.bucketDrip <= 0) {
       o.bucketDrip = 0.16 + Math.random() * 0.12;
       const a = Math.random() * Math.PI * 2;
-      tetherParticles.push({
+      pushTetherParticle({
         x: o.x + Math.cos(a) * o.r * 0.8,
         y: o.y - o.r * 0.5 + Math.random() * o.r * 0.3,
         vx: (Math.random() - 0.5) * 2.6,
@@ -1478,7 +1599,7 @@ function update(dt) {
         // splash a glob toward the blob
         const dx = player.x - o.x, dy = player.y - o.y;
         const d = Math.hypot(dx, dy) || 1;
-        tetherParticles.push({
+        pushTetherParticle({
           x: o.x + dx / d * o.r,
           y: o.y + dy / d * o.r * 0.4,
           vx: dx / d * 2.2 + (Math.random() - 0.5),
@@ -1546,7 +1667,7 @@ function spawnGoalBurst(tier) {
   for (let i = 0; i < cfg.sparks; i++) {
     const a = Math.random() * Math.PI * 2;
     const sp = cfg.spMin + Math.random() * (cfg.spMax - cfg.spMin);
-    sparks.push({
+    pushSpark({
       x: g.x, y: g.y,
       vx: Math.cos(a) * sp, vy: Math.sin(a) * sp,
       life: 1,
@@ -1554,12 +1675,12 @@ function spawnGoalBurst(tier) {
       color: colors[(Math.random() * colors.length) | 0],
     });
   }
-  for (const r of cfg.rings) rings.push({ x: g.x, y: g.y, r: r.r, vr: r.vr, life: r.life });
+  for (const r of cfg.rings) pushRing({ x: g.x, y: g.y, r: r.r, vr: r.vr, life: r.life });
 
   if (tier === 2) {
     // MASSIVE only: radial energy beams exploding from the goal
     for (let i = 0; i < 16; i++) {
-      beams.push({
+      pushBeam({
         x: g.x, y: g.y,
         a: (Math.PI * 2 * i) / 16 + Math.random() * 0.22,
         maxLen: 70 + Math.random() * 110,
@@ -1698,6 +1819,7 @@ function win() {
 }
 
 function lose() {
+  clearPaintLayer();             // fresh run — start with a clean canvas
   deathSplatter(player.x, player.y);
   status = 'lost';
   statusTimer = 1.5;
@@ -1712,6 +1834,646 @@ function lose() {
   elNextBtn.style.display = 'none';
   loseCause = '';
 }
+
+/* ============================================================
+   ENDLESS RUN MODE
+   ============================================================ */
+// Seeded PRNG (mulberry32)
+function sRand(seed) {
+  let s = seed | 0;
+  return function() {
+    s = (s + 0x6D2B79F5) | 0;
+    let t = Math.imul(s ^ (s >>> 15), 1 | s);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+const EndlessRun = {
+
+  /* ---- INIT ---- */
+  init() {
+    // reset state
+    this._paintBlitFrame = 0;
+    trackChunks = [];
+    flatOrbs = [];
+    flatWalls = [];
+    flatCoins = [];
+    cameraX = 0;
+    runDistance = 0;
+    runCoins = 0;
+    ultMeter = 0;
+    ultActive = false;
+    ultTimer = 0;
+    seedCounter = Date.now() & 0x7FFFFFFF;
+
+    // fake level so existing draw/physics functions work unchanged
+    level = { name: 'ENDLESS', player: { x: 150, y: 425 }, goal: { x: -9999, y: -9999, r: 0 }, orbs: [], walls: [] };
+    levelIndex = -1;
+
+    // player start
+    player = { x: 150, y: 425, vx: 2.5, vy: 0 };
+    tethered = false;
+    tether = null;
+    trail = [];
+    sparks.length = 0;
+    rings.length = 0;
+    beams.length = 0;
+    tetherParticles.length = 0;
+    snap = 0;
+    stretchEase = 1;
+    tetherSproing = 0;
+    paintRGB = '49,150,104';
+    setPaintWell(paintRGB);
+    clearPaintLayer();
+
+    // parallax
+    this.buildParallax();
+
+    // generate initial chunks
+    for (let i = 0; i < 3; i++) this.generateChunk(i * CHUNK_W);
+
+    // rebuild level arrays from chunks
+    this.rebuildArrays();
+
+    status = 'playing';
+    statusTimer = 0;
+    runTime = 0;
+
+    // hide death/win overlay
+    elMsg.classList.add('hidden');
+    elMsg.classList.remove('lost');
+
+    // HUD
+    elLevelTitle.textContent = 'ENDLESS RUN';
+    this.showHUD(true);
+  },
+
+  /* ---- PARALLAX ---- */
+  buildParallax() {
+    parallaxLayers = [];
+    if (typeof document === 'undefined') return;
+    const pw = 2200, ph = H;
+
+    // layer 0 — sky gradient
+    const c0 = document.createElement('canvas'); c0.width = pw; c0.height = ph;
+    const g0 = c0.getContext('2d');
+    const grad0 = g0.createLinearGradient(0, 0, 0, ph);
+    grad0.addColorStop(0, '#8ec5d6'); grad0.addColorStop(0.6, '#b8d8e3'); grad0.addColorStop(1, '#e8dfd0');
+    g0.fillStyle = grad0; g0.fillRect(0, 0, pw, ph);
+    // faint paint flecks
+    g0.globalAlpha = 0.15;
+    for (let i = 0; i < 40; i++) {
+      g0.fillStyle = Math.random() < 0.5 ? '#7ab89a' : '#c9a86c';
+      g0.beginPath(); g0.arc(Math.random() * pw, Math.random() * ph, 2 + Math.random() * 5, 0, Math.PI * 2); g0.fill();
+    }
+    g0.globalAlpha = 1;
+    parallaxLayers.push({ speed: 0.05, canvas: c0 });
+
+    // layer 1 — distant paint strokes (mountain-like)
+    const c1 = document.createElement('canvas'); c1.width = pw; c1.height = ph;
+    const g1 = c1.getContext('2d');
+    g1.clearRect(0, 0, pw, ph);
+    g1.globalAlpha = 0.25;
+    const cols1 = ['#9fb89f', '#8fa888', '#a0b498'];
+    for (let i = 0; i < 12; i++) {
+      g1.fillStyle = cols1[i % cols1.length];
+      const bx = Math.random() * pw;
+      const bw = 80 + Math.random() * 250;
+      const bh = 40 + Math.random() * 180;
+      const by = ph * 0.45 + Math.random() * ph * 0.25 - bh * 0.5;
+      g1.beginPath();
+      g1.moveTo(bx, by + bh); g1.lineTo(bx + bw * 0.1, by);
+      g1.lineTo(bx + bw * 0.35, by + bh * 0.3);
+      g1.lineTo(bx + bw * 0.6, by - bh * 0.1);
+      g1.lineTo(bx + bw * 0.85, by + bh * 0.4);
+      g1.lineTo(bx + bw, by + bh);
+      g1.closePath(); g1.fill();
+    }
+    g1.globalAlpha = 1;
+    parallaxLayers.push({ speed: 0.15, canvas: c1 });
+
+    // layer 2 — foreground paint drips
+    const c2 = document.createElement('canvas'); c2.width = pw; c2.height = ph;
+    const g2 = c2.getContext('2d');
+    g2.clearRect(0, 0, pw, ph);
+    g2.globalAlpha = 0.12;
+    for (let i = 0; i < 25; i++) {
+      g2.fillStyle = ['#d4a66a', '#b89070', '#8a957a', '#c8a878'][i % 4];
+      const dx = Math.random() * pw;
+      const dw = 4 + Math.random() * 14;
+      const dh = 30 + Math.random() * 120;
+      const dy = Math.random() * ph * 0.4 + ph * 0.3;
+      g2.beginPath(); g2.ellipse(dx, dy, dw * 0.5, dh, 0, 0, Math.PI * 2); g2.fill();
+    }
+    g2.globalAlpha = 1;
+    parallaxLayers.push({ speed: 0.4, canvas: c2 });
+  },
+
+  /* ---- SEEDED PRNG for chunks ---- */
+  rng() { return sRand(seedCounter++); },
+
+  /* ---- GENERATE A CHUNK ---- */
+  generateChunk(startX) {
+    const r = this.rng();
+    const distFactor = Math.min(1, startX / 80000);   // ramps 0→1 over 80k px
+    const difficulty = 0.2 + distFactor * 0.8;
+
+    const orbs = [];
+    const walls = [];
+    const coins = [];
+
+    // --- orbs: place 5-8 per chunk ensuring TETHER_RANGE chain ---
+    const orbCount = 5 + Math.floor(r() * 4);
+    let lastY = H * 0.5 + (r() - 0.5) * 300;
+    for (let i = 0; i < orbCount; i++) {
+      const ox = startX + 160 + i * (CHUNK_W - 320) / (orbCount - 1 || 1);
+      const oy = Math.max(80, Math.min(H - 80, lastY + (r() - 0.5) * 280));
+      lastY = oy;
+
+      // type weighted by difficulty
+      const roll = r();
+      let type;
+      if (roll < 0.15 + difficulty * 0.15) type = 'repel';
+      else if (roll < 0.35 + difficulty * 0.1) type = 'turbo';
+      else type = 'normal';
+
+      orbs.push({ x: ox, y: oy, r: 16, type });
+    }
+
+    // --- walls: 0-2 per chunk at higher difficulty ---
+    if (difficulty > 0.3 && r() < difficulty * 0.7) {
+      const wx = startX + 300 + r() * (CHUNK_W - 600);
+      const wallH = 60 + r() * 200;
+      const wallY = r() < 0.5 ? (H - wallH) * r() : H - wallH - r() * 60;
+      const wallW = 30 + r() * 20;
+      // gap: leave a gap of at least 160px for the blob to swing through
+      const gapCenter = wallY + wallH * (0.3 + r() * 0.4);
+      walls.push({ x: wx, y: wallY, w: wallW, h: gapCenter - wallY - 80 });
+      if (wallY + wallH - gapCenter - 80 > 40)
+        walls.push({ x: wx, y: gapCenter + 80, w: wallW, h: wallY + wallH - gapCenter - 80 });
+    }
+
+    // --- coins: placed in arcs between orbs ---
+    for (let i = 0; i < orbs.length - 1; i++) {
+      if (r() < 0.7) {
+        const a = orbs[i], b = orbs[i + 1];
+        const count = 2 + Math.floor(r() * 3);
+        for (let k = 0; k < count; k++) {
+          const t = (k + 1) / (count + 1);
+          coins.push({
+            x: a.x + (b.x - a.x) * t + (r() - 0.5) * 50,
+            y: a.y + (b.y - a.y) * t + (r() - 0.5) * 60 - 30,
+            r: 7,
+            collected: false
+          });
+        }
+      }
+    }
+
+    trackChunks.push({ startX, orbs, walls, coins });
+  },
+
+  /* ---- REBUILD flat arrays from active chunks ---- */
+  rebuildArrays() {
+    flatOrbs.length = 0;
+    flatWalls.length = 0;
+    flatCoins.length = 0;
+    for (const c of trackChunks) {
+      flatOrbs.push(...c.orbs);
+      flatWalls.push(...c.walls);
+      // only keep uncollected coins
+      for (const coin of c.coins) if (!coin.collected) flatCoins.push(coin);
+    }
+    level.orbs = flatOrbs;
+    level.walls = flatWalls;
+  },
+
+  /* ---- RECYCLE + GENERATE chunks ---- */
+  recycleChunks() {
+    const playerChunk = Math.floor(player.x / CHUNK_W);
+    // cull chunks far behind
+    trackChunks = trackChunks.filter(c => c.startX + CHUNK_W > cameraX - CHUNK_CULL);
+    // generate ahead
+    const needEnd = cameraX + W + CHUNK_AHEAD;
+    let lastEnd = trackChunks.length ? trackChunks[trackChunks.length - 1].startX + CHUNK_W : 0;
+    while (lastEnd < needEnd) {
+      this.generateChunk(lastEnd);
+      lastEnd = trackChunks[trackChunks.length - 1].startX + CHUNK_W;
+    }
+    // keep chunk containing tethered orb alive
+    if (tethered && tether) {
+      const orbChunk = trackChunks.find(c => c.orbs.includes(tether.orb));
+      if (!orbChunk) {
+        // orb's chunk was recycled — release
+        release();
+      }
+    }
+    this.rebuildArrays();
+  },
+
+  /* ---- FLOAT PRECISION RESET ---- */
+  shiftOrigin() {
+    const dx = ORIGIN_RESET;
+    player.x -= dx;
+    cameraX -= dx;
+    if (tether) {
+      // tether.orb is a reference to an object in a chunk, already shifted below
+    }
+    for (const c of trackChunks) {
+      c.startX -= dx;
+      for (const o of c.orbs) o.x -= dx;
+      for (const w of c.walls) w.x -= dx;
+      for (const coin of c.coins) coin.x -= dx;
+    }
+    level.goal.x -= dx;
+  },
+
+  /* ---- ULTIMATE ---- */
+  tryUltimate() {
+    if (ultMeter < ULT_COST || ultActive) return;
+    ultActive = true;
+    ultTimer = ULT_DURATION;
+    ultMeter -= ULT_COST;
+    this.updateMeterUI();
+  },
+
+  updateUltimate(dt) {
+    if (!ultActive) return;
+    ultTimer -= dt / 60;
+    if (ultTimer <= 0) {
+      ultActive = false;
+      ultTimer = 0;
+    }
+    this.updateMeterUI();
+  },
+
+  updateMeterUI() {
+    const fill = document.getElementById('ultimateFill');
+    if (fill) fill.style.width = Math.min(100, ultMeter).toFixed(0) + '%';
+    const btn = document.getElementById('ultimateBtn');
+    if (btn) {
+      if (ultActive) { btn.classList.add('active'); btn.textContent = '✦'; }
+      else if (ultMeter >= ULT_COST) { btn.classList.remove('active'); btn.textContent = '✦'; btn.style.animation = 'pulse 1s infinite'; }
+      else { btn.classList.remove('active'); btn.textContent = '✦'; btn.style.animation = ''; }
+    }
+  },
+
+  /* ---- COIN PICKUP ---- */
+  checkCoins() {
+    for (let i = flatCoins.length - 1; i >= 0; i--) {
+      const c = flatCoins[i];
+      if (c.collected) continue;
+      // magnet: pull toward player
+      if (ultActive) {
+        const dx = player.x - c.x, dy = player.y - c.y;
+        const d = Math.hypot(dx, dy);
+        if (d < ULT_MAGNET_R && d > 1) {
+          c.x += dx / d * 8;
+          c.y += dy / d * 8;
+        }
+      }
+      const d = Math.hypot(player.x - c.x, player.y - c.y);
+      if (d < PLAYER_R + c.r + 4) {
+        c.collected = true;
+        runCoins++;
+        ultMeter = Math.min(ULT_COST, ultMeter + ULT_METER_COIN);
+        // FX
+        pushSpark({
+          x: c.x, y: c.y, vx: (Math.random() - 0.5) * 3, vy: (Math.random() - 0.5) * 3,
+          life: 0.6, size: 2, color: '#e0af3c'
+        });
+        flatCoins.splice(i, 1);  // remove immediately to keep array small
+        this.updateMeterUI();
+      }
+    }
+  },
+
+  /* ---- COLLISION CHECKS ---- */
+  checkEndlessWalls() {
+    for (const w of level.walls) {
+      const cx = Math.max(w.x, Math.min(player.x, w.x + w.w));
+      const cy = Math.max(w.y, Math.min(player.y, w.y + w.h));
+      if (Math.hypot(player.x - cx, player.y - cy) <= PLAYER_R) return true;
+    }
+    return false;
+  },
+
+  checkEndlessBounds() {
+    // left edge = death; top/bottom = death; right edge = no wall (endless)
+    return player.x < cameraX - OUT_MARGIN || player.y < -OUT_MARGIN || player.y > H + OUT_MARGIN;
+  },
+
+  /* ---- DEATH ---- */
+  death() {
+    clearPaintLayer();           // fresh run — wipe the old paint layer
+    if (tethered) release();
+    status = 'lost';
+    statusTimer = 2.0;   // seconds the RUN ENDED screen lingers before auto-restart
+    deathSplatter(player.x, player.y);
+    stopTurboBed();
+    playLose('TOO SLOW!');
+    this.showHUD(false);
+
+    // save best
+    let bestDist = 0, bestCoins = 0;
+    try {
+      const save = loadSave();
+      const eb = save.endlessBest || { distance: 0, coins: 0 };
+      bestDist = eb.distance || 0;
+      bestCoins = eb.coins || 0;
+      if (runDistance > bestDist) {
+        save.endlessBest = { distance: runDistance, coins: runCoins };
+        writeSave(save);
+        bestDist = runDistance;
+        bestCoins = runCoins;
+      }
+    } catch (e) {}
+
+    elMsg.classList.add('lost');
+    elMsg.classList.remove('hidden');
+    elMsgT.textContent = 'RUN ENDED';
+    elMsgStars.textContent = '';
+    elMsgObj.style.display = 'none';
+    elMsgScore.innerHTML = '<b>' + runDistance + '</b> m  ·  ' + runCoins + ' coins'
+      + (runDistance >= bestDist && bestDist > 0 ? '  ·  <span class="newbest">NEW BEST!</span>' : '')
+      + (bestDist > 0 && runDistance < bestDist ? '  ·  best ' + bestDist + 'm' : '');
+    elMsgS.textContent = 'Tap the screen to run again';
+    elRestart.style.display = '';
+    elNextBtn.style.display = 'none';
+    bindRestartBtn();
+  },
+
+  /* ---- HUD VISIBILITY ---- */
+  showHUD(on) {
+    const hudEl = document.getElementById('hudEndless');
+    if (hudEl) hudEl.classList.toggle('hidden', !on);
+    if (on) this.updateMeterUI();
+  },
+
+  /* ---- MAIN UPDATE ---- */
+  update(dt) {
+    time += dt;
+
+    // toast timer (shared)
+    if (toastTimer > 0) {
+      toastTimer -= dt;
+      if (toastTimer <= 0) elToast.classList.remove('show');
+    }
+
+    if (status === 'paused' || status === 'ready') return;
+
+    if (status === 'lost') {
+      statusTimer -= dt / 60;
+      if (statusTimer <= 0) { this.init(); return; }
+      // still animate sparks/rings during death
+      for (let i = sparks.length - 1; i >= 0; i--) {
+        const p = sparks[i]; p.life -= dt / 60; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 0.02 * dt;
+        if (p.life <= 0) sparks.splice(i, 1);
+      }
+      return;
+    }
+
+    if (status !== 'playing') return;
+
+    // slow-mo from ultimate
+    const effDt = ultActive ? dt * ULT_SLOW : dt;
+
+    runTime += dt / 60;
+    runDistance = Math.floor(player.x / 50);
+
+    // camera follow (player at 30% from left)
+    cameraX = player.x - W * 0.3;
+
+    // recycle & generate chunks
+    this.recycleChunks();
+
+    // ultimate timer
+    this.updateUltimate(dt);
+
+    // speed ramp: increase difficulty
+    // (handled via difficulty in generateChunk based on distance)
+
+    // air-rush bed
+    if (tethered) {
+      const tspd = Math.abs(tether.angVel) * tether.dist;
+      setRush(Math.min(1, Math.max(0, (tspd - 3) / 14)));
+    } else {
+      const fspd = Math.hypot(player.vx, player.vy);
+      setRush(Math.min(0.3, Math.max(0, (fspd - 6) / 40)));
+    }
+
+    // swipe-to-steer nudge: decays over a few frames, only while flying loose
+    if (swipeTrack !== 0) {
+      const nudge = swipeTrack * effDt * 0.5;  // smooth the impulse over ~2 frames
+      player.vx += nudge;
+      swipeTrack *= Math.pow(0.5, effDt);
+      if (Math.abs(swipeTrack) < 0.3) swipeTrack = 0;
+    }
+
+    // ---- physics (same as core update) ----
+    if (!tethered) {
+      player.vx *= Math.pow(DRAG, effDt);
+      player.vy *= Math.pow(DRAG, effDt);
+      player.vy += GRAVITY * effDt;
+      player.x  += player.vx * effDt;
+      player.y  += player.vy * effDt;
+    } else {
+      const t = tether, o = t.orb;
+      if (t.turbo) {
+        t.angVel = Math.min(t.angVel * Math.pow(TURBO_ACCEL, effDt), TURBO_CAP);
+        updateTurboBed(Math.abs(t.angVel) / TURBO_CAP);
+      }
+      if (t.repel) {
+        t.dist = Math.min(t.dist + REPEL_EXPAND * effDt, REPEL_LIMIT);
+        if (t.dist >= REPEL_LIMIT) {
+          ultMeter = Math.min(ULT_COST, ultMeter + ULT_METER_REPEL);
+          this.updateMeterUI();
+          playKick();
+          release(); return;
+        }
+      }
+      const prevX = player.x, prevY = player.y;
+      t.angle += t.angVel * effDt;
+      player.x = o.x + Math.cos(t.angle) * t.dist;
+      player.y = o.y + Math.sin(t.angle) * t.dist;
+      if (effDt > 0) {
+        player.vx = (player.x - prevX) / effDt;
+        player.vy = (player.y - prevY) / effDt;
+      }
+      const below = player.y > o.y + 6;
+      if (below && !lastBelow && creakCd <= 0 && Math.abs(t.angVel) * t.dist > 5) {
+        playCreak(); creakCd = 0.4;
+      }
+      lastBelow = below;
+      if (creakCd > 0) creakCd -= effDt / 60;
+      dripAcc -= effDt;
+      if (dripAcc <= 0) {
+        dripAcc = Math.max(0.12, 1.1 - Math.abs(t.angVel) * t.dist * 0.05);
+        if (Math.random() < 0.55) playDrip(0.032);
+      }
+    }
+
+    // paint bucket drip (tethered)
+    if (tethered && tether) {
+      const o = tether.orb, c = orbColors[o.type];
+      o.bucketDrip = (o.bucketDrip || 0) - effDt;
+      if (o.bucketDrip <= 0) {
+        o.bucketDrip = 0.16 + Math.random() * 0.12;
+        const a = Math.random() * Math.PI * 2;
+        pushTetherParticle({
+          x: o.x + Math.cos(a) * o.r * 0.8, y: o.y - o.r * 0.5 + Math.random() * o.r * 0.3,
+          vx: (Math.random() - 0.5) * 2.6, vy: 1 + Math.random() * 3.2,
+          r: 1.8 + Math.random() * 3, life: 0.6 + Math.random() * 0.6, color: c.paint
+        });
+      }
+    }
+
+    // tether particles
+    for (let i = tetherParticles.length - 1; i >= 0; i--) {
+      const p = tetherParticles[i];
+      p.life -= effDt / 60; p.y += p.vy * effDt; p.x += p.vx * effDt; p.vy += 0.04 * effDt;
+      if (p.life <= 0) tetherParticles.splice(i, 1);
+    }
+
+    // coin pickup + magnet
+    this.checkCoins();
+
+    // ultimate meter gain from orb attach
+    if (tethered && tether && !tether._metered) {
+      ultMeter = Math.min(ULT_COST, ultMeter + ULT_METER_ORB);
+      tether._metered = true;
+      this.updateMeterUI();
+    }
+    if (!tethered && tether) tether._metered = false;
+
+    // collision checks
+    if (this.checkEndlessWalls()) { this.death(); return; }
+    if (this.checkEndlessBounds()) { this.death(); return; }
+    // fell behind camera = death
+    if (player.x < cameraX - 200) { this.death(); return; }
+
+    // trail
+    trail.unshift({ x: player.x, y: player.y });
+    const targetLen = 22 + Math.min(18, Math.hypot(player.vx, player.vy) * 2.2);
+    while (trail.length > targetLen) trail.pop();
+
+    snap *= Math.pow(0.84, effDt);
+    tetherSproing *= Math.pow(0.88, effDt);
+
+    // spark/ring anim (shared)
+    for (let i = sparks.length - 1; i >= 0; i--) {
+      const p = sparks[i]; p.life -= dt / 60; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 0.02 * dt;
+      if (p.life <= 0) sparks.splice(i, 1);
+    }
+    for (let i = rings.length - 1; i >= 0; i--) {
+      const r = rings[i]; r.r += r.vr * dt; r.life -= dt / 60;
+      if (r.life <= 0) rings.splice(i, 1);
+    }
+
+    // float precision reset
+    if (player.x > ORIGIN_RESET) this.shiftOrigin();
+
+    // HUD
+    elHudTimer.textContent = runDistance + 'm';
+  },
+
+  /* ---- MAIN DRAW ---- */
+  draw() {
+    // paint layer is only composited every 10th frame here (huge canvas)
+    if (paintCanvas && (++EndlessRun._paintBlitFrame % 10 === 1)) {
+      ctx.drawImage(paintCanvas, 0, 0);
+    }
+
+    // parallax layers (screen space)
+    if (parallaxLayers.length) {
+      for (const layer of parallaxLayers) {
+        const cw = layer.canvas.width;
+        const off = (cameraX * layer.speed) % cw;
+        ctx.drawImage(layer.canvas, -off, 0);
+        ctx.drawImage(layer.canvas, -off + cw, 0);
+      }
+    } else {
+      drawBackground();
+    }
+
+    // world space
+    ctx.save();
+    ctx.translate(-cameraX, 0);
+
+    drawWalls();
+    drawOrbs();
+    drawTether();
+    drawTrail();
+    drawTetherParticles();
+    drawPlayer();
+
+    // coins (solid fills + vertical culling for speed)
+    for (const c of flatCoins) {
+      if (c.collected) continue;
+      if (c.x < cameraX - 40 || c.x > cameraX + W + 40) continue;
+      if (Math.abs(c.y - player.y) > 100) continue;   // skip vertically far coins
+      ctx.save();
+      ctx.translate(c.x, c.y);
+      // gold paint drop — solid colors keep the gold look, no gradient cost
+      const pulse = 1 + Math.sin(time * 5 + c.x * 0.01) * 0.15;
+      ctx.scale(pulse, pulse);
+      ctx.fillStyle = '#e0af3c';
+      ctx.beginPath();
+      ctx.arc(0, 0, c.r, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#ffe680';
+      ctx.beginPath();
+      ctx.arc(-c.r * 0.28, -c.r * 0.28, c.r * 0.42, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#b8871b';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.arc(0, 0, c.r, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    ctx.restore(); // back to screen space
+
+    // sparks & rings (screen space — draw at camera offset)
+    ctx.lineWidth = 2.5;
+    for (const r of rings) {
+      ctx.strokeStyle = 'rgba(224,175,60,' + (r.life * 1.4).toFixed(3) + ')';
+      ctx.beginPath();
+      ctx.arc(r.x - cameraX, r.y, r.r, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+    for (const sp of sparks) {
+      ctx.globalAlpha = Math.max(0, sp.life);
+      ctx.fillStyle = sp.color;
+      ctx.beginPath();
+      ctx.arc(sp.x - cameraX, sp.y, sp.size * sp.life, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+
+    // ultimate vignette overlay
+    if (ultActive) {
+      const frac = ultTimer / ULT_DURATION;
+      const alpha = 0.12 + 0.18 * Math.sin(time * 8);
+      ctx.fillStyle = 'rgba(155,111,208,' + (alpha * frac).toFixed(3) + ')';
+      ctx.fillRect(0, 0, W, H);
+      // edge glow
+      ctx.shadowColor = 'rgba(155,111,208,0.7)';
+      ctx.shadowBlur = 40;
+      ctx.strokeStyle = 'rgba(172,132,216,' + (0.6 * frac).toFixed(3) + ')';
+      ctx.lineWidth = 3;
+      ctx.strokeRect(8, 8, W - 16, H - 16);
+      ctx.shadowBlur = 0;
+    }
+  }
+};
+
+// flat arrays (rebuilt by EndlessRun.rebuildArrays)
+let flatOrbs = [];
+let flatWalls = [];
+let flatCoins = [];
 
 /* ============================================================
    RENDERING
@@ -1804,7 +2566,10 @@ function ensurePaintLayer() {
   paintCtx = mk.ctx;
 }
 
-// stamp the current wet-paint streak onto the persistent paint layer
+// Paint layer: strokes are drawn EVERY frame so lines stay smooth/continuous.
+// The offscreen canvas persists within a level and is cleared on level load
+// and on death (fresh runs start clean).
+
 function addPaintStroke(x, y, spd, rgb) {
   ensurePaintLayer();
   if (!paintCtx) return;
@@ -2009,11 +2774,36 @@ function drawWalls() {
   }
 }
 
+// cached linear gradients for orb bodies, keyed by type + radius
+const orbBodyGrads = {};
+
 function drawOrbs() {
   level.orbs.forEach((o, i) => {
     const c = orbColors[o.type];
     const r = o.r;
     const attached = tethered && tether && tether.orb === o;
+
+    // world-space culling + far-orb simplification (endless mode only,
+    // where many chunks of orbs exist off-screen / at a distance)
+    if (gameMode === GAME_MODES.ENDLESS) {
+      const scrX = o.x - cameraX;
+      if (!attached && (scrX < -80 || scrX > W + 80)) return;   // skip off-screen
+
+      // far orbs (>600px from camera center): cheap flat circle, no detail
+      if (!attached && Math.abs(o.x - (cameraX + W * 0.5)) > 600) {
+        ctx.save();
+        ctx.translate(o.x, o.y);
+        ctx.shadowColor = c.glow;
+        ctx.shadowBlur = 10;
+        ctx.fillStyle = c.fill;
+        ctx.beginPath();
+        ctx.arc(0, 0, r, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        ctx.restore();
+        return;
+      }
+    }
 
     // tilt toward the brush while it rides this bucket
     const tilt = attached
@@ -2030,11 +2820,16 @@ function drawOrbs() {
 
     const rimY = -r * 0.55, baseY = r * 0.75, topW = r * 0.95, botW = r * 0.6;
 
+    // cached linear gradient per (type, radius) — created once, not per frame
+    const gradKey = o.type + '_' + r;
+    if (!orbBodyGrads[gradKey]) {
+      const bodyGrad = ctx.createLinearGradient(0, rimY, 0, baseY);
+      bodyGrad.addColorStop(0, c.bodyTop);
+      bodyGrad.addColorStop(1, c.bodyBot);
+      orbBodyGrads[gradKey] = bodyGrad;
+    }
     // tin body (softly tinted per type)
-    const bodyGrad = ctx.createLinearGradient(0, rimY, 0, baseY);
-    bodyGrad.addColorStop(0, c.bodyTop);
-    bodyGrad.addColorStop(1, c.bodyBot);
-    ctx.fillStyle = bodyGrad;
+    ctx.fillStyle = orbBodyGrads[gradKey];
     ctx.strokeStyle = c.stroke;
     ctx.lineWidth = 1.6;
     ctx.beginPath();
@@ -2504,6 +3299,7 @@ function drawTetherParticles() {
 }
 
 function draw() {
+  if (gameMode === GAME_MODES.ENDLESS) { EndlessRun.draw(); return; }
   drawBackground();
   if (paintCanvas) ctx.drawImage(paintCanvas, 0, 0);
   drawBounds();
@@ -2951,13 +3747,27 @@ function fitLayout() {
 window.addEventListener('resize', fitLayout);
 window.addEventListener('orientationchange', fitLayout);
 
+// ---------- Endless swipe-to-steer state ----------
+let swipeStartX = 0, swipeStartY = 0, swipeStartT = 0;
+let swipeTrack = 0;  // horizontal nudge impulse queued for the next update frame
+function onEndlessRestart() { EndlessRun.init(); }
+function onScreenTap() {
+  if (status === 'lost') {
+    // tap to restart: endless regenerates a fresh track, levels reload the current one
+    if (gameMode === GAME_MODES.ENDLESS) onEndlessRestart();
+    else loadLevel(levelIndex);
+    return;
+  }
+  if (status === 'ready') { launchBall(); return; }
+  if (status === 'paused') { togglePause(); return; }
+  tryAttach();
+}
+
 function mouseDown() {
   if (Date.now() - lastTouch < 500) return;  // ignore synthetic mouse after touch
   ensureAudio();
-  if (status === 'lost') { loadLevel(levelIndex); return; }  // tap to restart after game over
-  if (status === 'ready') { launchBall(); return; }          // tap launches (no grab yet)
-  if (status === 'paused') { togglePause(); return; }        // tap anywhere to resume
-  tryAttach();
+  onScreenTap();
+  swipeTrack = 0;   // taps don't steer; only explicit swipes do
 }
 function mouseUp() {
   elCtrlCircle.classList.remove('held');
@@ -2976,10 +3786,10 @@ wrap.addEventListener('touchstart', (e) => {
   if (t && t.closest && t.closest('button')) return;   // presses on controls aren't gameplay
   if (t === canvas) e.preventDefault();                // stop scroll/zoom on the game surface
   ensureAudio();
-  if (status === 'lost') { loadLevel(levelIndex); return; }  // tap screen to restart
-  if (status === 'ready') { launchBall(); return; }          // tap launches (no grab yet)
-  if (status === 'paused') { togglePause(); return; }        // tap anywhere to resume
-  tryAttach();
+  swipeStartX = t && t.clientX !== undefined ? t.clientX : (e.touches[0] && e.touches[0].clientX) || 0;
+  swipeStartY = t && t.clientY !== undefined ? t.clientY : (e.touches[0] && e.touches[0].clientY) || 0;
+  swipeStartT = Date.now();
+  onScreenTap();
 }, { passive: false });
 
 wrap.addEventListener('touchmove', (e) => { if (e.target === canvas) e.preventDefault(); }, { passive: false });
@@ -2989,6 +3799,16 @@ wrap.addEventListener('touchmove', (e) => { if (e.target === canvas) e.preventDe
 document.addEventListener('touchend', (e) => {
   lastTouch = Date.now();
   elCtrlCircle.classList.remove('held');
+  // swipe-to-steer: a quick horizontal flick nudges the blob's trajectory
+  if (gameMode === GAME_MODES.ENDLESS && e.changedTouches && e.changedTouches[0]) {
+    const ch = e.changedTouches[0];
+    const dx = ch.clientX - swipeStartX;
+    const dy = ch.clientY - swipeStartY;
+    const dtMs = Date.now() - swipeStartT;
+    if (dtMs < 400 && Math.abs(dx) > 28 && Math.abs(dx) > Math.abs(dy) * 1.3) {
+      swipeTrack += Math.sign(dx) * 7;
+    }
+  }
   release();
 }, { passive: true });
 document.addEventListener('touchcancel', (e) => { lastTouch = Date.now(); elCtrlCircle.classList.remove('held'); release(); }, { passive: true });
@@ -3000,10 +3820,7 @@ function circleDown(e) {
   if (e && typeof e.stopPropagation === 'function') e.stopPropagation();
   elCtrlCircle.classList.add('held');
   ensureAudio();
-  if (status === 'lost') { loadLevel(levelIndex); return; }   // tap ring to restart
-  if (status === 'ready') { launchBall(); return; }           // ring launches
-  if (status === 'paused') { togglePause(); return; }         // ring resumes
-  tryAttach();
+  onScreenTap();
 }
 elCtrlCircle.addEventListener('mousedown', (e) => { e.preventDefault(); circleDown(e); });
 elCtrlCircle.addEventListener('touchstart', (e) => { e.preventDefault(); e.stopPropagation(); circleDown(e); }, { passive: false });
@@ -3028,7 +3845,24 @@ function bindButton(el, handler) {
 }
 
 // Restart button (also stop it from triggering an attach)
-bindButton(elRestart, () => { ensureAudio(); playTick(); loadLevel(levelIndex); });
+// Restart button (also stop it from triggering an attach)
+function bindRestartBtn() {
+  const handler = gameMode === GAME_MODES.ENDLESS
+    ? () => { ensureAudio(); playTick(); EndlessRun.init(); }
+    : () => { ensureAudio(); playTick(); loadLevel(levelIndex); };
+  // Use the same pattern as bindButton for proper event handling
+  elRestart.onclick = null;  // clear old onclick
+  elRestart.addEventListener('mousedown', (e) => e.stopPropagation());
+  elRestart.addEventListener('touchstart', (e) => { e.stopPropagation(); }, { passive: false });
+  // Replace click handler by removing old and adding new
+  // Since we can't easily remove, we use a flag on the element
+  if (elRestart._restartHandler) {
+    elRestart.removeEventListener('click', elRestart._restartHandler);
+  }
+  elRestart._restartHandler = handler;
+  elRestart.addEventListener('click', handler);
+}
+bindRestartBtn();
 
 // Story Continue: dismiss the narrative overlay, then resume flow
 bindButton(elStoryContinue, () => { ensureAudio(); playTick(); dismissStory(); });
@@ -3155,9 +3989,14 @@ elResetProgress.addEventListener('click', () => {
 const elMenu = document.getElementById('menu');
 const elMenuStart = document.getElementById('menuStartBtn');
 const elMenuLevelSelect = document.getElementById('menuLevelSelectBtn');
+const elMenuEndless = document.getElementById('menuEndlessBtn');
+const elUltimateBtn = document.getElementById('ultimateBtn');
 
 elMenuStart.addEventListener('click', () => {
+  gameMode = GAME_MODES.LEVELS;
+  bindRestartBtn();
   elMenu.classList.add('hidden');
+  EndlessRun.showHUD(false);
   // hide game title during gameplay
   const titleEl3 = document.getElementById('title');
   if (titleEl3) titleEl3.style.display = 'none';
@@ -3183,23 +4022,49 @@ elMenuStart.addEventListener('click', () => {
 });
 
 elMenuLevelSelect.addEventListener('click', () => {
+  gameMode = GAME_MODES.LEVELS;
   elMenu.classList.add('hidden');
   openLevelSelect();
 });
 
+elMenuEndless.addEventListener('click', () => {
+  // Endless Run disabled for now (perf) — button is hidden/disabled in the menu.
+  return;
+});
+
 /* ============================================================
-   GAME LOOP (60 fps)
+   GAME LOOP (fixed 60fps physics, draw at native refresh)
    ============================================================ */
+const STEP_MS = 1000 / 60;          // one physics step = exactly 1/60s
 let last = performance.now();
+let acc = 0;                        // accumulated real time waiting to step
+let elFps = null;
+let fpsFrames = 0, fpsAccumMs = 0;
 
 function loop(now) {
-  let dt = (now - last) / 16.667;   // normalized to a 60 fps step
+  let elapsed = now - last;
   last = now;
-  if (dt <= 0) dt = 1;
-  if (dt > 3)  dt = 3;              // clamp big frame gaps (tab switch etc.)
+  if (elapsed > 100) elapsed = 100; // clamp huge gaps (tab switch etc.)
 
-  update(dt);
+  // FIXED-STEP PHYSICS: advance in exact 1/60s ticks regardless of refresh
+  acc += elapsed;
+  while (acc >= STEP_MS) {
+    update(1);                      // dt=1 is always one 60fps step
+    acc -= STEP_MS;
+  }
+
+  // VISUALS: draw on every rAF frame (native refresh: 60/120/144Hz…)
   draw();
+
+  // FPS meter — counts rendered frames over real time
+  fpsFrames++;
+  fpsAccumMs += elapsed;
+  if (fpsAccumMs >= 1000) {
+    if (!elFps) elFps = document.getElementById('fps');
+    if (elFps) elFps.textContent = Math.round(fpsFrames * 1000 / fpsAccumMs) + ' fps';
+    fpsFrames = 0; fpsAccumMs = 0;
+  }
+
   requestAnimationFrame(loop);
 }
 
