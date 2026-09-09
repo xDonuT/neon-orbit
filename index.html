@@ -246,6 +246,62 @@
     pointer-events: auto;
   }
   #message.hidden { display: none; }
+
+  /* ------- Won-state: bright celebratory treatment ------- */
+  #message.won {
+    background:
+      radial-gradient(55% 46% at 50% 44%, rgba(255,255,255,0.00) 0%, rgba(70,52,34,0.10) 55%, rgba(62,44,28,0.34) 100%),
+      rgba(62,44,28,0.26);
+    animation: winPulse 2.4s ease-in-out infinite;
+  }
+  @keyframes winPulse {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.88; }
+  }
+  #message.won #msgTitle {
+    color: #d8a41e;
+    background: linear-gradient(180deg, #ffeeb0 0%, #efc356 30%, #d69a1c 55%, #a8730e 85%, #8a6010 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 3px 14px rgba(210, 150, 30, 0.42));
+    animation: titlePop 0.65s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+  }
+  @keyframes titlePop {
+    0%   { transform: scale(0.45) rotate(-5deg); opacity: 0; }
+    55%  { transform: scale(1.1)  rotate(2.5deg); opacity: 1; }
+    100% { transform: scale(1)    rotate(0); opacity: 1; }
+  }
+  #message:not(.won) #winStroke { display: none; }
+  #winStroke {
+    height: 20px;
+    width: 0;
+    border-radius: 10px;
+    margin: -10px 0 -8px;
+    background: linear-gradient(90deg, #e4513f 0%, #e0af3c 45%, #2f9e70 100%);
+    box-shadow: 0 4px 14px rgba(90, 60, 25, 0.35);
+    animation: strokeIn 0.7s 0.42s cubic-bezier(0.34, 1.2, 0.5, 1) forwards;
+  }
+  @keyframes strokeIn {
+    from { width: 0; }
+    to   { width: clamp(160px, 38vw, 340px); }
+  }
+  #winConfetti {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 1;
+  }
+  #winConfetti .conf {
+    position: absolute;
+    top: 0;
+    animation: confFall linear backwards;
+  }
+  @keyframes confFall {
+    0%   { transform: translateX(0) translateY(-12px) rotate(0deg); opacity: 1; }
+    100% { transform: translateX(var(--sway)) translateY(var(--fall)) rotate(var(--spin)); opacity: 0.92; }
+  }
   #msgTitle {
     font-size: clamp(36px, 8vmin, 84px);
     font-weight: bold;
@@ -261,8 +317,20 @@
     color: #b57f16;
     text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6), 0 2px 8px rgba(150, 110, 40, 0.35);
   }
-  #msgStars .star {
-    display: inline-block;
+  #msgStars .star { display: inline-block; }
+  #msgStars .earned {
+    background: linear-gradient(180deg, #fff3b8 0%, #ffd75e 30%, #f5a623 55%, #e08b12 75%, #c97a0e 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 2px 3px rgba(255, 200, 60, 0.65)) drop-shadow(0 0 18px rgba(255, 205, 80, 0.85));
+    animation: starPop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+  }
+  #msgStars .empty {
+    color: rgba(130, 105, 60, 0.7);
+    -webkit-text-fill-color: currentColor;
+    text-shadow: none;
+    -webkit-text-stroke: 1.5px rgba(150, 125, 75, 0.8);
     animation: starPop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
   }
   @keyframes starPop {
@@ -355,7 +423,7 @@
     justify-content: center;
     gap: 10px;
     padding: 28px 20px;
-    background: rgba(47, 38, 26, 0.42);
+    background: radial-gradient(120% 120% at 50% 30%, #3a3020 0%, #241d12 70%, #191408 100%);
     text-align: center;
     overflow-y: auto;
     overscroll-behavior: contain;
@@ -972,7 +1040,9 @@
       </div>
 
       <div id="message" class="hidden" aria-live="assertive">
+        <div id="winConfetti"></div>
         <div id="msgTitle"></div>
+        <div id="winStroke"></div>
         <div id="msgStars"></div>
         <div id="msgScore"></div>
         <div id="msgObj"></div>
@@ -1344,6 +1414,24 @@ let shakeMag = 0;     // current screen-shake magnitude (px)
 let shakeMax = 0;     // initial shake magnitude (decay reference)
 let time = 0;                     // global animation clock
 
+// Pop a screen shake. mag is peak offset in px; it decays to zero on its own.
+function addShake(mag) {
+  if (mag > shakeMag) { shakeMag = mag; shakeMax = mag; }
+}
+// Advance shake decay (call once per frame in update).
+function updateShake(dt) {
+  if (shakeMag > 0) {
+    shakeMag *= Math.pow(0.82, dt);       // exponential decay
+    if (shakeMag < 0.15) shakeMag = 0;
+  }
+}
+// Current per-frame random offset (px). Zero when no shake is active.
+function shakeOffset() {
+  if (shakeMag <= 0) return { x: 0, y: 0 };
+  const k = shakeMag * (shakeMax > 0 ? shakeMag / shakeMax : 1);  // ease as it dies
+  return { x: (Math.random() * 2 - 1) * k, y: (Math.random() * 2 - 1) * k };
+}
+
 // ---------- Endless Run state ----------
 let gameMode = GAME_MODES.LEVELS;
 let cameraX = 0;
@@ -1460,6 +1548,7 @@ function launchBall() {
 function showReadyUI(on) {
   if (on) {
     elMsg.classList.remove('lost');
+    elMsg.classList.remove('won');
     elMsg.classList.remove('hidden');
     elMsgT.textContent = 'TAP TO LAUNCH';
     elMsgObj.style.display = '';
@@ -1478,6 +1567,7 @@ function showReadyUI(on) {
 function showPauseUI(on) {
   if (on) {
     elMsg.classList.remove('lost');
+    elMsg.classList.remove('won');
     elMsg.classList.remove('hidden');
     elMsgT.textContent = 'PAUSED';
     elMsgObj.style.display = 'none';
@@ -1498,6 +1588,7 @@ const CUSTOM_IDX = -2;       // levelIndex sentinel used while a custom level is
 function resetLevel(lv, label) {
   clearPaintLayer();   // new canvas to mangle each level
   level = lv;
+  shakeMag = 0; shakeMax = 0;
   player = { x: lv.player.x, y: lv.player.y, vx: 0, vy: 0 };
   goalGrad = null;
   tethered = false;
@@ -1624,6 +1715,7 @@ if (best.type === 'turbo') {
   tethered = true;
   snap = 1;
   tetherSproing = 1;
+  addShake(best.type === 'repel' ? 7 : 2.5);
   paintRGB = orbColors[best.type].paint;
   setPaintWell(paintRGB);
   pushRing({ x: best.x, y: best.y, r: best.r * 0.5, vr: 2.2, life: 0.30, col: '255,255,255' });
@@ -1646,6 +1738,7 @@ function release() {
   if (pathFadeAt < 0) pathFadeAt = time;
   const spd = Math.hypot(player.vx, player.vy);   // pre-boost, drives the whoosh pitch
   playRelease(spd);
+  addShake(Math.min(6, 1.5 + spd * 0.25));
   if (tether.repel) { player.vx *= 0.9; player.vy *= 0.9; }
   else              { player.vx *= RELEASE_BOOST; player.vy *= RELEASE_BOOST; }
   tethered = false;
@@ -1658,6 +1751,7 @@ function release() {
 function update(dt) {
   if (gameMode === GAME_MODES.ENDLESS) { EndlessRun.update(dt); return; }
   time += dt;
+  updateShake(dt);
   if (toastTimer > 0) {
     toastTimer -= dt;
     if (toastTimer <= 0) elToast.classList.remove('show');
@@ -1743,6 +1837,7 @@ function update(dt) {
       t.dist = Math.min(t.dist + REPEL_EXPAND * dt, REPEL_LIMIT);
       if (t.dist >= REPEL_LIMIT) {        // ...then auto-release
         playKick();
+        addShake(8);
         toast('\u26A0 RED kicked you loose!');
         release(); return;
       }
@@ -1890,6 +1985,33 @@ function spawnGoalBurst(tier) {
   }
 }
 
+// Paint-colored confetti rains across the win overlay.
+function spawnConfetti() {
+  const wrap = document.getElementById('winConfetti');
+  if (!wrap) return;
+  const colors = ['#e4513f', '#e0af3c', '#2f9e70', '#8a55b8', '#ffffff', '#f5ede0', '#d8a41e'];
+  const rect = wrap.getBoundingClientRect();
+  const h = Math.max(rect.height, 640);
+  for (let i = 0; i < 90; i++) {
+    const p = document.createElement('div');
+    p.className = 'conf';
+    const size = 6 + Math.random() * 9;
+    p.style.cssText =
+      'left:' + (Math.random() * 100).toFixed(1) + '%;' +
+      'width:' + size.toFixed(1) + 'px;' +
+      'height:' + (size * (0.6 + Math.random() * 0.7)).toFixed(1) + 'px;' +
+      'background:' + colors[(Math.random() * colors.length) | 0] + ';' +
+      'border-radius:' + (Math.random() > 0.5 ? '50%' : '2px') + ';' +
+      '--sway:' + ((Math.random() * 160 - 80)).toFixed(0) + 'px;' +
+      '--spin:' + ((Math.random() * 900 - 450)).toFixed(0) + 'deg;' +
+      '--fall:' + (h * 1.15).toFixed(0) + 'px;' +
+      'animation-duration:' + (1.5 + Math.random() * 2.0).toFixed(2) + 's;' +
+      'animation-delay:' + (Math.random() * 0.7).toFixed(2) + 's;';
+    p.addEventListener('animationend', () => p.remove());
+    wrap.appendChild(p);
+  }
+}
+
 // ---------- Story / narrative data ----------
 const STORY = {
   intro: {
@@ -1963,13 +2085,16 @@ function win() {
   winSlowMax = fx.slow;
   flashAlpha = fx.flash;
   winLabelT = 0.9;
+  addShake([0, 5, 9][landTier]);   // soft/power/massive impact
   spawnGoalBurst(landTier);
   playWin(landTier);
   playMusicWin();
   stopTurboBed();
   elMsg.classList.remove('lost');
+  elMsg.classList.add('won');
   elMsg.classList.remove('hidden');
   elMsgObj.style.display = 'none';
+  spawnConfetti();
 
   if (isCustom) {
     // imported levels: no save, no story, no next level — replay or go home
@@ -2005,9 +2130,14 @@ function win() {
   const bossKey = levelIndex + 1;
   const boss = STORY.bosses[bossKey];
   if (boss) {
-    // keep the win message (stars + next) underneath; show the story on top
+    // checkpoint first: hide the win results until the story is dismissed,
+    // so both never fight for the screen at once
+    const conf = document.getElementById('winConfetti');
+    if (conf) conf.innerHTML = '';
+    elMsg.classList.add('hidden');
     showStory(boss, () => {
-      // after Continue, the win overlay is already visible; nothing extra to do
+      elMsg.classList.remove('hidden');   // reveal the results on top now
+      spawnConfetti();
     });
   }
 
@@ -2017,7 +2147,8 @@ function win() {
   // wrap each glyph in a span for the staggered pop-in animation
   let starHtml = '';
   for (let i = 0; i < starsText.length; i++) {
-    starHtml += '<span class="star" style="animation-delay:' + (i * 0.15) + 's">' + starsText[i] + '</span>';
+    const earned = starsText[i] === '\u2605';
+    starHtml += '<span class="star' + (earned ? ' earned' : ' empty') + '" style="animation-delay:' + (i * 0.15) + 's">' + starsText[i] + '</span>';
   }
   elMsgStars.innerHTML = starHtml;
   playStarPop(stars);
@@ -2034,11 +2165,13 @@ function win() {
 function lose() {
   clearPaintLayer();             // fresh run — start with a clean canvas
   deathSplatter(player.x, player.y);
+  addShake(14);
   status = 'lost';
   statusTimer = 1.5;
   stopTurboBed();
   playLose(loseCause);
   elMsg.classList.add('lost');
+  elMsg.classList.remove('won');
   elMsg.classList.remove('hidden');
   elMsgObj.style.display = 'none';
   elMsgT.textContent = loseCause || 'BACK TO THE ROOM!';
@@ -2116,6 +2249,7 @@ const EndlessRun = {
     // hide death/win overlay
     elMsg.classList.add('hidden');
     elMsg.classList.remove('lost');
+    elMsg.classList.remove('won');
 
     // HUD
     elLevelTitle.textContent = 'ENDLESS RUN';
@@ -2404,6 +2538,7 @@ const EndlessRun = {
     } catch (e) {}
 
     elMsg.classList.add('lost');
+    elMsg.classList.remove('won');
     elMsg.classList.remove('hidden');
     elMsgT.textContent = 'RUN ENDED';
     elMsgStars.textContent = '';
@@ -3576,6 +3711,10 @@ function drawTetherParticles() {
 
 function draw() {
   if (gameMode === GAME_MODES.ENDLESS) { EndlessRun.draw(); return; }
+  const off = shakeOffset();
+  if (off.x || off.y) ctx.save();
+  if (off.x) ctx.translate(off.x, 0);
+  if (off.y) ctx.translate(0, off.y);
   drawBackground();
   if (paintCanvas) ctx.drawImage(paintCanvas, 0, 0);
   drawBounds();
@@ -3594,6 +3733,7 @@ function draw() {
     ctx.fillRect(0, 0, W, H);
   }
   drawVignette();
+  if (off.x || off.y) ctx.restore();
 }
 
 /* ============================================================
