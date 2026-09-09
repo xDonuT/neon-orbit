@@ -96,12 +96,22 @@
     font-size: 13px;
     font-weight: bold;
     letter-spacing: 0.15em;
-    color: rgba(74, 64, 56, 0.75);
+    color: rgba(74, 64, 56, 0.8);
     text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    opacity: 0.85;
+    opacity: 0.9;
+    /* paint-swatch chip */
+    display: inline-block;
+    max-width: 100%;
+    padding: 2px 10px;
+    background: rgba(247, 242, 228, 0.55);
+    border-radius: 10px;
+    border: 1px solid rgba(120, 96, 60, 0.16);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 1px 2px rgba(80, 60, 30, 0.1);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
   }
   /* Timer (top-center, dripping paint style) */
   #hudTimerWrap {
@@ -116,13 +126,15 @@
     font-size: 14px;
     font-weight: bold;
     letter-spacing: 0.1em;
-    color: rgba(138, 106, 28, 0.85);
+    color: rgba(138, 106, 28, 0.9);
     text-shadow: 0 1px 0 rgba(255, 255, 255, 0.7);
     white-space: nowrap;
     font-variant-numeric: tabular-nums;
     padding: 2px 10px;
     background: rgba(247, 242, 228, 0.6);
     border-radius: 12px;
+    border: 1px solid rgba(120, 96, 60, 0.16);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 1px 2px rgba(80, 60, 30, 0.1);
     backdrop-filter: blur(2px);
     -webkit-backdrop-filter: blur(2px);
   }
@@ -438,11 +450,110 @@
   #menu.hidden { display: none; }
   #menuTitle { font-size: clamp(32px, 8vmin, 72px); font-weight: bold; letter-spacing: 0.3em; color: var(--ink); text-shadow: 0 2px 0 rgba(255,255,255,0.85), 0 3px 10px rgba(80, 60, 30, 0.3); }
   #menuSub { font-size: 14px; color: #6b5f4f; letter-spacing: 0.15em; margin-bottom: 32px; }
+  /* dripping paint-mark under the title: staggered blobs in the neon palette */
+  #menuPaintMark {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    margin-top: 2px;
+    height: 12px;
+  }
+  #menuPaintMark i {
+    width: 11px;
+    height: 11px;
+    border-radius: 60% 40% 55% 45%;
+    background: var(--neon-green);
+    box-shadow: 0 1px 0 rgba(255,255,255,0.5);
+    animation: paintDrop 1.6s ease-in-out infinite;
+  }
+  #menuPaintMark i:nth-child(1) { background: var(--neon-green);  animation-delay: 0.0s; }
+  #menuPaintMark i:nth-child(2) { background: var(--neon-yellow); width: 9px; height: 9px; animation-delay: 0.15s; }
+  #menuPaintMark i:nth-child(3) { background: var(--neon-red);    width: 13px; height: 13px; animation-delay: 0.3s; }
+  #menuPaintMark i:nth-child(4) { background: var(--neon-purple); width: 10px; height: 10px; animation-delay: 0.45s; }
+  #menuPaintMark i:nth-child(5) { background: var(--neon-green);  width: 8px; height: 8px; animation-delay: 0.6s; }
+  @keyframes paintDrop {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50%      { transform: translateY(3px) scale(0.94); }
+  }
   .menuBtn { font-family: inherit; font-size: 16px; letter-spacing: 0.2em; color: var(--ink); background: rgba(255, 250, 235, 0.6); border: 1px solid rgba(97, 76, 48, 0.4); padding: 12px 28px; border-radius: 6px; cursor: pointer; transition: background 0.15s; }
   .menuBtnDisabled { opacity: 0.4; cursor: default; pointer-events: none; text-decoration: line-through; }
   .menuBtn:hover { background: rgba(255, 250, 235, 0.9); }
   .menuBtn:active { transform: scale(0.98); }
   .levelsInfo { font-size: 12px; color: #6b5f4f; letter-spacing: 0.1em; }
+  /* ------- JSON level import overlay ------- */
+  #jsonOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 30;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    background: rgba(242, 236, 221, 0.97);
+    color: var(--ink);
+    padding: 20px;
+    overflow: hidden;
+  }
+  #jsonOverlay.hidden { display: none; }
+  #jsonInput {
+    width: 100%;
+    max-width: 620px;
+    height: clamp(140px, 36vmin, 260px);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 12px;
+    line-height: 1.5;
+    color: #2a2a2a;
+    background: #fffdf5;
+    border: 1px solid rgba(97, 76, 48, 0.4);
+    border-radius: 6px;
+    padding: 10px;
+    resize: none;
+    white-space: pre;
+    overflow: auto;
+    box-sizing: border-box;
+  }
+  #jsonErr {
+    min-height: 18px;
+    font-size: 12px;
+    color: #a03a2a;
+    letter-spacing: 0.05em;
+    text-align: center;
+    max-width: 560px;
+    font-weight: bold;
+  }
+  /* ------- Admin password gate ------- */
+  #adminGate {
+    position: fixed;
+    inset: 0;
+    z-index: 30;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    background: rgba(242, 236, 221, 0.97);
+    color: var(--ink);
+    padding: 20px;
+    overflow: hidden;
+  }
+  #adminGate.hidden { display: none; }
+  #adminGate input {
+    font-family: inherit;
+    width: 100%;
+    max-width: 300px;
+    box-sizing: border-box;
+  }
+  #adminErr {
+    min-height: 18px;
+    font-size: 12px;
+    color: #a03a2a;
+    letter-spacing: 0.05em;
+    text-align: center;
+    font-weight: bold;
+  }
+  #jsonOutWrap code { background: rgba(97,76,48,0.08); padding: 0 4px; border-radius: 3px; }
   /* ------- Level Select overlay ------- */
   #levelSelect {
     position: absolute;
@@ -698,6 +809,17 @@
     #levelTitle { font-size: 11px; }
     #hudTimer { font-size: 12px; padding: 1px 8px; }
     .hud-btn { width: 36px; height: 36px; font-size: 14px; }
+    /* Raise the pause/sound/menu cluster so everything below (paint well, guide)
+       can sit higher and not get clipped on small phones */
+    #sidePanel {
+      justify-content: flex-start;
+      padding-top: calc(env(safe-area-inset-top, 0px) + 2px);
+      gap: 4px;
+    }
+    #sidePanel #hudPanel { gap: 2px; }
+    #sidePanel #paintWell { padding: 0 0 2px; }
+    #sidePanel #controlCircleWrap { margin: 4px 0 0; }
+    #sidePanel #guideSection { padding: 2px 0; gap: 2px; }
   }
   @media (orientation: portrait) and (max-width: 900px) {
     #rotatePrompt { display: flex; }
@@ -772,11 +894,56 @@
   <!-- Menu screen (start screen, hidden after tap) -->
   <div id="menu">
     <div id="menuTitle">CANVAS&nbsp;ESCAPE</div>
+    <div id="menuPaintMark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
     <div id="menuSub">A tiny blob of paint, trapped on an endless palette. The canvas waits beyond. Can you escape?</div>
 <button class="menuBtn" id="menuStartBtn" aria-label="Start game">Play</button>
 <button class="menuBtn" id="menuLevelSelectBtn" aria-label="Level select">Level Select</button>
+<button class="menuBtn" id="menuSfxBtn" aria-label="Toggle sound effects">Sound FX: ON</button>
+<button class="menuBtn" id="menuMusicBtn" aria-label="Toggle background music">Music: ON</button>
 <button class="menuBtn menuBtnDisabled" id="menuEndlessBtn" aria-label="Endless run" disabled style="border-color:rgba(138,85,184,0.5);">Endless Run</button>
+<button class="menuBtn" id="menuJsonBtn" aria-label="Play a level from JSON" style="border-color:rgba(97,76,48,0.5);">Add a Level</button>
     <div class="levelsInfo">Levels 1–40</div>
+  </div>
+
+  <!-- Admin password gate (protects the level-adding tools) -->
+  <div id="adminGate" class="hidden">
+    <h3 style="font-size:clamp(20px,4.5vmin,40px);font-weight:bold;letter-spacing:0.2em;margin-bottom:8px;">ADMIN ONLY</h3>
+    <div style="font-size:12px;color:#6b5f4f;letter-spacing:0.1em;margin-bottom:10px;text-align:center;max-width:520px;">
+      Enter the admin password to add or test levels.
+    </div>
+    <input id="adminPass" type="password" aria-label="Admin password" style="font-size:16px;padding:10px 14px;border:1px solid rgba(97,76,48,0.4);border-radius:6px;background:#fffdf5;color:#2a2a2a;text-align:center;letter-spacing:0.2em;" placeholder="password">
+    <div id="adminErr"></div>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;">
+      <button class="menuBtn" id="adminOkBtn" aria-label="Unlock admin tools">UNLOCK</button>
+      <button class="menuBtn" id="adminCancelBtn" aria-label="Back to menu">CANCEL</button>
+    </div>
+  </div>
+
+  <!-- JSON level import overlay -->
+  <div id="jsonOverlay" class="hidden">
+    <h3 style="font-size:clamp(20px,4.5vmin,40px);font-weight:bold;letter-spacing:0.2em;margin-bottom:8px;">ADD A LEVEL</h3>
+    <div style="font-size:12px;color:#6b5f4f;letter-spacing:0.1em;margin-bottom:10px;text-align:center;max-width:520px;">
+      Paste a level below. Format: { name, player:{x,y}, goal:{x,y,r}, orbs:[{x,y,type}], walls:[{x,y,w,h}] }<br>
+      orb type: normal &middot; turbo &middot; repel
+    </div>
+    <textarea id="jsonInput" spellcheck="false" aria-label="Level JSON" placeholder='{ "name":"MY LEVEL", "player":{"x":130,"y":425}, "goal":{"x":1100,"y":425,"r":55}, "orbs":[{"x":450,"y":425,"type":"normal"},{"x":750,"y":350,"type":"turbo"}], "walls":[] }'></textarea>
+    <div id="jsonErr"></div>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;">
+      <button class="menuBtn" id="jsonPlayBtn" aria-label="Play the level to test it">PLAY (TEST)</button>
+      <button class="menuBtn" id="jsonAddBtn" aria-label="Add this level to the game">ADD TO GAME</button>
+      <button class="menuBtn" id="jsonExampleBtn" aria-label="Load example JSON">EXAMPLE</button>
+      <button class="menuBtn" id="jsonCloseBtn" aria-label="Close JSON import">CANCEL</button>
+    </div>
+    <div id="jsonOutWrap" class="hidden" style="width:100%;max-width:620px;">
+      <div style="font-size:12px;color:#6b5f4f;letter-spacing:0.1em;text-align:center;margin-bottom:6px;">
+        Copy this block and paste it into <code>index.html</code> — <b>ADD_LEVEL_HERE</b> marker inside the <code>LEVELS</code> array.<br>
+        It adds the level + a PAR3 (3-star par seconds) entry. Save &amp; redeploy so all players see it.
+      </div>
+      <textarea id="jsonOut" readonly aria-label="Generated level code" style="width:100%;height:clamp(120px,30vmin,200px);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;line-height:1.5;color:#2a2a2a;background:#fffdf5;border:1px solid rgba(97,76,48,0.4);border-radius:6px;padding:10px;box-sizing:border-box;white-space:pre;overflow:auto;"></textarea>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:8px;">
+        <button class="menuBtn" id="jsonCopyBtn" aria-label="Copy generated code">COPY</button>
+      </div>
+    </div>
   </div>
 
   <!-- Game: full screen, canvas + overlays -->
@@ -1322,12 +1489,16 @@ function showPauseUI(on) {
   }
 }
 
-function loadLevel(idx) {
-  if (idx >= LEVELS.length) idx = 0;
+// ---------- Custom (imported) level state ----------
+let customLevel = null;      // parsed user level object while it is being played
+const CUSTOM_IDX = -2;       // levelIndex sentinel used while a custom level is live
+
+// Shared reset used by both built-in and custom levels. `lv` is the level
+// object (level.player/goal/orbs/walls); label is the HUD title text.
+function resetLevel(lv, label) {
   clearPaintLayer();   // new canvas to mangle each level
-  levelIndex = idx;
-  level = LEVELS[idx];
-  player = { x: level.player.x, y: level.player.y, vx: 0, vy: 0 };
+  level = lv;
+  player = { x: lv.player.x, y: lv.player.y, vx: 0, vy: 0 };
   goalGrad = null;
   tethered = false;
   tether = null;
@@ -1354,16 +1525,28 @@ function loadLevel(idx) {
   statusTimer = 0;
   runTime = 0;
   elHudTimer.textContent = fmtTime(0);
-  elLevelTitle.textContent = 'LEVEL ' + (idx + 1) + ' \u2014 ' + level.name;
+  elLevelTitle.textContent = label;
   elHudInfo.classList.remove('faded');
   setTimeout(() => elHudInfo.classList.add('faded'), 3000);
   pathFadeAt = -1;                        // fresh route hint each level
+  showReadyUI(true);
+  closeLevelSelect();
+  elMsgStars.textContent = '';
+  elMsgScore.textContent = '';
+  elNextBtn.style.display = 'none';
+}
+
+function loadLevel(idx) {
+  if (idx >= LEVELS.length) idx = 0;
+  customLevel = null;               // playing a real level again
+  levelIndex = idx;
+  const lv = LEVELS[idx];
+  resetLevel(lv, 'LEVEL ' + (idx + 1) + ' \u2014 ' + lv.name);
   // one-time orb legend (replaces the old footer)
   if (idx === 0) toast('HOLD to grab & swing \u00b7 RELEASE to fly');
   if (idx === 3) toast('YELLOW orb = cadmium \u00b7 speeds you up');
   if (idx === 6) toast('RED orb = alizarin \u00b7 kicks you loose');
-  if (level.walls && level.walls.length) toast('Dunk under the tape!');
-  showReadyUI(true);
+  if (lv.walls && lv.walls.length) toast('Dunk under the tape!');
   // show the act-opener story once per session when a new floor begins
   const openerKey = idx + 1;   // 1-based level number
   const opener = STORY.openers[openerKey];
@@ -1371,12 +1554,27 @@ function loadLevel(idx) {
     storySeen[openerKey] = true;
     showStory(opener);
   }
-  // close level select overlay if open
-  closeLevelSelect();
-  elLevelTitle.textContent = 'LEVEL ' + (idx + 1) + ' \u2014 ' + level.name;
-  elMsgStars.textContent = '';
-  elMsgScore.textContent = '';
-  elNextBtn.style.display = 'none';
+}
+
+// Start a user-provided level (no save / unlock / story / next-level flow).
+function loadCustomLevel(lv) {
+  customLevel = lv;
+  gameMode = GAME_MODES.LEVELS;
+  levelIndex = CUSTOM_IDX;
+  bindRestartBtn();
+  EndlessRun.showHUD(false);
+  const name = (lv.name && String(lv.name).trim()) ? String(lv.name).trim() : 'CUSTOM LEVEL';
+  resetLevel(lv, 'CUSTOM \u2014 ' + name);
+  const titleEl = document.getElementById('title');
+  if (titleEl) titleEl.style.display = 'none';
+  hideStory();
+  if (lv.walls && lv.walls.length) toast('Dunk under the tape!');
+}
+
+// Reload whatever is currently active (custom level, or the built-in at levelIndex).
+function reloadCurrentLevel() {
+  if (customLevel) loadCustomLevel(customLevel);
+  else loadLevel(levelIndex);
 }
 
 /* ============================================================
@@ -1507,7 +1705,7 @@ function update(dt) {
     // 'lost' auto-restarts after a moment; 'won' waits for NEXT LEVEL tap
     if (status === 'lost') {
       statusTimer -= dt * ts;
-      if (statusTimer <= 0) loadLevel(levelIndex);   // restart current
+      if (statusTimer <= 0) reloadCurrentLevel();   // restart current
     }
     return;   // freeze physics, keep background animating
   }
@@ -1748,10 +1946,43 @@ function dismissStory() {
 }
 
 function win() {
-  const last = levelIndex === LEVELS.length - 1;
+  const isCustom = levelIndex === CUSTOM_IDX;
+  const last = !isCustom && levelIndex === LEVELS.length - 1;
   const speed = Math.hypot(player.vx, player.vy);
   landTier = speed >= WIN_SPEED_POWER ? 2 : speed >= WIN_SPEED_SOFT ? 1 : 0;
   const fx = WIN_FX[landTier];
+
+  // ---- hide game title during play ----
+  const titleEl = document.getElementById('title');
+  if (titleEl && titleEl.style.display !== 'none') titleEl.style.display = 'none';
+
+  status = 'won';
+  statusTimer = 2.4 + fx.slow;
+  winHalt = fx.halt;
+  winSlow = fx.slow;
+  winSlowMax = fx.slow;
+  flashAlpha = fx.flash;
+  winLabelT = 0.9;
+  spawnGoalBurst(landTier);
+  playWin(landTier);
+  playMusicWin();
+  stopTurboBed();
+  elMsg.classList.remove('lost');
+  elMsg.classList.remove('hidden');
+  elMsgObj.style.display = 'none';
+
+  if (isCustom) {
+    // imported levels: no save, no story, no next level — replay or go home
+    elMsgStars.textContent = '\u2605\u2605\u2605';
+    elMsgScore.textContent = fmtTime(runTime);
+    elMsgScore.className = '';
+    elMsgT.textContent = 'CUSTOM CLEARED!';
+    elMsgS.textContent = (level.name ? level.name.toUpperCase() : '') + '  \u00b7  play again or head to the menu';
+    elRestart.style.display = 'none';
+    elNextBtn.style.display = '';
+    elNextBtn.textContent = 'PLAY AGAIN \u21bb';
+    return;
+  }
 
   // ---- mastery result: stars (by time) + track best ----
   const t = runTime;
@@ -1769,24 +2000,6 @@ function win() {
     if (!save.unlocked.includes(levelIndex)) save.unlocked.push(levelIndex);
     writeSave(save);
   } catch (e) { /* storage unavailable */ }
-
-  // ---- hide game title during play ----
-  const titleEl = document.getElementById('title');
-  if (titleEl && titleEl.style.display !== 'none') titleEl.style.display = 'none';
-
-  status = 'won';
-  statusTimer = 2.4 + fx.slow;
-  winHalt = fx.halt;
-  winSlow = fx.slow;
-  winSlowMax = fx.slow;
-  flashAlpha = fx.flash;
-  winLabelT = 0.9;
-  spawnGoalBurst(landTier);
-  playWin(landTier);
-  stopTurboBed();
-  elMsg.classList.remove('lost');
-  elMsg.classList.remove('hidden');
-  elMsgObj.style.display = 'none';
 
   // ---- boss / checkpoint story screens (levels 10, 20, 30, 40) ----
   const bossKey = levelIndex + 1;
@@ -3014,16 +3227,43 @@ function drawTether() {
 
   ctx.lineCap = 'round';
 
-  // hanging rope (hay-braid tan)
-  ctx.strokeStyle = 'rgba(126,94,50,0.9)';
-  ctx.lineWidth = 2.6 + tetherSproing * 2;  // briefly thicker during sproing
-  ctx.beginPath();
-  ctx.moveTo(player.x, player.y);
-  ctx.quadraticCurveTo(mx, my, o.x, o.y);
-  ctx.stroke();
+  // sample the quadratic into segments so the rope can taper toward the orb
+  const SAMPLES = 14;
+  const pts = [];
+  for (let i = 0; i <= SAMPLES; i++) {
+    const u = i / SAMPLES;
+    const a = 1 - u;
+    pts.push({
+      x: a * a * player.x + 2 * a * u * mx + u * u * o.x,
+      y: a * a * player.y + 2 * a * u * my + u * u * o.y
+    });
+  }
 
-  // lighter highlight strand
-  ctx.strokeStyle = 'rgba(216,182,120,0.45)';
+  // soft shadow under the rope (2px offset, cheap no-blur)
+  ctx.strokeStyle = 'rgba(60,42,20,0.18)';
+  for (let i = 0; i < pts.length - 1; i++) {
+    const w = (2.8 + tetherSproing * 2) * (1 - 0.45 * (i / SAMPLES)) * (brushVis / BRUSH_BASE || 1);
+    ctx.lineWidth = Math.max(1.4, w);
+    ctx.beginPath();
+    ctx.moveTo(pts[i].x + 1.4, pts[i].y + 1.8);
+    ctx.lineTo(pts[i + 1].x + 1.4, pts[i + 1].y + 1.8);
+    ctx.stroke();
+  }
+
+  // main rope (hay-braid tan), tapering from brush (wide) to orb (narrow)
+  ctx.strokeStyle = 'rgba(126,94,50,0.9)';
+  for (let i = 0; i < pts.length - 1; i++) {
+    const u = i / SAMPLES;
+    const w = (2.6 + tetherSproing * 2) * (1 - 0.45 * u) * Math.max(0.75, brushVis / BRUSH_BASE);
+    ctx.lineWidth = Math.max(1.2, w);
+    ctx.beginPath();
+    ctx.moveTo(pts[i].x, pts[i].y);
+    ctx.lineTo(pts[i + 1].x, pts[i + 1].y);
+    ctx.stroke();
+  }
+
+  // lighter highlight strand along the rope
+  ctx.strokeStyle = 'rgba(216,182,120,0.5)';
   ctx.lineWidth = 1;
   ctx.beginPath();
   ctx.moveTo(player.x, player.y);
@@ -3051,6 +3291,31 @@ function drawTrail() {
     const a = Math.min(0.5, t * 0.4 * gain);
     ctx.strokeStyle = 'rgba(' + paintRGB + ',' + a.toFixed(3) + ')';
     ctx.lineWidth = (4 * t + 1.2) * (0.7 + 0.45 * gain) * brushScale;
+    ctx.beginPath();
+    ctx.moveTo(trail[i].x, trail[i].y);
+    ctx.lineTo(trail[i + 1].x, trail[i + 1].y);
+    ctx.stroke();
+  }
+  // wet sheen near the brush: a soft glow pass + bright glossy core on the
+  // newest few segments makes the paint look freshly laid. Kept short for perf.
+  const glossy = Math.min(6, Math.floor(trail.length * 0.35));
+  const from = Math.max(0, trail.length - 1 - glossy);
+  const wBase = (4 * (1 - from / trail.length) + 1.2) * (0.7 + 0.45 * gain) * brushScale;
+  // soft under-glow
+  for (let i = from; i < trail.length - 1; i += stride) {
+    const t = 1 - i / trail.length;
+    ctx.strokeStyle = 'rgba(' + paintRGB + ',' + (t * 0.14).toFixed(3) + ')';
+    ctx.lineWidth = wBase * 2.6 * (0.6 + 0.4 * t);
+    ctx.beginPath();
+    ctx.moveTo(trail[i].x, trail[i].y);
+    ctx.lineTo(trail[i + 1].x, trail[i + 1].y);
+    ctx.stroke();
+  }
+  // glossy core highlight
+  for (let i = from; i < trail.length - 1; i += stride) {
+    const t = 1 - i / trail.length;
+    ctx.strokeStyle = 'rgba(255,255,255,' + (t * 0.22).toFixed(3) + ')';
+    ctx.lineWidth = Math.max(0.8, wBase * 0.3);
     ctx.beginPath();
     ctx.moveTo(trail[i].x, trail[i].y);
     ctx.lineTo(trail[i + 1].x, trail[i + 1].y);
@@ -3164,6 +3429,17 @@ function drawPlayer() {
   ctx.translate(player.x, player.y);
   ctx.scale(pop * str, pop * (2 - str));
   ctx.rotate(ang);
+
+  // wet-paint halo: soft paint-colored glow so the blob reads as wet gloss.
+  // Uses a cached-style radial fill (no shadowBlur, keeps phones smooth).
+  const halo = ctx.createRadialGradient(0, 0, R * 0.6, 0, 0, R * 2.1);
+  halo.addColorStop(0, 'rgba(' + paintRGB + ',0.30)');
+  halo.addColorStop(0.55, 'rgba(' + paintRGB + ',0.12)');
+  halo.addColorStop(1, 'rgba(' + paintRGB + ',0)');
+  ctx.fillStyle = halo;
+  ctx.beginPath();
+  ctx.arc(0, 0, R * 2.1, 0, Math.PI * 2);
+  ctx.fill();
 
   // hanging loop at the top (tether knot point)
   ctx.strokeStyle = 'rgba(96,70,34,0.95)';
@@ -3327,12 +3603,61 @@ const elSnd = document.getElementById('sndBtn');
 let audioCtx = null;
 let masterGain = null;
 let noiseBuf = null;
-let sndOn = true;
+let sndOn = true;       // sound effects
+let musicOn = true;     // background music
+
+// remember audio prefs between sessions
+try {
+  const ap = JSON.parse(localStorage.getItem('paintOrbitAudio') || '{}');
+  if (typeof ap.sfx === 'boolean') sndOn = ap.sfx;
+  if (typeof ap.music === 'boolean') musicOn = ap.music;
+} catch (e) { /* storage unavailable */ }
+function saveAudioPrefs() {
+  try { localStorage.setItem('paintOrbitAudio', JSON.stringify({ sfx: sndOn, music: musicOn })); } catch (e) {}
+}
+
+// ---- master + per-channel mute helpers ----
+// sndOn = sound effects, musicOn = background music. The HUD 🔊 is a master
+// mute that flips both; the menu has a separate toggle for each.
+const elMenuSfxBtn   = document.getElementById('menuSfxBtn');
+const elMenuMusicBtn = document.getElementById('menuMusicBtn');
+function updateAudioUI() {
+  const master = sndOn && musicOn;
+  if (elSnd) {
+    elSnd.textContent = master ? '\uD83D\uDD0A' : '\uD83D\uDD07';
+    elSnd.setAttribute('aria-label', master ? 'Sound on' : 'Sound muted');
+  }
+  if (elMenuSfxBtn) {
+    elMenuSfxBtn.textContent = 'Sound FX: ' + (sndOn ? 'ON' : 'OFF');
+    elMenuSfxBtn.setAttribute('aria-pressed', sndOn ? 'true' : 'false');
+  }
+  if (elMenuMusicBtn) {
+    elMenuMusicBtn.textContent = 'Music: ' + (musicOn ? 'ON' : 'OFF');
+    elMenuMusicBtn.setAttribute('aria-pressed', musicOn ? 'true' : 'false');
+  }
+}
+function applyMute() {
+  saveAudioPrefs();
+  setMusicMute(!musicOn);
+  setRush(sndOn ? rushTarget : 0);
+  if (!sndOn) stopTurboBed();
+  updateAudioUI();
+}
+function toggleSfx() { sndOn = !sndOn; applyMute(); }
+function toggleMusic() { musicOn = !musicOn; applyMute(); if (musicOn) startBgm(); }
+function toggleMasterSound() {
+  // both currently on -> mute all; otherwise -> unmute all
+  const now = sndOn && musicOn;
+  sndOn = !now; musicOn = !now;
+  applyMute();
+  if (musicOn) startBgm();
+}
 
 // looping air-rush bed (whoosh that tracks spin) and turbo climbing bed
 let rushSrc = null, rushFilter = null, rushGain = null, rushTarget = 0;
 let turboOsc = null, turboLp = null, turboGain = null;
 let creakCd = 0, lastBelow = null, dripAcc = 0;
+let musicGain = null;   // music bus under the SFX (separate mute via gain)
 
 // small pitch jitter so repeated hits never sound like a ringtone
 const det = () => 1 + (Math.random() * 0.07 - 0.035);
@@ -3346,6 +3671,10 @@ function ensureAudio() {
       masterGain = audioCtx.createGain();
       masterGain.gain.value = 0.32;
       masterGain.connect(audioCtx.destination);
+      // music sits under the SFX, slightly quieter and never clipped
+      musicGain = audioCtx.createGain();
+      musicGain.gain.value = musicOn ? 1 : 0;
+      musicGain.connect(masterGain);
 
       // looping air-rush bed: quiet always-on noise, swept toward motion
       rushSrc = audioCtx.createBufferSource();
@@ -3364,6 +3693,8 @@ function ensureAudio() {
     } catch (e) { /* audio unavailable */ }
   }
   if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+  if (musicOn) startBgm();
+  updateAudioUI();
 }
 
 // sweep the air-rush bed:  x in [0..1], quiet at 0, screaming at 1
@@ -3712,6 +4043,143 @@ function playStarPop(stars) {
 }
 
 /* ============================================================
+   BACKGROUND MUSIC
+   A self-contained procedural lo-fi loop (no audio files).
+   Warm pad chords + soft bass + sparse pentatonic plucks at a
+   relaxed tempo, fed through musicGain so the 🔊 toggle works.
+   ============================================================ */
+let bgmTimer = null;
+let bgmStep = 0;          // eighth-note step (8 per bar, 32-step loop = 4 bars)
+let bgmNext = 0;          // audio-clock time of the next step to schedule
+const BGM_BPM   = 100;
+const BGM_Q     = 60 / BGM_BPM;                       // quarter-note seconds
+const BGM_8TH   = BGM_Q / 2;                          // eighth-note seconds
+const mf = (m) => 440 * Math.pow(2, (m - 69) / 12);   // midi -> hz
+// Escape arc across 4 bars: home -> drift -> lift -> coil (dominant pull back to C).
+// The G7 keeps every loop leaning forward, like re-gripping the rope for the next swing.
+const BGM_CHORDS = [
+  { bass: 36, pad: [60, 64, 67, 71] },   // Cmaj7  - grounded, calm
+  { bass: 45, pad: [57, 60, 64, 67] },   // Am7    - drifting, weightless
+  { bass: 41, pad: [53, 57, 60, 64] },   // Fmaj7  - lift, opening up
+  { bass: 43, pad: [55, 59, 62, 65] }    // G7     - tension, reaching for the edge
+];
+// One 4-bar melody that CLIMBS (reaching up the canvas), peaking as the G7 pulls home.
+// All notes stay in C major pentatonic so they sing over every chord. Kept in a
+// comfortable mid range so nothing pierces.
+const BGM_LEAD = [60, 62, 64, 67,  69, 67, 72, 69,  72, 74, 76, 74,  76, 79, 80, 79];
+
+function startBgm() {
+  if (!audioCtx || bgmTimer) return;
+  bgmStep = 0;
+  bgmNext = audioCtx.currentTime + 0.15;
+  bgmTimer = setInterval(bgmTick, 80);
+}
+function stopBgm() {
+  if (bgmTimer) { clearInterval(bgmTimer); bgmTimer = null; }
+}
+function bgmTick() {
+  if (!audioCtx) return;
+  const ahead = audioCtx.currentTime + 0.35;
+  while (bgmNext < ahead) {
+    bgmPlayStep(bgmNext);
+    bgmNext += BGM_8TH;
+    bgmStep++;
+  }
+}
+// schedule a voice to musicGain at an explicit audio-clock time
+function bgmVoice(t, type, freq, dur, vol, slideTo, att) {
+  if (!audioCtx || !musicGain) return;
+  const o = audioCtx.createOscillator();
+  const g = audioCtx.createGain();
+  o.type = type;
+  o.frequency.setValueAtTime(freq, t);
+  if (slideTo !== undefined) o.frequency.exponentialRampToValueAtTime(Math.max(1, slideTo), t + dur);
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.linearRampToValueAtTime(vol, t + (att === undefined ? 0.03 : att));
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  o.connect(g); g.connect(musicGain);
+  o.start(t); o.stop(t + dur + 0.05);
+}
+function bgmNoise(t, dur, fLo, fHi, q, vol) {
+  if (!audioCtx || !musicGain) return;
+  const src = audioCtx.createBufferSource();
+  src.buffer = noise();
+  const filt = audioCtx.createBiquadFilter();
+  filt.type = 'bandpass';
+  filt.Q.value = q || 1;
+  filt.frequency.setValueAtTime(fLo, t);
+  filt.frequency.exponentialRampToValueAtTime(Math.max(1, fHi), t + dur);
+  const g = audioCtx.createGain();
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.linearRampToValueAtTime(vol, t + 0.01);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  src.connect(filt); filt.connect(g); g.connect(musicGain);
+  src.start(t); src.stop(t + dur + 0.02);
+}
+// quick kick: short sine drop, feels like a soft thump on a canvas frame
+function bgmKick(t, vol) {
+  bgmVoice(t, 'sine', 150, 0.13, vol || 0.16, 48, 0.004);
+}
+// snare-ish: a bandpassed noise burst (like a splat/paper tap)
+function bgmSnare(t, vol) {
+  bgmNoise(t, 0.07, 1500, 800, 1.6, vol || 0.05);
+}
+function bgmPlayStep(t) {
+  const e = bgmStep % 8;                 // eighth position within the bar
+  const bar = Math.floor(bgmStep / 8);   // bar index (0..3 then loops)
+  const ch = BGM_CHORDS[bar % BGM_CHORDS.length];
+  const last = bar % BGM_CHORDS.length === BGM_CHORDS.length - 1;  // on the G7 (coil) bar
+  // light swing: push the off-beat eighths slightly late
+  const sw = (e % 2 === 1) ? BGM_8TH * 0.16 : 0;
+  const ts = t + sw;
+
+  // drums - soft/jazzy; a touch more hi-hat drive on the "reach" bar
+  if (e === 0 || e === 4)  bgmKick(ts);
+  if (e === 2 || e === 6)  bgmSnare(ts);
+  if (e % 2 === 1)         bgmNoise(ts, 0.03, 5600, 6400, 3, last ? 0.012 : 0.009);   // hat
+
+  // warm pad chord, re-struck each bar with a medium attack
+  if (e === 0) {
+    const padDur = BGM_Q * 3.8;
+    for (const m of ch.pad) bgmVoice(t, 'triangle', mf(m), padDur, 0.02, undefined, 0.25);
+    // subtle shimmer on the chord top (octave only - nothing too bright)
+    bgmVoice(t, 'sine', mf(ch.pad[3] + 12), padDur, 0.008, undefined, 0.25);
+  }
+
+  // walking bass: root on 1&3, fifth / octave on 2&4 for forward motion
+  if (e === 0)      bgmVoice(ts, 'sine', mf(ch.bass), BGM_Q * 0.8, 0.11, mf(ch.bass - 12), 0.02);
+  else if (e === 2) bgmVoice(ts, 'sine', mf(ch.bass + 7), BGM_Q * 0.6, 0.06, undefined, 0.02);
+  else if (e === 4) bgmVoice(ts, 'sine', mf(ch.bass + 12), BGM_Q * 0.7, 0.08, undefined, 0.02);
+  else if (e === 6) bgmVoice(ts, 'sine', mf(ch.bass + 7), BGM_Q * 0.5, 0.05, undefined, 0.02);
+
+  // lead melody climbing up the phrase; slightly louder on the coil bar
+  if (e % 2 === 0) {
+    const li = Math.floor(bgmStep / 2) % BGM_LEAD.length;
+    bgmVoice(ts, 'triangle', mf(BGM_LEAD[li]),
+             last ? 0.3 : 0.26, last ? 0.045 : 0.038, undefined, 0.005);
+  }
+}
+function setMusicMute(muted) {
+  if (musicGain && audioCtx) {
+    musicGain.gain.setTargetAtTime(muted ? 0 : 1, audioCtx.currentTime, 0.06);
+  }
+}
+
+// Bright "free" resolution when a level is cleared: a quick rising arpeggio that
+// lands on a high C, lighting up just after the splash SFX. Pure garnish — the
+// bgm loop simply continues underneath. Music-off is still respected via musicGain.
+let bgmSwellFlash = null;   // temporary gain node for the swell, if active
+function playMusicWin() {
+  if (!audioCtx || !musicGain || !musicOn) return;
+  const t0 = audioCtx.currentTime + 0.06;
+  // gentle rising resolve in a warm mid register - no piercing top notes
+  const arp = [48, 52, 55, 60, 64, 67, 72];
+  arp.forEach((m, i) => {
+    bgmVoice(t0 + i * 0.06, 'triangle', mf(m), 0.7, 0.04, undefined, 0.008);
+  });
+}
+
+/* ============================================================
    INPUT (mouse + touch)
    ============================================================ */
 const wrap = document.getElementById('wrap');
@@ -3755,7 +4223,7 @@ function onScreenTap() {
   if (status === 'lost') {
     // tap to restart: endless regenerates a fresh track, levels reload the current one
     if (gameMode === GAME_MODES.ENDLESS) onEndlessRestart();
-    else loadLevel(levelIndex);
+    else reloadCurrentLevel();
     return;
   }
   if (status === 'ready') { launchBall(); return; }
@@ -3849,7 +4317,7 @@ function bindButton(el, handler) {
 function bindRestartBtn() {
   const handler = gameMode === GAME_MODES.ENDLESS
     ? () => { ensureAudio(); playTick(); EndlessRun.init(); }
-    : () => { ensureAudio(); playTick(); loadLevel(levelIndex); };
+    : () => { ensureAudio(); playTick(); reloadCurrentLevel(); };
   // Use the same pattern as bindButton for proper event handling
   elRestart.onclick = null;  // clear old onclick
   elRestart.addEventListener('mousedown', (e) => e.stopPropagation());
@@ -3874,9 +4342,11 @@ if (elStory) {
   });
 }
 
-// NEXT LEVEL: advance (or wrap to level 1 after the last)
+// NEXT LEVEL: advance (or wrap to level 1 after the last). For a custom
+// level this button reads "PLAY AGAIN" and reloads the same JSON level.
 bindButton(elNextBtn, () => {
   ensureAudio(); playTick();
+  if (customLevel) { reloadCurrentLevel(); return; }
   const nextIdx = levelIndex + 1;
   loadLevel(nextIdx >= LEVELS.length ? 0 : nextIdx);
 });
@@ -3890,15 +4360,24 @@ function togglePause() {
 }
 bindButton(elPause, togglePause);
 
-// ---------- Sound toggle ----------
+// ---------- Sound toggle (HUD 🔊 = master mute for both channels) ----------
 bindButton(elSnd, () => {
   ensureAudio();
-  sndOn = !sndOn;
-  elSnd.textContent = sndOn ? '🔊' : '🔇';
-  elSnd.setAttribute('aria-label', sndOn ? 'Sound on' : 'Sound off');
-  setRush(sndOn ? rushTarget : 0);
-  if (!sndOn) stopTurboBed();
+  toggleMasterSound();
 });
+
+// ---------- Menu: separate SFX / music toggles ----------
+bindButton(elMenuSfxBtn, () => {
+  ensureAudio();
+  playTick();
+  toggleSfx();
+});
+bindButton(elMenuMusicBtn, () => {
+  ensureAudio();
+  playTick();
+  toggleMusic();
+});
+updateAudioUI();
 
 // ---------- Back to menu ----------
 function returnToMenu() {
@@ -4031,6 +4510,230 @@ elMenuEndless.addEventListener('click', () => {
   // Endless Run disabled for now (perf) — button is hidden/disabled in the menu.
   return;
 });
+
+// ---------- Add a Level (admin) ----------
+const ADMIN_PASS = 'canvas123';    // change me to pick a new admin password
+
+const elJsonOverlay = document.getElementById('jsonOverlay');
+const elJsonInput   = document.getElementById('jsonInput');
+const elJsonErr     = document.getElementById('jsonErr');
+const elJsonOutWrap = document.getElementById('jsonOutWrap');
+const elJsonOut     = document.getElementById('jsonOut');
+const elMenuJsonBtn = document.getElementById('menuJsonBtn');
+const elAdminGate   = document.getElementById('adminGate');
+const elAdminPass   = document.getElementById('adminPass');
+const elAdminErr    = document.getElementById('adminErr');
+
+const JSON_EXAMPLE = JSON.stringify({
+  name: 'SPIRAL GAUNTLET',
+  player: { x: 130, y: 425 },
+  goal: { x: 1100, y: 425, r: 55 },
+  orbs: [
+    { x: 420, y: 425, type: 'normal' },
+    { x: 660, y: 300, type: 'turbo' },
+    { x: 880, y: 560, type: 'repel' },
+    { x: 660, y: 560, type: 'turbo' }
+  ],
+  walls: [
+    { x: 900, y: 300, w: 160, h: 40 }
+  ]
+}, null, 2);
+
+function openAdminGate() {
+  elAdminErr.textContent = '';
+  elAdminPass.value = '';
+  elAdminGate.classList.remove('hidden');
+  elAdminPass.focus();
+}
+function closeAdminGate(backToMenu) {
+  elAdminGate.classList.add('hidden');
+  if (backToMenu !== false) elMenu.classList.remove('hidden');
+}
+
+function openJsonOverlay() {
+  elJsonErr.textContent = '';
+  elJsonOutWrap.classList.add('hidden');
+  if (!elJsonInput.value.trim()) elJsonInput.value = JSON_EXAMPLE;
+  elJsonOverlay.classList.remove('hidden');
+  elJsonInput.focus();
+}
+function closeJsonOverlay(backToMenu) {
+  elJsonOverlay.classList.add('hidden');
+  if (backToMenu !== false) elMenu.classList.remove('hidden');
+}
+
+elMenuJsonBtn.addEventListener('click', () => {
+  ensureAudio(); playTick();
+  elMenu.classList.add('hidden');
+  openAdminGate();
+});
+
+// unlock when the password matches
+function tryAdminUnlock() {
+  if (elAdminPass.value === ADMIN_PASS) {
+    elAdminErr.textContent = '';
+    closeAdminGate(false);
+    openJsonOverlay();
+  } else {
+    elAdminErr.textContent = 'Wrong password.';
+    elAdminPass.select();
+  }
+}
+document.getElementById('adminOkBtn').addEventListener('click', () => { ensureAudio(); playTick(); tryAdminUnlock(); });
+document.getElementById('adminCancelBtn').addEventListener('click', () => { ensureAudio(); playTick(); closeAdminGate(); });
+elAdminPass.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') { e.preventDefault(); tryAdminUnlock(); }
+});
+
+elJsonOverlay.addEventListener('mousedown', (e) => e.stopPropagation());
+elJsonOverlay.addEventListener('touchstart', (e) => { e.stopPropagation(); }, { passive: false });
+elAdminGate.addEventListener('mousedown', (e) => e.stopPropagation());
+elAdminGate.addEventListener('touchstart', (e) => { e.stopPropagation(); }, { passive: false });
+
+// Parse + validate a level JSON string. Returns { level } on success,
+// or { error } with a human-readable reason on failure.
+function parseLevelJSON(text) {
+  let raw;
+  try {
+    raw = JSON.parse(text);
+  } catch (e) {
+    return { error: 'Not valid JSON: ' + e.message };
+  }
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
+    return { error: 'Level must be a JSON object.' };
+  }
+
+  const num = (v) => typeof v === 'number' && isFinite(v);
+  const box = (label) => ({
+    error: 'Field "' + label + '" must be { x, y } numbers (canvas is 1400 x 850).'
+  });
+
+  // ---- name ----
+  const name = (typeof raw.name === 'string' && raw.name.trim())
+    ? raw.name.trim() : 'CUSTOM LEVEL';
+
+  // ---- player spawn ----
+  const p = raw.player;
+  if (!p || !num(p.x) || !num(p.y)) return box('player');
+  const px = clampNum(p.x, 0, W), py = clampNum(p.y, 0, H);
+
+  // ---- goal ----
+  const g = raw.goal;
+  if (!g || !num(g.x) || !num(g.y)) return box('goal');
+  const goal = {
+    x: clampNum(g.x, 0, W),
+    y: clampNum(g.y, 0, H),
+    r: num(g.r) && g.r > 0 ? clampNum(g.r, 4, 120) : 55
+  };
+
+  // ---- orbs ----
+  if (!Array.isArray(raw.orbs) || raw.orbs.length === 0) {
+    return { error: 'Field "orbs" must be a non-empty array, e.g. [{ "x":430, "y":425, "type":"normal" }].' };
+  }
+  const orbs = [];
+  for (let i = 0; i < raw.orbs.length; i++) {
+    const o = raw.orbs[i];
+    if (!o || !num(o.x) || !num(o.y)) return box('orbs[' + i + ']');
+    const type = ['normal', 'turbo', 'repel'].includes(o.type) ? o.type : 'normal';
+    const r = num(o.r) && o.r > 0 ? clampNum(o.r, 6, 40) : 16;
+    orbs.push({ x: clampNum(o.x, 0, W), y: clampNum(o.y, 0, H), r: r, type: type });
+  }
+
+  // ---- walls ----
+  const walls = [];
+  if (raw.walls !== undefined) {
+    if (!Array.isArray(raw.walls)) return { error: 'Field "walls" must be an array.' };
+    for (let i = 0; i < raw.walls.length; i++) {
+      const wl = raw.walls[i];
+      if (!wl || !num(wl.x) || !num(wl.y) || !num(wl.w) || !num(wl.h)) {
+        return { error: 'walls[' + i + '] must be { x, y, w, h } numbers.' };
+      }
+      walls.push({ x: wl.x, y: wl.y, w: wl.w, h: wl.h });
+    }
+  }
+
+  return { level: { name: name, player: { x: px, y: py }, goal: goal, orbs: orbs, walls: walls } };
+}
+
+// Clamp a number into [lo, hi].
+function clampNum(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+
+document.getElementById('jsonExampleBtn').addEventListener('click', () => {
+  elJsonInput.value = JSON_EXAMPLE;
+  elJsonErr.textContent = '';
+  elJsonOutWrap.classList.add('hidden');
+});
+
+document.getElementById('jsonCloseBtn').addEventListener('click', () => {
+  ensureAudio(); playTick();
+  closeJsonOverlay();
+});
+
+// PLAY (TEST): run it as a one-off custom level, like before.
+document.getElementById('jsonPlayBtn').addEventListener('click', () => {
+  ensureAudio(); playTick();
+  const res = parseLevelJSON(elJsonInput.value);
+  if (res.error) { elJsonErr.textContent = res.error; return; }
+  elJsonErr.textContent = '';
+  closeJsonOverlay(false);   // don't pop the menu back over the loaded level
+  loadCustomLevel(res.level);
+  toast('Playing custom level \u2014 have fun!');
+});
+
+// Generate the ready-to-paste LEVELS entry + PAR3 par for this level.
+function buildOrb(o) {
+  if ((o.r === undefined || o.r === 16) && ['normal', 'turbo', 'repel'].includes(o.type)) {
+    return 'orb(' + Math.round(o.x) + ', ' + Math.round(o.y) + ", '" + o.type + "')";
+  }
+  return '{ x: ' + Math.round(o.x) + ', y: ' + Math.round(o.y) +
+         ', r: ' + Math.round(o.r || 16) + ", type: '" + o.type + "' }";
+}
+function buildWall(w) {
+  return 'wall(' + Math.round(w.x) + ', ' + Math.round(w.y) + ', ' + Math.round(w.w) + ', ' + Math.round(w.h) + ')';
+}
+function suggestPar(lv) {
+  // rough 3-star par guess: ~2s setup + travel time per swing orb + walls
+  return Math.max(6, Math.round(3 + lv.orbs.length * 3.5 + lv.walls.length * 1.2));
+}
+function generateLevelCode(lv) {
+  const esc = (s) => String(s).split("'").join("\\'");
+  const num = LEVELS.length + 1;   // 1-based next level number
+  const orbsTxt = lv.orbs.map(buildOrb).join(', ');
+  const wallsTxt = lv.walls.map(buildWall).join(', ');
+  const par = suggestPar(lv);
+  const obj = '  { name: \'' + esc(lv.name) + '\',   player: {x:' + Math.round(lv.player.x) +
+    ', y:' + Math.round(lv.player.y) + ', vx:0, vy:0}, goal: {x:' + Math.round(lv.goal.x) +
+    ', y:' + Math.round(lv.goal.y) + ', r:' + Math.round(lv.goal.r) + '},\n' +
+    '    orbs:  [ ' + orbsTxt + (wallsTxt ? ' ],\n    walls: [ ' + wallsTxt : ' ], walls: []') + ' ] },';
+  return '1) Paste inside the LEVELS array (it becomes level #' + num + '):\n\n' + obj + '\n\n' +
+    '2) Paste this par seconds value into PAR3 (same position, #' + num + '): ' + par +
+    '   // 3-star par for "' + lv.name + '"';
+}
+
+document.getElementById('jsonAddBtn').addEventListener('click', () => {
+  ensureAudio(); playTick();
+  const res = parseLevelJSON(elJsonInput.value);
+  if (res.error) { elJsonErr.textContent = res.error; return; }
+  elJsonErr.textContent = '';
+  elJsonOut.value = generateLevelCode(res.level);
+  elJsonOutWrap.classList.remove('hidden');
+  elJsonOut.focus();
+});
+
+document.getElementById('jsonCopyBtn').addEventListener('click', () => {
+  const txt = elJsonOut.value;
+  const done = () => toast('Level code copied!');
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(txt).then(done, () => fallbackCopy(txt, done));
+  } else {
+    fallbackCopy(txt, done);
+  }
+});
+function fallbackCopy(txt, done) {
+  elJsonOut.select();
+  try { document.execCommand('copy'); } catch (e) { /* ignore */ }
+  if (done) done();
+}
 
 /* ============================================================
    GAME LOOP (fixed 60fps physics, draw at native refresh)
