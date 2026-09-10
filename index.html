@@ -249,6 +249,9 @@
 
   /* ------- Won-state: bright celebratory treatment ------- */
   #message.won {
+    justify-content: flex-start;
+    overflow-y: auto;
+    padding: clamp(14px, 4vh, 44px) 0 4vh;
     background:
       radial-gradient(55% 46% at 50% 44%, rgba(255,255,255,0.00) 0%, rgba(70,52,34,0.10) 55%, rgba(62,44,28,0.34) 100%),
       rgba(62,44,28,0.26);
@@ -346,13 +349,132 @@
   }
   #msgScore .best { color: #1f7a55; text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5); }
   #msgScore .newbest { color: #b57f16; text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5); }
+  #message.won #msgScore, #message.won #msgScore .best {
+    color: #fdf9ee;
+    font-weight: 700;
+    text-shadow: 0 1px 0 rgba(40, 25, 10, 0.55), 0 2px 10px rgba(40, 25, 10, 0.75);
+  }
+  #message.won #msgScore .newbest {
+    color: #ffd97a;
+    font-weight: 700;
+    text-shadow: 0 1px 0 rgba(40, 25, 10, 0.55), 0 0 14px rgba(255, 205, 90, 0.7);
+  }
   #msgSub {
     font-size: 18px;
     letter-spacing: 0.15em;
     color: #5a4a3a;
     text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
   }
-  #message.lost #msgSub { color: #8a6a1c; text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5); }
+  #message.lost #msgSub {
+  color: #fdf9ee;
+  font-weight: 600;
+  font-size: 18px;
+  text-shadow: 0 1px 0 rgba(40, 25, 10, 0.55), 0 2px 10px rgba(40, 25, 10, 0.7);
+}
+  #message.won #msgSub {
+    color: #fdf9ee;
+    font-weight: 600;
+    text-shadow: 0 1px 0 rgba(40, 25, 10, 0.55), 0 2px 10px rgba(40, 25, 10, 0.7);
+  }
+  #message:not(.won) #winBuddyBox { display: none; }
+  #winBuddyBox {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    margin-top: 4px;
+    flex-shrink: 0;
+  }
+  #winBuddyCv {
+    width: 150px;
+    height: 132px;
+    position: relative;
+    z-index: 1;
+  }
+  #winBuddySay {
+    position: absolute;
+    top: -18px;
+    z-index: 2;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: #3d3530;
+    background: #f7f2e4;
+    border: 1.5px solid rgba(97, 76, 48, 0.35);
+    border-bottom-width: 3px;
+    border-radius: 12px;
+    padding: 7px 14px;
+    box-shadow: 0 3px 0 rgba(80, 60, 30, 0.18);
+    white-space: nowrap;
+    animation: buddyPop 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+  }
+  #winBuddySay::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: -8px;
+    margin-left: -7px;
+    border: 7px solid transparent;
+    border-top-color: #f7f2e4;
+    border-bottom: 0;
+  }
+  @keyframes buddyPop {
+    0%   { transform: scale(0); opacity: 0; }
+    60%  { transform: scale(1.15); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  #galleryWrap {
+    display: none;
+    position: relative;
+    width: fit-content;
+    max-width: min(68vw, 520px);
+    padding: 10px 12px 12px;
+    background: linear-gradient(180deg, #6b5638, #4a3a26);
+    border-radius: 6px;
+    box-shadow: 0 4px 0 rgba(40, 28, 16, 0.35), 0 10px 26px rgba(40, 28, 16, 0.35);
+  }
+  #message.cardMode #galleryWrap { display: block; animation: buddyPop 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) backwards; }
+  #message.cardMode #winBuddyBox { display: none; }
+  #galleryLabel {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.32em;
+    color: #f2e8d0;
+    text-align: center;
+    margin-bottom: 8px;
+  }
+  #galleryCanvas {
+    display: block;
+    width: min(68vw, 520px, calc(44vh * 1.333));
+    height: auto;
+    max-width: 100%;
+    border-radius: 3px;
+    border: 2px solid #f3ecdc;
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.15);
+    background: #f3ecdc;
+  }
+  #artCardBtns {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 10px;
+  }
+  .artBtn {
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    color: #2b2118;
+    background: #f2e8d0;
+    border: 1.5px solid rgba(43, 33, 24, 0.55);
+    border-radius: 999px;
+    padding: 6px 14px;
+    cursor: pointer;
+    transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+  }
+  .artBtn:hover { background: #fdf6e6; transform: translateY(-1px); }
+  .artBtn:active { transform: translateY(0); box-shadow: 0 1px 0 rgba(80, 60, 30, 0.3); }
   #msgObj {
     display: none;
     font-size: 16px;
@@ -456,6 +578,59 @@
   }
   #storyContinueBtn { background: rgba(255, 250, 235, 0.88); }
 
+  /* ------- Mission briefing overlay (before each fresh level) ------- */
+  #missionOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 910;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 28px 20px;
+    background: radial-gradient(120% 120% at 50% 30%, #4a3a20 0%, #241c10 70%, #171209 100%);
+    text-align: center;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  #missionOverlay:not(.hidden) { display: flex; }
+  #missionKick {
+    font-size: 13px;
+    letter-spacing: 0.4em;
+    color: #ffd97a;
+    text-shadow: 0 1px 2px rgba(40, 25, 10, 0.6);
+    margin-bottom: 10px;
+  }
+  #missionTitle {
+    font-size: clamp(26px, 6vmin, 52px);
+    font-weight: bold;
+    letter-spacing: 0.18em;
+    color: #fdf7e8;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.25), 0 3px 12px rgba(40, 25, 10, 0.5);
+  }
+  #missionBody {
+    font-size: clamp(14px, 2.6vmin, 20px);
+    line-height: 1.7;
+    letter-spacing: 0.08em;
+    color: #efe6d2;
+    white-space: pre-line;
+    max-width: 620px;
+    text-shadow: 0 1px 2px rgba(40, 25, 10, 0.55);
+    margin: 12px 0 8px;
+  }
+  #missionHint {
+    font-size: 13px;
+    letter-spacing: 0.22em;
+    color: #ffd97a;
+    background: rgba(255, 217, 122, 0.10);
+    border: 1px solid rgba(255, 217, 122, 0.35);
+    border-radius: 8px;
+    padding: 8px 16px;
+    margin: 6px 0 18px;
+  }
+  #missionStartBtn { background: rgba(255, 220, 140, 0.92); }
+
   #toast {
     position: absolute;
     top: 14px;
@@ -513,11 +688,57 @@
     background: rgba(242, 236, 221, 0.92);
     color: var(--ink);
     gap: 24px;
-    overflow: hidden;
+    overflow-y: auto;
+    padding: 28px 14px 28px 14px;
   }
   #menu.hidden { display: none; }
   #menuTitle { font-size: clamp(32px, 8vmin, 72px); font-weight: bold; letter-spacing: 0.3em; color: var(--ink); text-shadow: 0 2px 0 rgba(255,255,255,0.85), 0 3px 10px rgba(80, 60, 30, 0.3); }
-  #menuSub { font-size: 14px; color: #6b5f4f; letter-spacing: 0.15em; margin-bottom: 32px; }
+  #menuSub {
+    font-size: 15px;
+    line-height: 1.7;
+    letter-spacing: 0.08em;
+    color: #3d3530;
+    max-width: 480px;
+    padding: 0 10px;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8);
+    margin-bottom: 24px;
+  }
+  #menuPaintPick {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 26px;
+  }
+  #menuPaintLabel {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.35em;
+    color: #6b5f4f;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8);
+  }
+  #menuPaintSwatches {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .paintSwatch {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 2.5px solid rgba(61, 53, 48, 0.55);
+    box-shadow: 0 2px 0 rgba(80, 60, 30, 0.25), inset 0 3px 5px rgba(255, 255, 255, 0.45);
+    cursor: pointer;
+    position: relative;
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+  }
+  .paintSwatch:hover { transform: translateY(-2px); }
+  .paintSwatch.sel {
+    border-color: #1a1510;
+    box-shadow: 0 0 0 3px rgba(26, 21, 16, 0.15), 0 3px 0 rgba(80, 60, 30, 0.3), inset 0 3px 5px rgba(255, 255, 255, 0.45);
+    transform: scale(1.18);
+  }
   /* dripping paint-mark under the title: staggered blobs in the neon palette */
   #menuPaintMark {
     display: flex;
@@ -874,6 +1095,10 @@
 
   /* ------- Compact layout for short / landscape phones ------- */
   @media (max-height: 520px) {
+    #menu { justify-content: flex-start; gap: 12px; padding: 14px 14px 20px; overflow-y: auto; }
+    #menuSub { font-size: 13px; margin-bottom: 16px; }
+    #menuTitle { font-size: clamp(26px, 7vmin, 40px); }
+    .menuBtn { padding: 8px 18px; font-size: 14px; }
     #levelTitle { font-size: 11px; }
     #hudTimer { font-size: 12px; padding: 1px 8px; }
     .hud-btn { width: 36px; height: 36px; font-size: 14px; }
@@ -964,6 +1189,10 @@
     <div id="menuTitle">CANVAS&nbsp;ESCAPE</div>
     <div id="menuPaintMark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
     <div id="menuSub">A tiny blob of paint, trapped on an endless palette. The canvas waits beyond. Can you escape?</div>
+    <div id="menuPaintPick" aria-label="Choose your paint">
+      <div id="menuPaintLabel">YOUR&nbsp;PAINT</div>
+      <div id="menuPaintSwatches"></div>
+    </div>
 <button class="menuBtn" id="menuStartBtn" aria-label="Start game">Play</button>
 <button class="menuBtn" id="menuLevelSelectBtn" aria-label="Level select">Level Select</button>
 <button class="menuBtn" id="menuSfxBtn" aria-label="Toggle sound effects">Sound FX: ON</button>
@@ -1047,6 +1276,18 @@
         <div id="msgScore"></div>
         <div id="msgObj"></div>
         <div id="msgSub"></div>
+        <div id="galleryWrap" aria-hidden="true">
+          <div id="galleryLabel">YOUR MASTERPIECE</div>
+          <canvas id="galleryCanvas" width="1280" height="960" aria-label="Your run, framed as art"></canvas>
+          <div id="artCardBtns">
+            <button type="button" class="artBtn" id="saveCardBtn" aria-label="Save masterpiece as PNG">SAVE PNG</button>
+            <button type="button" class="artBtn" id="shareCardBtn" aria-label="Share masterpiece">SHARE</button>
+          </div>
+        </div>
+        <div id="winBuddyBox" aria-hidden="true">
+          <div id="winBuddySay"></div>
+          <canvas id="winBuddyCv" width="0" height="0"></canvas>
+        </div>
         <div id="msgBtns">
 <button id="restartBtn" aria-label="Restart level">RESTART LEVEL</button>
 <button id="menuBtnMsg" class="menuBtn" aria-label="Back to menu" style="display:none;">MENU</button>
@@ -1060,6 +1301,15 @@
         <div id="storyTitle"></div>
         <div id="storyBody"></div>
         <button class="menuBtn" id="storyContinueBtn" aria-label="Continue">CONTINUE</button>
+      </div>
+
+      <!-- Mission briefing: shown before each freshly-entered level -->
+      <div id="missionOverlay" class="hidden">
+        <div id="missionKick">MISSION</div>
+        <div id="missionTitle"></div>
+        <div id="missionBody"></div>
+        <div id="missionHint"></div>
+        <button class="menuBtn" id="missionStartBtn" aria-label="Start level">START</button>
       </div>
 
       <div id="toast" aria-live="polite"></div>
@@ -1193,45 +1443,45 @@ const SPEED_RAMP      = 0.0004; // difficulty increase per meter of distance
 // ---------- Levels ----------
 const LEVELS = [
   { name: 'FIRST STEPS',   player: {x:130, y:425, vx:0, vy:0}, goal: {x:1090, y:425, r:55},
-    orbs:  [ orb(430, 425, 'normal') ], walls: [] },
+    orbs:  [ orb(430, 425, 'normal', true) ], walls: [] },
 
   { name: 'TWO ORBS',      player: {x:120, y:540, vx:0, vy:0}, goal: {x:1080, y:580, r:50},
-    orbs:  [ orb(360, 540, 'normal'), orb(660, 420, 'normal') ], walls: [] },
+    orbs:  [ orb(360, 540, 'normal', true), orb(660, 420, 'normal', true) ], walls: [] },
 
   { name: 'DIAGONAL SWING',player: {x:110, y:660, vx:0, vy:0}, goal: {x:1080, y:480, r:48},
-    orbs:  [ orb(330, 610, 'normal'), orb(570, 520, 'normal'), orb(800, 620, 'normal') ], walls: [] },
+    orbs:  [ orb(330, 610, 'normal', true), orb(570, 520, 'normal', true), orb(800, 620, 'normal', true) ], walls: [] },
 
-  { name: 'MEET CADMIUM',   player: {x:120, y:580, vx:0, vy:0}, goal: {x:1020, y:520, r:45},
-    orbs:  [ orb(330, 580, 'turbo'), orb(650, 460, 'normal') ], walls: [] },
+  { name: 'MEET TURBO',   player: {x:120, y:580, vx:0, vy:0}, goal: {x:1020, y:520, r:45},
+    orbs:  [ orb(330, 580, 'turbo', true), orb(650, 460, 'normal') ], walls: [] },
 
-  { name: 'CADMIUM SPIN',   player: {x:110, y:250, vx:0, vy:0}, goal: {x:1260, y:450, r:45},
-    orbs:  [ orb(300, 420, 'turbo'), orb(560, 250, 'normal'), orb(820, 420, 'turbo'), orb(1080, 250, 'normal') ], walls: [] },
+  { name: 'TURBO SPIN',   player: {x:110, y:250, vx:0, vy:0}, goal: {x:1260, y:450, r:45},
+    orbs:  [ orb(300, 420, 'turbo', true), orb(560, 250, 'normal'), orb(820, 420, 'turbo', true), orb(1080, 250, 'normal') ], walls: [] },
 
   { name: 'TAPED OFF',   player: {x:110, y:480, vx:0, vy:0}, goal: {x:1140, y:600, r:48},
-    orbs:  [ orb(300, 480, 'normal'), orb(640, 680, 'normal') ],
+    orbs:  [ orb(300, 480, 'normal', true), orb(640, 680, 'normal', true) ],
     walls: [ wall(430, 300, 260, 60) ] },
 
   { name: 'SPLASH BACK',     player: {x:120, y:500, vx:0, vy:0}, goal: {x:1230, y:500, r:50},
-    orbs:  [ orb(320, 500, 'normal'), orb(640, 500, 'normal'), orb(910, 500, 'repel') ], walls: [] },
+    orbs:  [ orb(320, 500, 'normal', true), orb(640, 500, 'normal', true), orb(910, 500, 'repel') ], walls: [] },
 
   { name: 'SOAK AND GO',   player: {x:110, y:500, vx:0, vy:0}, goal: {x:1140, y:700, r:48},
-    orbs:  [ orb(300, 560, 'turbo'), orb(520, 620, 'normal'), orb(740, 260, 'repel'), orb(860, 660, 'turbo') ], walls: [] },
+    orbs:  [ orb(300, 560, 'turbo', true), orb(520, 620, 'normal', true), orb(740, 260, 'repel'), orb(860, 660, 'turbo') ], walls: [] },
 
   { name: 'THE CATWALK', player: {x:100, y:700, vx:0, vy:0}, goal: {x:1210, y:500, r:44},
-    orbs:  [ orb(280, 640, 'normal'), orb(520, 500, 'turbo'), orb(760, 620, 'normal'), orb(960, 400, 'turbo') ], walls: [] },
+    orbs:  [ orb(280, 640, 'normal', true), orb(520, 500, 'turbo', true), orb(760, 620, 'normal'), orb(960, 400, 'turbo') ], walls: [] },
 
   { name: 'THE BRIDGE',    player: {x:100, y:450, vx:0, vy:0}, goal: {x:1080, y:600, r:48},
-    orbs:  [ orb(280, 450, 'normal'), orb(620, 450, 'normal') ],
+    orbs:  [ orb(280, 450, 'normal', true), orb(620, 450, 'normal', true) ],
     walls: [ wall(400, 300, 260, 40), wall(400, 560, 260, 60) ] },
 
   { name: 'SQUEEZE IN',  player: {x:120, y:720, vx:0, vy:0}, goal: {x:1240, y:480, r:44},
     orbs:  [ orb(280, 660, 'normal'), orb(640, 560, 'normal'), orb(860, 600, 'turbo'), orb(1080, 500, 'normal') ],
     walls: [ wall(400, 380, 220, 36) ] },
 
-  { name: 'CADMIUM CASCADE', player: {x:100, y:640, vx:0, vy:0}, goal: {x:1330, y:500, r:42},
+  { name: 'TURBO CASCADE', player: {x:100, y:640, vx:0, vy:0}, goal: {x:1330, y:500, r:42},
     orbs:  [ orb(300, 640, 'turbo'), orb(540, 500, 'normal'), orb(780, 640, 'turbo'), orb(1000, 460, 'normal'), orb(1200, 600, 'turbo') ], walls: [] },
 
-  { name: 'ALIZARIN RUN',     player: {x:100, y:550, vx:0, vy:0}, goal: {x:1330, y:550, r:42},
+  { name: 'REPEL RUN',     player: {x:100, y:550, vx:0, vy:0}, goal: {x:1330, y:550, r:42},
     orbs:  [ orb(300, 550, 'normal'), orb(520, 380, 'repel'), orb(520, 720, 'repel'), orb(680, 550, 'normal'), orb(1040, 550, 'turbo') ], walls: [] },
 
   { name: 'THE RIBBON',   player: {x:110, y:500, vx:0, vy:0}, goal: {x:1300, y:300, r:40},
@@ -1363,8 +1613,47 @@ const LEVELS = [
     walls: [ wall(480, 200, 30, 130), wall(480, 520, 30, 130), wall(790, 200, 30, 130), wall(790, 520, 30, 130), wall(1100, 200, 30, 130), wall(1100, 520, 30, 130) ] }
 ];
 
-function orb(x, y, type) { return { x: x, y: y, r: 16, type: type }; }
+function orb(x, y, type, req) {
+  const o = { x: x, y: y, r: 16, type: type };
+  if (req) o.req = true;     // key bucket for the Palette Mix quest
+  return o;
+}
 function wall(x, y, w, h) { return { x: x, y: y, w: w, h: h }; }
+
+// ---------- Palette Mix quest ----------
+// Some levels tag buckets as "keys". The signing spot is ALWAYS open, but the
+// stars are earned by the mission: touch every key bucket (any order) = 3★,
+// a one-shot to the goal = 0★. Optional + unordered, driven purely by data.
+function levelHasKeys() {
+  return !!(level && Array.isArray(level.orbs) && level.orbs.some(function (o) { return !!o.req; }));
+}
+function countReqOrbs(lv) {
+  if (!lv || !Array.isArray(lv.orbs)) return 0;
+  let n = 0;
+  for (const o of lv.orbs) if (o.req) n++;
+  return n;
+}
+function reqPending() {
+  if (!level || !Array.isArray(level.orbs)) return 0;
+  let n = 0;
+  for (const o of level.orbs) if (o.req && !o.reqDone) n++;
+  return n;
+}
+function nextReqOrb() {
+  let best = null, bestD = Infinity;
+  if (!level || !Array.isArray(level.orbs)) return best;
+  for (const o of level.orbs) {
+    if (o.req && !o.reqDone) {
+      const d = Math.hypot(player.x - o.x, player.y - o.y);
+      if (d < bestD) { bestD = d; best = o; }
+    }
+  }
+  return best;
+}
+function markReq(o) {
+  if (o && o.req && !o.reqDone) { o.reqDone = true; return true; }
+  return false;
+}
 
 // ---- Mastery par table (seconds) ----
 // 3-star par for each level. 2-star = par * 1.6, 1-star = par * 3.0.
@@ -1378,6 +1667,15 @@ function starsForTime(li, t) {
   return 0;
 }
 
+// Mastery grading: on levels with a palette-mix quest the stars are earned by
+// the MISSION (all key buckets dipped = 3★, anything less = 0★). The goal is
+// always open, but a one-shot to the signing spot pays no stars. Levels
+// without a quest keep the time-based par table above.
+function starsForLevel(li, t) {
+  if (levelHasKeys()) return reqPending() === 0 ? 3 : 0;
+  return starsForTime(li, t);
+}
+
 // ---------- Runtime state ----------
 let levelIndex = 0;
 let level = null;                 // current level data reference
@@ -1389,6 +1687,7 @@ let player = { x: 0, y: 0, vx: 0, vy: 0 };
 let tethered = false;
 let tether = null;                // { orb, angVel(rad/frame), dist, angle, repel, turbo }
 let runTime = 0;                  // seconds spent in 'playing' on the current level
+let runMaxSpeed = 0;              // fastest swing line-speed this attempt (for the art card)
 let trail = [];
 let snap = 0;         // attach "pop" 0..1, decays out
 let stretchEase = 1;  // smoothed player stretch (1 = round)
@@ -1432,6 +1731,120 @@ function shakeOffset() {
   return { x: (Math.random() * 2 - 1) * k, y: (Math.random() * 2 - 1) * k };
 }
 
+// ---------- Orb chatter: quiet one-liners when you grab a bucket ----------
+const ORB_LINES = {
+  normal: [
+    { t: 'Stay smooth.', f: 'happy' },
+    { t: 'Keep going!', f: 'happy' },
+    { t: 'You got this.', f: 'happy' },
+    { t: 'Wheee \u2014 round and round.', f: 'laugh' },
+    { t: 'Nailed it!', f: 'laugh' },
+    { t: 'Nice swing!', f: 'wink' },
+    { t: 'Okay, that was cool.', f: 'wink' },
+    { t: 'Easy does it...', f: 'happy' },
+  ],
+  turbo: [
+    { t: 'Go go go!', f: 'laugh' },
+    { t: 'Zoom!', f: 'wow' },
+    { t: 'Spin me!', f: 'laugh' },
+    { t: 'Faster!!', f: 'laugh' },
+    { t: 'Wheeee!', f: 'laugh' },
+    { t: 'Let\u2019s fly!', f: 'wow' },
+    { t: 'Can\u2019t slow down now!', f: 'laugh' },
+  ],
+  repel: [
+    { t: 'Ugh, me again?', f: 'pout' },
+    { t: 'Thought you\u2019d miss me!', f: 'wink' },
+    { t: 'Pushy, huh?', f: 'annoyed' },
+    { t: 'Boo\u2026', f: 'sad' },
+    { t: 'Try the other one.', f: 'pout' },
+    { t: 'Oho, nice try.', f: 'wink' },
+    { t: 'You\u2019ll spin it back!', f: 'happy' },
+  ],
+};
+function pickOrbLine(type, lastIdx) {
+  const pool = ORB_LINES[type] || ORB_LINES.normal;
+  let i = (Math.random() * pool.length) | 0;
+  if (i === lastIdx) i = (i + 1) % pool.length;   // avoid instant repeats
+  return { text: pool[i].t, feel: pool[i].f, idx: i };
+}
+let orbSay = null;        // { type, text, feel, life, maxLife }
+let orbSayLastIdx = -1;   // per-type? single shared is enough
+let orbSayCd = 0;         // seconds until the next line is allowed
+let orbSayOrb = null;     // the specific bucket talking (for bubble placement)
+function sayOrbLine(type, orb) {
+  if (orbSayCd > 0 || status !== 'playing') return;   // no chatter spam
+  const picked = pickOrbLine(type, orbSayLastIdx);
+  orbSayLastIdx = picked.idx;
+  orbSay = { type: type, text: picked.text, feel: picked.feel, life: 1.6, maxLife: 1.6 };
+  orbSayOrb = orb || null;
+  orbSayCd = 2.2;   // calm gap between lines
+}
+function updateOrbSay(dt) {
+  if (orbSayCd > 0) orbSayCd -= dt / 60;
+  if (orbSay) {
+    orbSay.life -= dt / 60;
+    if (orbSay.life <= 0) { orbSay = null; orbSayOrb = null; }
+  }
+}
+
+// Small speech bubble rising from the grabbed bucket.
+function drawOrbSay() {
+  if (!orbSay || !orbSayOrb) return;
+  const s = orbSay, o = orbSayOrb;
+  const inT = Math.min(1, (s.maxLife - s.life) / 0.12);   // fade in ~0.12s
+  const outT = Math.min(1, s.life / 0.35);                // fade out last 0.35s
+  const a = Math.max(0, Math.min(inT, outT));
+  if (a <= 0) return;
+  const pop = s.maxLife - s.life < 0.18 ? 1 + (0.18 - (s.maxLife - s.life)) * 2 : 1;
+  const bob = Math.sin(time * 0.07) * 2;    // slow gentle drift (time counts 60-steps/sec)
+
+  const text = s.text;
+  ctx.font = '600 13px system-ui, sans-serif';
+  const tw = ctx.measureText(text).width;
+  const padX = 10, padY = 8;
+  const bw = tw + padX * 2;
+  const bh = 16 + padY * 2 + 4;
+  const bx = o.x - bw / 2;
+  const by = o.y - o.r - bh - 14 + bob;
+
+  ctx.save();
+  ctx.globalAlpha = a;
+  ctx.translate(o.x, by + bh + 6);
+  ctx.scale(pop, pop);
+  ctx.translate(-o.x, -(by + bh + 6));
+  ctx.fillStyle = 'rgba(255, 250, 235, 0.97)';
+  ctx.strokeStyle = 'rgba(97, 76, 48, 0.35)';
+  ctx.lineWidth = 1.2;
+  ctx.beginPath();
+  const rad = 9;
+  ctx.moveTo(bx + rad, by);
+  ctx.lineTo(bx + bw - rad, by);
+  ctx.quadraticCurveTo(bx + bw, by, bx + bw, by + rad);
+  ctx.lineTo(bx + bw, by + bh - rad);
+  ctx.quadraticCurveTo(bx + bw, by + bh, bx + bw - rad, by + bh);
+  ctx.lineTo(bx + rad, by + bh);
+  ctx.quadraticCurveTo(bx, by + bh, bx, by + bh - rad);
+  ctx.lineTo(bx, by + rad);
+  ctx.quadraticCurveTo(bx, by, bx + rad, by);
+  ctx.closePath();
+  ctx.fill();
+  // little tail pointing at the orb
+  ctx.beginPath();
+  ctx.moveTo(o.x - 5, by + bh - 1);
+  ctx.lineTo(o.x + 5, by + bh - 1);
+  ctx.lineTo(o.x, by + bh + 7);
+  ctx.closePath();
+  ctx.fill();
+  ctx.fillStyle = '#3d3530';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(text, o.x, by + bh / 2 + 1);
+  ctx.restore();
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'alphabetic';
+}
+
 // ---------- Endless Run state ----------
 let gameMode = GAME_MODES.LEVELS;
 let cameraX = 0;
@@ -1454,8 +1867,23 @@ const orbColors = {
   repel:  { fill: '#e4513f', stroke: '#b5372a', glow: '#b5372a', paint: '224,76,56',
             bodyTop: '#ecd2cd', bodyBot: '#bc8f87' }
 };
-// color the ink brush is currently loaded with (per attached orb)
-let paintRGB = '248,245,238';
+// the player's chosen identity paint (one pick from the menu - his one color)
+const PAINT_POTS = [
+  { name: 'MINT',    rgb: '49,150,104' },
+  { name: 'CYAN',    rgb: '31,138,156' },
+  { name: 'LEMON',   rgb: '201,154,46' },
+  { name: 'ROSE',    rgb: '214,79,63'  },
+  { name: 'GRAPE',   rgb: '138,85,184' },
+  { name: 'MAGENTA', rgb: '160,77,140' },
+];
+// the blob's body & buddy are always his signature paint (his identity)
+let paintRGB = PAINT_POTS[0].rgb;
+let signatureRGB = PAINT_POTS[0].rgb;
+// the ink his brush paints the canvas with: follows whichever bucket he rides,
+// so each swing leaves a different color and the art layers into a rainbow
+let inkRGB = PAINT_POTS[0].rgb;
+let stainRGB = null;   // transient bucket stain coating while riding
+let stainA = 0;        // 0..1 strength of the stain wash
 
 // ---------- DOM handles ----------
 const elMsg    = document.getElementById('message');
@@ -1496,23 +1924,26 @@ function fmtTime(s) {
 }
 
 // ---- Persisted progress & best times ----
-// save = { unlocked: [0,3,...] (indices the player may enter), best: { "3": {stars, time}, ... } }
+// save = { unlocked: [0,3,...], best: { "3": {stars, time} }, paint: <pot index> }
 function loadSave() {
   try {
-    if (typeof localStorage === 'undefined') return { unlocked: [0], best: {} };
+    if (typeof localStorage === 'undefined') return { unlocked: [0], best: {}, paint: 0 };
     const raw = localStorage.getItem('neonOrbitSave');
     if (raw) {
       const s = JSON.parse(raw);
-      if (Array.isArray(s.unlocked)) return { unlocked: s.unlocked, best: s.best || {} };
+      if (Array.isArray(s.unlocked)) {
+        if (s.paint == null) s.paint = 0;    // older saves: default to the first pot
+        return { unlocked: s.unlocked, best: s.best || {}, paint: s.paint };
+      }
     }
     // migrate legacy neonOrbitCompleted array -> unlocked list
     const legacy = localStorage.getItem('neonOrbitCompleted');
     if (legacy) {
       const arr = JSON.parse(legacy);
-      if (Array.isArray(arr)) return { unlocked: arr, best: {} };
+      if (Array.isArray(arr)) return { unlocked: arr, best: {}, paint: 0 };
     }
   } catch (e) { /* storage unavailable */ }
-  return { unlocked: [0], best: {} };
+  return { unlocked: [0], best: {}, paint: 0 };
 }
 function writeSave(s) {
   try { if (typeof localStorage !== 'undefined') localStorage.setItem('neonOrbitSave', JSON.stringify(s)); } catch (e) {}
@@ -1547,14 +1978,17 @@ function launchBall() {
 
 function showReadyUI(on) {
   if (on) {
+    hideCard();
     elMsg.classList.remove('lost');
     elMsg.classList.remove('won');
     elMsg.classList.remove('hidden');
     elMsgT.textContent = 'TAP TO LAUNCH';
     elMsgObj.style.display = '';
-    elMsgObj.textContent = level && level.walls && level.walls.length
-      ? 'OBJECTIVE: swing past the tape to the signing spot'
-      : 'OBJECTIVE: reach the signing spot';
+    elMsgObj.textContent = levelHasKeys()
+      ? 'MISSION: dip into every KEY bucket to earn your 3 stars \u00b7 spot is always open'
+      : (level && level.walls && level.walls.length
+        ? 'OBJECTIVE: swing past the tape to the signing spot'
+        : 'OBJECTIVE: reach the signing spot');
     elMsgS.textContent = 'tap to start \u00b7 then hold to swing, release to fly';
     elRestart.style.display = 'none';
     elNextBtn.style.display = 'none';
@@ -1566,6 +2000,7 @@ function showReadyUI(on) {
 
 function showPauseUI(on) {
   if (on) {
+    hideCard();
     elMsg.classList.remove('lost');
     elMsg.classList.remove('won');
     elMsg.classList.remove('hidden');
@@ -1587,9 +2022,14 @@ const CUSTOM_IDX = -2;       // levelIndex sentinel used while a custom level is
 // object (level.player/goal/orbs/walls); label is the HUD title text.
 function resetLevel(lv, label) {
   clearPaintLayer();   // new canvas to mangle each level
+  slowPoolCd = 0;
   level = lv;
+  for (const o of lv.orbs) if (o.req) o.reqDone = false;   // fresh quest each attempt
+  stampWorkspace();    // workspace rings under the fresh canvas
   shakeMag = 0; shakeMax = 0;
+  orbSay = null; orbSayCd = 0; orbSayLastIdx = -1; orbSayOrb = null;
   player = { x: lv.player.x, y: lv.player.y, vx: 0, vy: 0 };
+  runMaxSpeed = 0;
   goalGrad = null;
   tethered = false;
   tether = null;
@@ -1597,7 +2037,9 @@ function resetLevel(lv, label) {
   snap = 0;
   stretchEase = 1;
   tetherSproing = 0;
-  paintRGB = '248,245,238';
+  paintRGB = signatureRGB;          // the blob never loses his own color
+  inkRGB = signatureRGB;            // fresh level: brush loads with his paint
+  stainA = 0;
   setPaintWell(paintRGB);
   stopTurboBed();
   lastBelow = null;
@@ -1631,19 +2073,27 @@ function loadLevel(idx) {
   if (idx >= LEVELS.length) idx = 0;
   customLevel = null;               // playing a real level again
   levelIndex = idx;
+  setBgmFloor(idx);
   const lv = LEVELS[idx];
+  bgmResumeAfterFade();
   resetLevel(lv, 'LEVEL ' + (idx + 1) + ' \u2014 ' + lv.name);
   // one-time orb legend (replaces the old footer)
   if (idx === 0) toast('HOLD to grab & swing \u00b7 RELEASE to fly');
-  if (idx === 3) toast('YELLOW orb = cadmium \u00b7 speeds you up');
-  if (idx === 6) toast('RED orb = alizarin \u00b7 kicks you loose');
+  if (idx === 3) toast('YELLOW orb = turbo \u00b7 speeds you up');
+  if (idx === 6) toast('RED orb = repel \u00b7 kicks you loose');
   if (lv.walls && lv.walls.length) toast('Dunk under the tape!');
   // show the act-opener story once per session when a new floor begins
   const openerKey = idx + 1;   // 1-based level number
   const opener = STORY.openers[openerKey];
+  // brief a freshly-entered level once (NEXT / level-select). Retries reuse it.
+  const fresh = missionShownFor !== idx;
+  missionShownFor = idx;
   if (opener && !storySeen[openerKey]) {
     storySeen[openerKey] = true;
+    if (fresh) missionOnContinue = () => showMission(lv);
     showStory(opener);
+  } else if (fresh) {
+    showMission(lv);
   }
 }
 
@@ -1652,6 +2102,8 @@ function loadCustomLevel(lv) {
   customLevel = lv;
   gameMode = GAME_MODES.LEVELS;
   levelIndex = CUSTOM_IDX;
+  setBgmFloor(0);                    // custom levels play on the ACT I floor
+  bgmResumeAfterFade();
   bindRestartBtn();
   EndlessRun.showHUD(false);
   const name = (lv.name && String(lv.name).trim()) ? String(lv.name).trim() : 'CUSTOM LEVEL';
@@ -1693,14 +2145,15 @@ function tryAttach() {
   let angVel = signedTangSpeed / dist;      // rad/frame
 if (best.type === 'turbo') {
     angVel *= TURBO_MULT;                   // turbo: double the spin on attach
-    toast('CADMIUM \u2014 keep holding to pile on the spin!');
+    toast('TURBO \u2014 keep holding to pile on the spin!');
   } else if (best.type === 'repel') {
 
     if (dist > REPEL_LIMIT) {               // too far out: just a gentle shove
       const rx = dx / dist, ry = dy / dist;
       player.vx += rx * 2.5;
       player.vy += ry * 2.5;
-      toast('\u26A0 ALIZARIN \u2014 beware, it shakes the brush loose!');
+      toast('\u26A0 REPEL \u2014 beware, it shakes the brush loose!');
+      sayOrbLine('repel', best);
       return;
     }
     // repel forces the OPPOSITE spin direction
@@ -1716,8 +2169,16 @@ if (best.type === 'turbo') {
   snap = 1;
   tetherSproing = 1;
   addShake(best.type === 'repel' ? 7 : 2.5);
-  paintRGB = orbColors[best.type].paint;
-  setPaintWell(paintRGB);
+  sayOrbLine(best.type, best);
+  // palette-mix quest: touching a key bucket logs it; finishing the set unlocks
+  if (markReq(best) && reqPending() === 0) onPaletteUnlocked();
+
+  // his brush loads with this bucket's paint (colorful ink on the canvas) and
+  // his body leans toward it while riding; he dries back to his own color after
+  inkRGB = orbColors[best.type].paint;
+  setPaintWell(inkRGB);
+  stainRGB = inkRGB;
+  stainA = 1;
   pushRing({ x: best.x, y: best.y, r: best.r * 0.5, vr: 2.2, life: 0.30, col: '255,255,255' });
   tether = {
     orb:   best,
@@ -1741,6 +2202,10 @@ function release() {
   addShake(Math.min(6, 1.5 + spd * 0.25));
   if (tether.repel) { player.vx *= 0.9; player.vy *= 0.9; }
   else              { player.vx *= RELEASE_BOOST; player.vy *= RELEASE_BOOST; }
+  slowPoolCd = 0;
+  if (gameMode === GAME_MODES.LEVELS && Math.hypot(player.vx, player.vy) >= 11) {
+    splatterLaunch(player.x, player.y, player.vx, player.vy);   // fast flick = spray
+  }
   tethered = false;
   tether = null;
   lastBelow = null;
@@ -1752,6 +2217,7 @@ function update(dt) {
   if (gameMode === GAME_MODES.ENDLESS) { EndlessRun.update(dt); return; }
   time += dt;
   updateShake(dt);
+  updateOrbSay(dt);
   if (toastTimer > 0) {
     toastTimer -= dt;
     if (toastTimer <= 0) elToast.classList.remove('show');
@@ -1796,11 +2262,8 @@ function update(dt) {
   if (status === 'paused' || status === 'ready') return;   // freeze physics while paused/ready
 
   if (status !== 'playing') {
-    // 'lost' auto-restarts after a moment; 'won' waits for NEXT LEVEL tap
-    if (status === 'lost') {
-      statusTimer -= dt * ts;
-      if (statusTimer <= 0) reloadCurrentLevel();   // restart current
-    }
+    // 'lost' waits for a tap so the game-over screen (with trash talk) is actually
+    // readable; 'won' waits for NEXT LEVEL. onScreenTap / buttons handle restart.
     return;   // freeze physics, keep background animating
   }
 
@@ -1810,7 +2273,13 @@ function update(dt) {
   // air-rush bed follows the spin: whisper -> screaming at turbo cap
   if (tethered) {
     const tspd = Math.abs(tether.angVel) * tether.dist;
+    if (tspd > runMaxSpeed) runMaxSpeed = tspd;
     setRush(Math.min(1, Math.max(0, (tspd - 3) / 14)));
+    // creeping the bucket slow = wet paint pools under it
+    if (gameMode === GAME_MODES.LEVELS && tspd < 5.5) {
+      if (slowPoolCd > 0) slowPoolCd -= dt;
+      else { stampSlowPool(tether.orb); slowPoolCd = 26; }
+    }
   } else {
     const fspd = Math.hypot(player.vx, player.vy);
     setRush(Math.min(0.3, Math.max(0, (fspd - 6) / 40)));
@@ -1926,12 +2395,28 @@ function update(dt) {
   while (trail.length > targetLen) trail.pop();
 
   // persistent wet paint: the brush keeps the canvas stained
-  addPaintStroke(player.x, player.y, Math.hypot(player.vx, player.vy), paintRGB);
+  addPaintStroke(player.x, player.y, Math.hypot(player.vx, player.vy), inkRGB);
 
   snap *= Math.pow(0.84, dt);   // attach pop decays
   tetherSproing *= Math.pow(0.88, dt);  // tether sproing decays
+  // leaning: while riding he visibly mixes toward that bucket's paint,
+  // then dries back to his own color once he lets go
+  stainA = tethered ? 1 : stainA * Math.pow(0.9, dt);
+  if (stainA < 0.01) stainA = 0;
 }
 
+function onPaletteUnlocked() {
+  const g = level.goal;
+  pushRing({ x: g.x, y: g.y, r: 8, vr: 3.2, life: 0.8, col: GOAL_PURPLE });
+  pushRing({ x: g.x, y: g.y, r: 3, vr: 1.8, life: 0.6, col: '255,220,140' });
+  for (const o of level.orbs) {
+    if (o.req) pushSpark({ x: o.x, y: o.y, vx: (Math.random() - 0.5) * 2, vy: (Math.random() - 0.5) * 2 - 1, life: 0.6, size: 2, color: 'rgb(' + orbColors[o.type].paint + ')' });
+  }
+  if (toastTimer <= 0) toast('MISSION COMPLETE \u2014 STARS EARNED!');
+}
+
+// The signing spot is ALWAYS open — the palette-mix quest only grades stars.
+// Touching the goal with buckets left unpaid simply banks 0 stars.
 function checkGoal() {
   const g = level.goal;
   return Math.hypot(player.x - g.x, player.y - g.y) < g.r + PLAYER_R;
@@ -2065,6 +2550,50 @@ function dismissStory() {
   const cb = storyOnContinue;
   storyOnContinue = null;
   if (cb) cb();
+  // a mission may be queued behind an opener story — show it next
+  const mission = missionOnContinue;
+  missionOnContinue = null;
+  if (mission) mission();
+}
+
+// ---------- Mission briefing (before each freshly-entered level) ----------
+const elMission = document.getElementById('missionOverlay');
+const elMissionTitle = document.getElementById('missionTitle');
+const elMissionBody = document.getElementById('missionBody');
+const elMissionHint = document.getElementById('missionHint');
+const elMissionStart = document.getElementById('missionStartBtn');
+
+let missionOnContinue = null;   // mission queued behind an act opener
+let missionShownFor = -1;       // last level that received its briefing
+
+function showMission(lv) {
+  if (elMissionTitle) elMissionTitle.textContent = (lv && lv.name) || '';
+  const keys = countReqOrbs(lv);
+  if (elMissionBody) elMissionBody.textContent = keys > 0
+    ? 'Dip into every KEY bucket, then swing to the signing spot.\n'
+    + 'The spot is ALWAYS open \u2014 but a one-shot straight to it banks 0 stars.'
+    : 'Swing to the signing spot and land your masterpiece.';
+  if (elMissionHint) {
+    if (keys > 0) {
+      elMissionHint.style.display = '';
+      elMissionHint.textContent = 'KEY BUCKETS: ' + keys + '  \u00b7  dip them ALL for 3 \u2605';
+    } else {
+      elMissionHint.style.display = 'none';
+    }
+  }
+  if (elMission) {
+    elMission.classList.remove('hidden');
+    elMission.scrollTop = 0;
+  }
+  if (elMissionStart) elMissionStart.focus && elMissionStart.focus();
+}
+
+function hideMission() {
+  if (elMission) elMission.classList.add('hidden');
+}
+
+function dismissMission() {
+  hideMission();
 }
 
 function win() {
@@ -2086,6 +2615,7 @@ function win() {
   flashAlpha = fx.flash;
   winLabelT = 0.9;
   addShake([0, 5, 9][landTier]);   // soft/power/massive impact
+  stampGoalSeal();                 // the goal's paint wave becomes part of the art
   spawnGoalBurst(landTier);
   playWin(landTier);
   playMusicWin();
@@ -2094,7 +2624,7 @@ function win() {
   elMsg.classList.add('won');
   elMsg.classList.remove('hidden');
   elMsgObj.style.display = 'none';
-  spawnConfetti();
+  cheerWinBuddy();
 
   if (isCustom) {
     // imported levels: no save, no story, no next level — replay or go home
@@ -2106,19 +2636,31 @@ function win() {
     elRestart.style.display = 'none';
     elNextBtn.style.display = '';
     elNextBtn.textContent = 'PLAY AGAIN \u21bb';
+    showCard({
+      title: (level.name ? level.name : 'UNTITLED'),
+      subtitle: 'CUSTOM LEVEL',
+      timeText: fmtTime(runTime),
+      stars: 3,
+      newBest: false
+    });
     return;
   }
 
-  // ---- mastery result: stars (by time) + track best ----
+  // ---- mastery result: stars (mission on keyed levels, else time) ----
   const t = runTime;
-  const stars = starsForTime(levelIndex, t);
+  const stars = starsForLevel(levelIndex, t);
   let wasNewBest = false;
   let prevBest = null;
   try {
     const save = loadSave();
     const rec = save.best[levelIndex];
     prevBest = rec && isFinite(rec.time) ? rec.time : null;
-    if (!rec || t < rec.time) { save.best[levelIndex] = { stars, time: t }; wasNewBest = true; }
+    // keep the BETTER record: more stars win, then faster time breaks ties
+    // (a fast missionless run must never permanently block a 3-star rating)
+    if (!rec || stars > (rec.stars || 0) || (stars === (rec.stars || 0) && t < rec.time)) {
+      save.best[levelIndex] = { stars, time: t };
+      wasNewBest = true;
+    }
     // pre-unlock the next level
     const nextIdx = levelIndex + 1;
     if (nextIdx < LEVELS.length && !save.unlocked.includes(nextIdx)) save.unlocked.push(nextIdx);
@@ -2137,7 +2679,7 @@ function win() {
     elMsg.classList.add('hidden');
     showStory(boss, () => {
       elMsg.classList.remove('hidden');   // reveal the results on top now
-      spawnConfetti();
+      cheerWinBuddy();
     });
   }
 
@@ -2160,10 +2702,412 @@ function win() {
   elRestart.style.display = 'none';
   elNextBtn.style.display = '';
   elNextBtn.textContent = last ? 'PLAY AGAIN' : 'NEXT LEVEL \u2192';
+  showCard({
+    title: LEVELS[levelIndex].name,
+    subtitle: last ? 'THE GALLERY' : 'LEVEL ' + (levelIndex + 1),
+    timeText: fmtTime(t),
+    stars: stars,
+    newBest: wasNewBest
+  });
+}
+
+// Trash talk for the game-over screen. Cheeky, never mean.
+const TRASH_TALK = [
+  'GG sir.',
+  'Better luck next time!',
+  'Skill issue?',
+  'GGEZ',
+  'The palette stays winning.',
+  'Almost... not really.',
+  'That wall said hi.',
+  'Your blob was not ready.',
+  'The canvas remains unclaimed.',
+  'Swing and a miss!',
+  'Back to the palette, champ.',
+  'You rustled the jars for nothing.',
+  'Paint fumes got to you?',
+  'That orb had you, not the other way.',
+];
+let lastTrashTalk = -1;
+function pickTrashTalk() {
+  let i = (Math.random() * TRASH_TALK.length) | 0;
+  if (i === lastTrashTalk) i = (i + 1) % TRASH_TALK.length;   // avoid instant repeats
+  lastTrashTalk = i;
+  return TRASH_TALK[i];
+}
+
+// Remove any leftover confetti.
+function clearConfetti() {
+  const wrap = document.getElementById('winConfetti');
+  if (!wrap) return;
+  while (wrap.firstChild) wrap.removeChild(wrap.firstChild);
+}
+
+// ============================================================
+// ART CARD — frames this attempt's paint strokes as a gallery
+// piece: mat + frame, auto-cropped to the action, plaque with
+// the level/time/stars/paint, signed by the little blob.
+// ============================================================
+let cardInfo = null;
+
+function showCard(info) {
+  cardInfo = info || null;
+  const label = document.getElementById('galleryLabel');
+  if (label) {
+    label.textContent = (info && info.subtitle === 'THE GALLERY')
+      ? 'THE GALLERY \u00b7 A NEW MASTERPIECE'
+      : 'YOUR MASTERPIECE';
+  }
+  elMsg.classList.add('cardMode');
+  composeArtCard();
+}
+
+function hideCard() {
+  cardInfo = null;
+  elMsg.classList.remove('cardMode');
+}
+
+// Vertical crop: keep the action (spawn, orbs, goal), trim dead sky/floor.
+function cardSourceCrop() {
+  let top = H, bot = 0;
+  const addY = (y) => { if (y < top) top = y; if (y > bot) bot = y; };
+  addY(level.player.y);
+  addY(level.goal.y);
+  for (const o of level.orbs) { addY(o.y - o.r - 12); addY(o.y + o.r + 12); }
+  top -= 40; bot += 40;
+  const minH = H * 0.55;
+  let h = bot - top;
+  if (h < minH) { const c = (top + bot) / 2; top = c - minH / 2; bot = c + minH / 2; }
+  if (top < 0) { bot -= top; top = 0; }
+  if (bot > H) { top -= bot - H; bot = H; }
+  if (top < 0) top = 0;
+  h = bot - top;
+  if (h < 200) { top = (H - 200) / 2; h = 200; }
+  return { sy: Math.round(top), sh: Math.round(h) };
+}
+
+function cardPaintName() { return PAINT_POTS[signatureIndex()].name; }
+
+function composeArtCard() {
+  if (!cardInfo) return;
+  const cv = document.getElementById('galleryCanvas');
+  if (!cv || !paintCanvas) return;
+  const gc = cv.getContext('2d');
+  const CW = cv.width, CH = cv.height;
+  gc.clearRect(0, 0, CW, CH);
+
+  // frame + mat
+  gc.fillStyle = '#6b5238';                 // wood frame
+  gc.fillRect(0, 0, CW, CH);
+  const mat = 30;
+  gc.fillStyle = '#f0e8d6';                 // pale mat board
+  gc.fillRect(mat, mat, CW - mat * 2, CH - mat * 2);
+  gc.strokeStyle = 'rgba(60,42,24,0.35)';   // subtle frame lip
+  gc.lineWidth = 2;
+  gc.strokeRect(mat + 4, mat + 4, CW - mat * 2 - 8, CH - mat * 2 - 8);
+
+  // painting: contain the (smart-cropped) paint layer inside the art well
+  const crop = cardSourceCrop();
+  const srcA = W / crop.sh;                 // source aspect (>= 1400/850)
+  const artH = 580, artY0 = 118;
+  const artW = Math.min(1180, artH * srcA); // may leave side mat for tall crops
+  const scale = Math.min(artW / W, artH / crop.sh);
+  const pw = W * scale, ph = crop.sh * scale;
+  const px = (CW - pw) / 2;
+  const py = artY0 + Math.max(0, (artH - ph)) * 0.5;
+
+  // mounting shadow lifts the print off the mat
+  gc.fillStyle = 'rgba(48,32,16,0.20)';
+  gc.fillRect(px + 6, py + 8, pw, ph);
+  gc.drawImage(paintCanvas, 0, crop.sy, W, crop.sh, px, py, pw, ph);
+  // crisp hairline around the print
+  gc.strokeStyle = 'rgba(60,42,24,0.35)';
+  gc.lineWidth = 1.5;
+  gc.strokeRect(px - 0.75, py - 0.75, pw + 1.5, ph + 1.5);
+
+  // ---- plaque (bottom-left on the mat) ----
+  const ink = '#33281a', soft = '#7c6244', gold = '#a97a16';
+  const px0 = 110;
+  let title = String(cardInfo.title || 'UNTITLED').toUpperCase();
+  if (title.length > 26) title = title.slice(0, 23) + '\u2026';
+
+  gc.textBaseline = 'alphabetic';
+  gc.textAlign = 'left';
+  gc.fillStyle = soft;
+  gc.font = '600 23px Verdana, sans-serif';
+  gc.fillText(String(cardInfo.subtitle || '').toUpperCase(), px0, 756);
+
+  gc.fillStyle = ink;
+  gc.font = '700 42px Georgia, "Times New Roman", serif';
+  gc.fillText(title, px0, 808);
+
+  // time + stars on one row
+  gc.fillStyle = ink;
+  gc.font = '700 32px Georgia, serif';
+  const tStart = px0;
+  gc.fillText(String(cardInfo.timeText || ''), tStart, 868);
+  const tw = gc.measureText(String(cardInfo.timeText || '')).width;
+
+  const n = Math.max(0, Math.min(3, cardInfo.stars | 0));
+  const sx = tStart + tw + 30;
+  for (let i = 0; i < 3; i++) {
+    const cx = sx + i * 40, cy = 857;
+    gc.beginPath();
+    for (let s = 0; s < 10; s++) {
+      const a = -Math.PI / 2 + s * Math.PI / 5;
+      const r = (s % 2 === 0) ? 18 : 8;
+      const vx = cx + Math.cos(a) * r, vy = cy + Math.sin(a) * r;
+      if (s === 0) gc.moveTo(vx, vy); else gc.lineTo(vx, vy);
+    }
+    gc.closePath();
+    if (i < n) { gc.fillStyle = '#d9a020'; gc.fill(); gc.strokeStyle = 'rgba(120,80,8,0.6)'; gc.lineWidth = 1.5; gc.stroke(); }
+    else { gc.strokeStyle = 'rgba(150,130,100,0.8)'; gc.lineWidth = 2; gc.stroke(); }
+  }
+  if (cardInfo.newBest) {
+    gc.fillStyle = gold;
+    gc.font = '700 21px Verdana, sans-serif';
+    gc.fillText('NEW BEST', sx + 132, 865);
+  }
+
+  // paint name + fastest swing (+ PALETTE MIX marker only when the quest paid off)
+  const mxSpd = Math.round(runMaxSpeed * 10) / 10;
+  const mixed = levelHasKeys() && reqPending() === 0;
+  gc.font = '600 21px Verdana, sans-serif';
+  let plX = px0;
+  if (mixed) {
+    gc.fillStyle = gold;
+    gc.fillText('PALETTE MIX   \u00b7   ', plX, 912);
+    plX += gc.measureText('PALETTE MIX   \u00b7   ').width;
+  }
+  gc.fillStyle = soft;
+  gc.fillText((cardPaintName() + ' PAINT').toUpperCase() + '   \u00b7   TOP SWING ' + mxSpd, plX, 912);
+
+  // ---- signature stamp: the little artist, bottom-right ----
+  drawWinBuddyBlob(gc, CW - 122, 862, 52, 'cool', 3);
+}
+
+// A big cheering version of the blob congratulates you on the win screen —
+// personal and warm instead of a confetti shower. Each line tags an emotion
+// (e) so the buddy dances/mugs differently every time.
+const WIN_LINES = [
+  { t: 'Nice one!',              e: 'hype'  },
+  { t: 'You did it!',            e: 'cheer' },
+  { t: 'Wheee \u2014 clean escape!', e: 'hype'  },
+  { t: 'The canvas loves you!',  e: 'shy'   },
+  { t: 'Pure art!',              e: 'cheer' },
+  { t: 'Smashin\u2019 it!',        e: 'hype'  },
+  { t: 'Signed & sealed!',       e: 'cool'  },
+  { t: 'That was beautiful!',    e: 'shy'   },
+  { t: 'Total masterpiece!',     e: 'goofy' },
+];
+let winCheerLast = -1;
+let winBuddyEmote = 'cheer';
+function cheerWinBuddy() {
+  const el = document.getElementById('winBuddySay');
+  if (!el) return;
+  let i = (Math.random() * WIN_LINES.length) | 0;
+  if (i === winCheerLast) i = (i + 1) % WIN_LINES.length;   // avoid instant repeats
+  winCheerLast = i;
+  el.textContent = WIN_LINES[i].t;
+  winBuddyEmote = WIN_LINES[i].e;
+  el.style.animation = 'none';       // re-trigger the pop (boss CONTINUE)
+  void el.offsetWidth;
+  el.style.animation = '';
+}
+
+// Renders the big buddy into #winBuddyCv whenever the win overlay is on screen.
+function drawWinBuddy() {
+  const cv = document.getElementById('winBuddyCv');
+  const box = document.getElementById('winBuddyBox');
+  if (!cv || !box || !box.offsetParent) return;      // hidden behind the story screen
+  const dpr = Math.min(2, window.devicePixelRatio || 1);
+  const cw = Math.max(1, Math.round(box.clientWidth) || 132);
+  const ch = Math.max(1, Math.round(box.clientHeight) || 124);
+  if (cv.width !== cw * dpr || cv.height !== ch * dpr) { cv.width = cw * dpr; cv.height = ch * dpr; }
+  const cx = cv.getContext('2d');
+  cx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  cx.clearRect(0, 0, cw, ch);
+  // fully center the buddy so the arms + body + bounce never clip
+  const R = Math.min(40, cw * 0.32, ch * 0.42);
+  const y = Math.max(R + 4, (ch + R * 0.3) / 2);
+  const emote = winBuddyEmote || 'cheer';
+  const hop = emote === 'hype' ? 10 : emote === 'shy' ? 3 : emote === 'cool' ? 5 : 7;
+  drawWinBuddyBlob(cx, cw / 2, y, R, emote, hop);
+}
+
+// Big buddy blob: pastel body in the current paint color, wobbles with a happy
+// hop, and mugs a different emotion each win (hype/cheer/shy/cool/goofy) using
+// its little hands.
+function drawWinBuddyBlob(cx, x, y, R, emote, hop) {
+  const animT = performance.now() * 0.001;
+  const bounce = Math.abs(Math.sin(animT * 2.2)) * hop;   // happy hop
+  const y0 = y - bounce;
+  const wobAmp = 0.055;
+  const wobPh = animT * 2.1;
+  const rgb = (paintRGB + '').split(/,\s*/).map(Number);
+  const base = rgb.map(v => Math.round(v + (255 - v) * 0.5));
+
+  cx.save();
+  cx.translate(x, y0);
+
+  // soft paint-colored bloom
+  const glow = cx.createRadialGradient(0, 0, R * 0.7, 0, 0, R * 2);
+  glow.addColorStop(0, 'rgba(' + paintRGB + ',0.35)');
+  glow.addColorStop(0.5, 'rgba(' + paintRGB + ',0.12)');
+  glow.addColorStop(1, 'rgba(' + paintRGB + ',0)');
+  cx.fillStyle = glow;
+  cx.beginPath(); cx.arc(0, 0, R * 2, 0, Math.PI * 2); cx.fill();
+
+  const dark = base.map(v => Math.max(0, v - 34)).join(',');
+  const bodyFill = 'rgb(' + base.join(',') + ')';
+  const armWig = Math.abs(Math.sin(animT * 2.2 + 0.6)) * (emote === 'hype' ? 10 : 6);
+  function arm(sx, sy, c1x, c1y, ex, ey, rHand) {
+    cx.strokeStyle = 'rgb(' + dark + ')';
+    cx.lineWidth = R * 0.16;
+    cx.lineCap = 'round';
+    cx.beginPath();
+    cx.moveTo(sx, sy);
+    cx.quadraticCurveTo(c1x, c1y, ex, ey);
+    cx.stroke();
+    cx.fillStyle = bodyFill;
+    cx.beginPath(); cx.arc(ex, ey, rHand || R * 0.19, 0, Math.PI * 2); cx.fill();
+  }
+
+  // --- arms: one pose per emotion ---
+  if (emote === 'hype') {
+    arm(-R * 0.72, -R * 0.08, -R * 1.5, -R * 0.5, -R * 1.35, -R * 1.0 - armWig);
+    arm(R * 0.72, -R * 0.08, R * 1.5, -R * 0.5, R * 1.35, -R * 1.0 - armWig);
+  } else if (emote === 'shy') {
+    // hands up near the cheeks
+    arm(-R * 0.62, -R * 0.05, -R * 1.4, -R * 0.15, -R * 0.96, -R * 0.52 - armWig * 0.4);
+    arm(R * 0.62, -R * 0.05, R * 1.4, -R * 0.15, R * 0.96, -R * 0.52 - armWig * 0.4);
+  } else if (emote === 'cool') {
+    // one arm raised, one hand cocked on the hip
+    arm(-R * 0.72, -R * 0.08, -R * 1.5, -R * 0.45, -R * 1.25, -R * 0.85 - armWig);
+    arm(R * 0.8, -R * 0.02, R * 1.25, R * 0.25, R * 0.82, R * 0.82, R * 0.22);
+  } else if (emote === 'goofy') {
+    arm(-R * 0.72, -R * 0.08, -R * 1.45, -R * 0.4, -R * 1.2, -R * 0.7 - armWig * 0.6);
+    arm(R * 0.72, -R * 0.08, R * 1.5, -R * 0.55, R * 1.28, -R * 0.98 - armWig);
+  } else {   // cheer
+    arm(-R * 0.72, -R * 0.08, -R * 1.45, -R * 0.45, -R * 1.28, -R * 0.92 - armWig);
+    arm(R * 0.72, -R * 0.08, R * 1.45, -R * 0.45, R * 1.28, -R * 0.92 - armWig);
+  }
+
+  // wobbly blob body (same silhouette family as the player)
+  const n = 10, pts = [];
+  for (let i = 0; i < n; i++) {
+    const a = (i / n) * Math.PI * 2;
+    const rad = R * (1 + wobAmp * Math.sin(3 * a + wobPh));
+    pts.push([Math.cos(a) * rad, Math.sin(a) * rad]);
+  }
+  cx.beginPath();
+  cx.moveTo((pts[0][0] + pts[1][0]) / 2, (pts[0][1] + pts[1][1]) / 2);
+  for (let i = 0; i < n; i++) {
+    const j = (i + 1) % n, k = (i + 2) % n;
+    cx.quadraticCurveTo(pts[i][0], pts[i][1], (pts[j][0] + pts[k][0]) / 2, (pts[j][1] + pts[k][1]) / 2);
+  }
+  cx.closePath();
+  const grad = cx.createRadialGradient(-R * 0.35, -R * 0.45, R * 0.12, 0, 0, R * 1.2);
+  grad.addColorStop(0, 'rgb(' + Math.min(255, base[0] + 40) + ',' + Math.min(255, base[1] + 40) + ',' + Math.min(255, base[2] + 40) + ')');
+  grad.addColorStop(0.55, bodyFill);
+  grad.addColorStop(1, 'rgb(' + Math.max(0, base[0] - 35) + ',' + Math.max(0, base[1] - 35) + ',' + Math.max(0, base[2] - 35) + ')');
+  cx.fillStyle = grad; cx.fill();
+  cx.strokeStyle = 'rgba(20,16,12,0.6)';
+  cx.lineWidth = 2.5;
+  cx.stroke();
+
+  // wet gloss
+  cx.fillStyle = 'rgba(255,255,255,0.4)';
+  cx.beginPath(); cx.ellipse(-R * 0.33, -R * 0.48, R * 0.42, R * 0.22, -0.6, 0, Math.PI * 2); cx.fill();
+
+  const eyeY = -R * 0.16, eyeDX = R * 0.42, eyeR = R * 0.36;
+  cx.lineCap = 'round';
+  cx.lineWidth = R * 0.09;
+  cx.strokeStyle = '#1a1510';
+
+  // --- eyes per emotion ---
+  if (emote === 'hype') {
+    // wide sparkly eyes
+    cx.fillStyle = '#f6f3ea';
+    cx.strokeStyle = '#1a1510';
+    cx.lineWidth = 1.1;
+    for (let s = -1; s <= 1; s += 2) {
+      cx.beginPath(); cx.arc(s * eyeDX, eyeY, eyeR * 0.9, 0, Math.PI * 2); cx.fill(); cx.stroke();
+    }
+    cx.fillStyle = '#1a1510';
+    for (let s = -1; s <= 1; s += 2) {
+      cx.beginPath(); cx.arc(s * eyeDX, eyeY, eyeR * 0.48, 0, Math.PI * 2); cx.fill();
+    }
+  } else if (emote === 'cool') {
+    // wink: one open, one closed, smirking
+    cx.lineWidth = R * 0.09;
+    cx.beginPath(); cx.arc(-eyeDX, eyeY, eyeR, 0.15, Math.PI - 0.15); cx.stroke();
+    cx.fillStyle = '#1a1510';
+    cx.beginPath(); cx.arc(eyeDX, eyeY, eyeR, 0, Math.PI * 2); cx.fill();
+    cx.fillStyle = 'rgba(255,255,255,0.9)';
+    cx.beginPath(); cx.arc(eyeDX - eyeR * 0.28, eyeY - eyeR * 0.3, eyeR * 0.3, 0, Math.PI * 2); cx.fill();
+  } else if (emote === 'goofy') {
+    // googly eyes crossing inward
+    cx.fillStyle = '#f6f3ea';
+    for (let s = -1; s <= 1; s += 2) {
+      cx.beginPath(); cx.arc(s * eyeDX, eyeY, eyeR * 0.88, 0, Math.PI * 2); cx.fill(); cx.stroke();
+    }
+    cx.fillStyle = '#1a1510';
+    cx.beginPath(); cx.arc(-eyeDX - eyeR * 0.42, eyeY, eyeR * 0.42, 0, Math.PI * 2); cx.fill();
+    cx.beginPath(); cx.arc(eyeDX + eyeR * 0.42, eyeY, eyeR * 0.42, 0, Math.PI * 2); cx.fill();
+  } else if (emote === 'shy') {
+    // tiny happy squeezed eyes
+    cx.lineWidth = R * 0.1;
+    for (let s = -1; s <= 1; s += 2) {
+      cx.beginPath(); cx.arc(s * eyeDX, eyeY, eyeR * 0.75, 0.25, Math.PI - 0.25); cx.stroke();
+    }
+  } else {   // cheer
+    for (let s = -1; s <= 1; s += 2) {
+      cx.beginPath(); cx.arc(s * eyeDX, eyeY, eyeR, 0.15, Math.PI - 0.15); cx.stroke();
+    }
+  }
+
+  // --- mouth per emotion ---
+  cx.fillStyle = '#1a1510';
+  if (emote === 'hype') {
+    cx.beginPath(); cx.ellipse(0, R * 0.24, R * 0.3, R * 0.2, 0, 0, Math.PI * 2); cx.fill();
+  } else if (emote === 'cool') {
+    cx.strokeStyle = '#1a1510';
+    cx.lineWidth = R * 0.08;
+    cx.beginPath(); cx.arc(R * 0.1, R * 0.3, R * 0.22, -0.5, Math.PI * 0.58); cx.stroke();
+  } else if (emote === 'goofy') {
+    // huge open mouth + big tongue out
+    cx.beginPath(); cx.ellipse(0, R * 0.22, R * 0.32, R * 0.22, 0, 0, Math.PI * 2); cx.fill();
+    cx.fillStyle = '#e4685c';
+    cx.beginPath(); cx.ellipse(0, R * 0.42, R * 0.17, R * 0.16, 0, 0, Math.PI * 2); cx.fill();
+  } else if (emote === 'shy') {
+    cx.strokeStyle = '#1a1510';
+    cx.lineWidth = R * 0.08;
+    cx.beginPath(); cx.arc(0, R * 0.32, R * 0.16, 0.25, Math.PI - 0.25); cx.stroke();
+  } else {   // cheer: open grin + little tongue
+    cx.beginPath(); cx.ellipse(0, R * 0.22, R * 0.3, R * 0.2, 0, 0, Math.PI * 2); cx.fill();
+    cx.fillStyle = '#e4685c';
+    cx.beginPath(); cx.ellipse(0, R * 0.36, R * 0.13, R * 0.11, 0, 0, Math.PI * 2); cx.fill();
+  }
+
+  // --- blush per emotion ---
+  if (emote === 'shy') {
+    cx.fillStyle = 'rgba(214,120,110,0.5)';
+  } else if (emote === 'cheer') {
+    cx.fillStyle = 'rgba(214,120,110,0.35)';
+  } else {
+    cx.fillStyle = 'rgba(214,120,110,0.18)';
+  }
+  for (let s = -1; s <= 1; s += 2) {
+    cx.beginPath(); cx.ellipse(s * eyeDX, R * 0.18, R * 0.2, R * 0.13, 0, 0, Math.PI * 2); cx.fill();
+  }
+  cx.restore();
 }
 
 function lose() {
+  hideCard();                    // no card on a loss — the run was wiped
   clearPaintLayer();             // fresh run — start with a clean canvas
+  clearConfetti();               // no confetti on a loss
   deathSplatter(player.x, player.y);
   addShake(14);
   status = 'lost';
@@ -2175,7 +3119,7 @@ function lose() {
   elMsg.classList.remove('hidden');
   elMsgObj.style.display = 'none';
   elMsgT.textContent = loseCause || 'BACK TO THE ROOM!';
-  elMsgS.textContent = 'Tap the screen to retry';
+  elMsgS.textContent = pickTrashTalk() + ' \u2014 tap to retry';
   elRestart.style.display = '';
   elNextBtn.style.display = 'none';
   loseCause = '';
@@ -2199,6 +3143,7 @@ const EndlessRun = {
 
   /* ---- INIT ---- */
   init() {
+    hideCard();                  // endless never shows the art card
     // reset state
     this._paintBlitFrame = 0;
     trackChunks = [];
@@ -2229,7 +3174,8 @@ const EndlessRun = {
     snap = 0;
     stretchEase = 1;
     tetherSproing = 0;
-    paintRGB = '49,150,104';
+    paintRGB = signatureRGB;
+    inkRGB = signatureRGB;          // endless start: brush loads with his paint
     setPaintWell(paintRGB);
     clearPaintLayer();
 
@@ -2513,7 +3459,9 @@ const EndlessRun = {
 
   /* ---- DEATH ---- */
   death() {
+    hideCard();                  // no art card in endless
     clearPaintLayer();           // fresh run — wipe the old paint layer
+    clearConfetti();             // no confetti on a loss
     if (tethered) release();
     status = 'lost';
     statusTimer = 2.0;   // seconds the RUN ENDED screen lingers before auto-restart
@@ -2546,7 +3494,7 @@ const EndlessRun = {
     elMsgScore.innerHTML = '<b>' + runDistance + '</b> m  ·  ' + runCoins + ' coins'
       + (runDistance >= bestDist && bestDist > 0 ? '  ·  <span class="newbest">NEW BEST!</span>' : '')
       + (bestDist > 0 && runDistance < bestDist ? '  ·  best ' + bestDist + 'm' : '');
-    elMsgS.textContent = 'Tap the screen to run again';
+    elMsgS.textContent = pickTrashTalk() + ' \u2014 tap to run again';
     elRestart.style.display = '';
     elNextBtn.style.display = 'none';
     bindRestartBtn();
@@ -2572,9 +3520,7 @@ const EndlessRun = {
     if (status === 'paused' || status === 'ready') return;
 
     if (status === 'lost') {
-      statusTimer -= dt / 60;
-      if (statusTimer <= 0) { this.init(); return; }
-      // still animate sparks/rings during death
+      // game-over screen lingers until tapped (no auto-restart)
       for (let i = sparks.length - 1; i >= 0; i--) {
         const p = sparks[i]; p.life -= dt / 60; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 0.02 * dt;
         if (p.life <= 0) sparks.splice(i, 1);
@@ -2708,6 +3654,8 @@ const EndlessRun = {
 
     snap *= Math.pow(0.84, effDt);
     tetherSproing *= Math.pow(0.88, effDt);
+    stainA = tethered ? 1 : stainA * Math.pow(0.9, effDt);
+    if (stainA < 0.01) stainA = 0;
 
     // spark/ring anim (shared)
     for (let i = sparks.length - 1; i >= 0; i--) {
@@ -2845,11 +3793,11 @@ let vignetteGrad = null;
 let goalGrad = null;
 
 // ---- offscreen layers (baked once, blitted each frame) ----
-// paperLayer: the stretched-sheet background (grain + frame). paintLayer:
-// the wet paint the brush leaves behind - it ACCUMULATES and persists.
+// Floor backgrounds are baked per act theme (paperLayers[theme]). The
+// paint layer is the wet paint the brush leaves behind - it ACCUMULATES.
 // Both are created lazily and skipped where document.createElement is
 // unavailable (e.g. the automated test harness), falling back to flat fills.
-let paperLayer = null;
+const paperLayers = {};
 let paintCanvas = null;
 let paintCtx = null;
 let lastPaintX = null, lastPaintY = null;
@@ -2861,49 +3809,110 @@ function makeCtx() {
   return { el: c, ctx: c.getContext('2d') };
 }
 
-function ensurePaperLayer() {
-  if (paperLayer || typeof document === 'undefined') return;
+// Act themes: 0 Palette(parchment) 1 Floor1(linen) 2 Floor2(blueprint)
+// 3 Floor3(gallery card stock). Endless draws its own sky, custom = Palette.
+function levelFloor() {
+  if (gameMode === GAME_MODES.ENDLESS) return -1;
+  if (levelIndex === CUSTOM_IDX) return 0;
+  return Math.min(3, Math.floor(levelIndex / 10));
+}
+
+// bake the stretched sheet for one act theme (colors below), reused every frame
+function ensurePaperLayer(theme) {
+  if (theme < 0 || theme > 3) theme = 0;
+  if (paperLayers[theme] || typeof document === 'undefined') return;
   const mk = makeCtx();
-  if (!mk) { paperLayer = null; return; }
-  paperLayer = mk.el;
-  const p = mk.ctx;
-  p.fillStyle = '#f2ecdd';
-  p.fillRect(0, 0, W, H);
+  if (!mk) return;
+  const c = mk.el, p = mk.ctx;
+  const Wr = W, Hr = H;
 
-  // stretcher bars peeking around the sheet
-  p.fillStyle = 'rgba(74,56,38,0.14)';
-  p.fillRect(12, 12, W - 24, 9);
-  p.fillRect(12, H - 21, W - 24, 9);
-  p.fillRect(12, 12, 9, H - 24);
-  p.fillRect(W - 21, 12, 9, H - 24);
-
-  // broad, uneven water stains
-  const stainA = p.createRadialGradient(W * 0.24, H * 0.3, 10, W * 0.24, H * 0.3, 330);
-  stainA.addColorStop(0, 'rgba(122,100,58,0.055)');
-  stainA.addColorStop(1, 'rgba(122,100,58,0)');
-  p.fillStyle = stainA; p.fillRect(0, 0, W, H);
-  const stainB = p.createRadialGradient(W * 0.8, H * 0.72, 10, W * 0.8, H * 0.72, 300);
-  stainB.addColorStop(0, 'rgba(158,72,52,0.045)');
-  stainB.addColorStop(1, 'rgba(158,72,52,0)');
-  p.fillStyle = stainB; p.fillRect(0, 0, W, H);
-
-  // fiber grain: fine specks + short strands
-  for (let i = 0; i < 2400; i++) {
-    const gx = Math.random() * W, gy = Math.random() * H;
-    const gw = Math.random() * 1.6 + 0.4;
-    p.fillStyle = Math.random() < 0.5 ? 'rgba(88,66,40,0.055)' : 'rgba(46,36,24,0.05)';
-    p.fillRect(gx, gy, gw, gw * 0.4);
+  function wash(cx, cy, rr, rgb0) {
+    const g = p.createRadialGradient(cx, cy, 6, cx, cy, rr);
+    g.addColorStop(0, rgb0); g.addColorStop(1, 'rgba(0,0,0,0)');
+    p.fillStyle = g; p.fillRect(0, 0, Wr, Hr);
   }
-  p.strokeStyle = 'rgba(88,66,40,0.06)';
-  p.lineWidth = 0.6;
-  for (let i = 0; i < 200; i++) {
-    const sx = Math.random() * W, sy = Math.random() * H;
-    const sa = Math.random() * Math.PI;
+  function grid(step, stroke, stronger) {
+    p.strokeStyle = stroke; p.lineWidth = stronger ? 1.4 : 1;
     p.beginPath();
-    p.moveTo(sx, sy);
-    p.lineTo(sx + Math.cos(sa) * (8 + Math.random() * 26), sy + Math.sin(sa) * (8 + Math.random() * 26));
+    for (let x = 0; x <= Wr; x += step) { p.moveTo(x, 0); p.lineTo(x, Hr); }
+    for (let y = 0; y <= Hr; y += step) { p.moveTo(0, y); p.lineTo(Wr, y); }
     p.stroke();
   }
+  function specks(count, color, maxw) {
+    for (let i = 0; i < count; i++) {
+      p.fillStyle = color;
+      const w = maxw || 1.6;
+      p.fillRect(Math.random() * Wr, Math.random() * Hr, Math.random() * w + 0.4, Math.random() * (w * 0.5) + 0.4);
+    }
+  }
+
+  if (theme === 0) {            // Palette — raw parchment & stretcher bars
+    p.fillStyle = '#f2ecdd'; p.fillRect(0, 0, Wr, Hr);
+    p.fillStyle = 'rgba(74,56,38,0.14)';
+    p.fillRect(12, 12, Wr - 24, 9); p.fillRect(12, Hr - 21, Wr - 24, 9);
+    p.fillRect(12, 12, 9, Hr - 24); p.fillRect(Wr - 21, 12, 9, Hr - 24);
+    wash(Wr * 0.24, Hr * 0.3, 330, 'rgba(122,100,58,0.055)');
+    wash(Wr * 0.8, Hr * 0.72, 300, 'rgba(158,72,52,0.045)');
+    for (let i = 0; i < 2400; i++) {
+      p.fillStyle = Math.random() < 0.5 ? 'rgba(88,66,40,0.055)' : 'rgba(46,36,24,0.05)';
+      const gw = Math.random() * 1.6 + 0.4;
+      p.fillRect(Math.random() * Wr, Math.random() * Hr, gw, gw * 0.4);
+    }
+    p.strokeStyle = 'rgba(88,66,40,0.06)'; p.lineWidth = 0.6;
+    for (let i = 0; i < 200; i++) {
+      const sx = Math.random() * Wr, sy = Math.random() * Hr, sa = Math.random() * Math.PI;
+      p.beginPath(); p.moveTo(sx, sy);
+      p.lineTo(sx + Math.cos(sa) * (8 + Math.random() * 26), sy + Math.sin(sa) * (8 + Math.random() * 26));
+      p.stroke();
+    }
+  } else if (theme === 1) {     // Floor 1 — woven linen canvas
+    p.fillStyle = '#ede1c6'; p.fillRect(0, 0, Wr, Hr);
+    p.strokeStyle = 'rgba(122,88,48,0.045)'; p.lineWidth = 1;
+    for (let x = -Hr; x < Wr; x += 26) {
+      p.beginPath(); p.moveTo(x, 0); p.lineTo(x + Hr, Hr); p.stroke();
+    }
+    for (let x = -Hr; x < Wr; x += 26) {
+      p.beginPath(); p.moveTo(x + Hr, 0); p.lineTo(x, Hr); p.stroke();
+    }
+    wash(Wr * 0.3, Hr * 0.28, 320, 'rgba(196,140,86,0.05)');
+    wash(Wr * 0.75, Hr * 0.7, 300, 'rgba(140,160,120,0.05)');
+    for (let i = 0; i < 1500; i++) {
+      p.fillStyle = Math.random() < 0.5 ? 'rgba(120,84,44,0.05)' : 'rgba(60,46,28,0.045)';
+      const gw = Math.random() * 1.3 + 0.4;
+      p.fillRect(Math.random() * Wr, Math.random() * Hr, gw, gw * 0.4);
+    }
+  } else if (theme === 2) {     // Floor 2 — blueprint drafting paper
+    p.fillStyle = '#16243f'; p.fillRect(0, 0, Wr, Hr);
+    grid(200, 'rgba(130,180,240,0.16)', true);
+    grid(40, 'rgba(120,170,235,0.08)', false);
+    // drafting registration marks
+    p.strokeStyle = 'rgba(200,222,255,0.15)'; p.lineWidth = 1;
+    for (let i = 0; i < 34; i++) {
+      const mx = Math.random() * Wr, my = Math.random() * Hr;
+      p.beginPath();
+      p.moveTo(mx - 7, my); p.lineTo(mx + 7, my);
+      p.moveTo(mx, my - 7); p.lineTo(mx, my + 7);
+      p.stroke();
+    }
+    specks(1200, 'rgba(235,244,255,0.10)', 1);
+  } else {                      // Floor 3 — dark gallery card stock
+    p.fillStyle = '#221b19'; p.fillRect(0, 0, Wr, Hr);
+    const vg = p.createRadialGradient(Wr / 2, Hr / 2, Hr * 0.3, Wr / 2, Hr / 2, Hr * 0.85);
+    vg.addColorStop(0, 'rgba(0,0,0,0)');
+    vg.addColorStop(1, 'rgba(0,0,0,0.42)');
+    p.fillStyle = vg; p.fillRect(0, 0, Wr, Hr);
+    // faint pastel dust + paper flecks so the dark reads as textured card
+    for (let i = 0; i < 900; i++) {
+      p.fillStyle = Math.random() < 0.4 ? 'rgba(255,236,205,0.05)' : 'rgba(255,255,255,0.03)';
+      const gw = Math.random() * 1.1 + 0.3;
+      p.fillRect(Math.random() * Wr, Math.random() * Hr, gw, gw * 0.4);
+    }
+    for (let i = 0; i < 26; i++) {
+      p.fillStyle = ['rgba(140,200,180,0.05)', 'rgba(220,160,120,0.05)', 'rgba(170,150,220,0.05)'][i % 3];
+      p.beginPath(); p.arc(Math.random() * Wr, Math.random() * Hr, 2 + Math.random() * 7, 0, Math.PI * 2); p.fill();
+    }
+  }
+  paperLayers[theme] = c;
 }
 
 function ensurePaintLayer() {
@@ -2924,6 +3933,10 @@ function addPaintStroke(x, y, spd, rgb) {
   if (lastPaintX !== null && spd > 0.6) {
     paintCtx.lineCap = 'round';
     paintCtx.lineJoin = 'round';
+    // pigment behavior: strokes MIX where they cross. On light paper that's a
+    // multiply (real color mixing); on dark blueprint/gallery it's lighter (glow).
+    const floor = levelFloor();
+    paintCtx.globalCompositeOperation = (floor === 2 || floor === 3) ? 'lighter' : 'multiply';
     // broad wet smear
     paintCtx.globalAlpha = 0.16;
     paintCtx.strokeStyle = 'rgb(' + rgb + ')';
@@ -2932,7 +3945,8 @@ function addPaintStroke(x, y, spd, rgb) {
     paintCtx.moveTo(lastPaintX, lastPaintY);
     paintCtx.lineTo(x, y);
     paintCtx.stroke();
-    // bright wet core
+    // bright wet core (plain over the smear)
+    paintCtx.globalCompositeOperation = 'source-over';
     paintCtx.globalAlpha = 0.9;
     paintCtx.lineWidth = 3 + Math.min(3, spd * 0.5);
     paintCtx.beginPath();
@@ -2954,6 +3968,7 @@ function clearPaintLayer() {
 function deathSplatter(x, y) {
   ensurePaintLayer();
   if (!paintCtx) return;
+  paintCtx.globalCompositeOperation = 'source-over';
   const rgb = paintRGB;
   const count = 8 + Math.floor(Math.random() * 5);
   paintCtx.lineCap = 'round';
@@ -2977,12 +3992,116 @@ function deathSplatter(x, y) {
   paintCtx.globalAlpha = 1;
 }
 
+// ---------------- floor staining: the canvas reacts to the run ----------------
+let slowPoolCd = 0;             // frames between slow-ride wet pools
+const GOAL_PURPLE = '138,85,184';
+
+// faint "paint bucket ring" stains under each orb + a sign-here ring at the goal,
+// stamped into the fresh paint layer so every attempt starts like a workspace.
+function stampWorkspace() {
+  ensurePaintLayer();
+  if (!paintCtx) return;
+  if (!level || !Array.isArray(level.orbs)) return;
+  const p = paintCtx;
+  p.globalCompositeOperation = 'source-over';
+  p.lineCap = 'round';
+  for (const o of level.orbs) {
+    const col = orbColors[o.type].paint;
+    p.globalAlpha = 0.10; p.strokeStyle = 'rgb(' + col + ')'; p.lineWidth = 1.4;
+    p.beginPath(); p.arc(o.x, o.y, o.r + 10, 0, Math.PI * 2); p.stroke();
+    p.globalAlpha = 0.05; p.lineWidth = 1;
+    p.beginPath(); p.arc(o.x, o.y, o.r + 20, 0, Math.PI * 2); p.stroke();
+    if (o.req) {
+      // key buckets get a gold 'ring' stain in the workspace
+      p.globalAlpha = 0.28; p.strokeStyle = 'rgb(224,170,44)'; p.lineWidth = 2;
+      p.beginPath(); p.arc(o.x, o.y, o.r + 15, 0, Math.PI * 2); p.stroke();
+    }
+  }
+  const g = level.goal;
+  p.globalAlpha = 0.4; p.strokeStyle = 'rgb(' + GOAL_PURPLE + ')'; p.lineWidth = 2;
+  p.beginPath(); p.arc(g.x, g.y, g.r + 8, 0, Math.PI * 2); p.stroke();
+  p.globalAlpha = 0.5;
+  p.beginPath(); p.arc(g.x, g.y, g.r + 8, -Math.PI * 0.25, Math.PI * 0.25); p.stroke();
+  p.globalAlpha = 0.18;
+  p.beginPath(); p.arc(g.x, g.y, g.r + 8, Math.PI * 0.75, Math.PI * 1.25); p.stroke();
+  p.globalAlpha = 1;
+}
+
+// the "final stamp": a radial paint wave permanently staining the goal area.
+function stampGoalSeal() {
+  ensurePaintLayer();
+  if (!paintCtx) return;
+  const g = level.goal;
+  const p = paintCtx;
+  // rich inner disc that "fills in" the signing spot
+  p.globalCompositeOperation = 'source-over';
+  const grad = p.createRadialGradient(g.x, g.y, 2, g.x, g.y, g.r * 1.6);
+  grad.addColorStop(0, 'rgba(138,85,184,0.34)');
+  grad.addColorStop(0.7, 'rgba(138,85,184,0.12)');
+  grad.addColorStop(1, 'rgba(138,85,184,0)');
+  p.fillStyle = grad; p.beginPath(); p.arc(g.x, g.y, g.r * 1.6, 0, Math.PI * 2); p.fill();
+  // expanding wave rings
+  for (let i = 0; i < 5; i++) {
+    p.globalAlpha = 0.5 - i * 0.09;
+    p.strokeStyle = 'rgb(' + GOAL_PURPLE + ')';
+    p.lineWidth = Math.max(1, 5 - i);
+    p.beginPath(); p.arc(g.x, g.y, g.r + 10 + i * (g.r * 0.45), 0, Math.PI * 2); p.stroke();
+  }
+  p.globalAlpha = 1;
+}
+
+// high-velocity release sprays a few directional droplets behind the blob
+function splatterLaunch(x, y, dx, dy) {
+  ensurePaintLayer();
+  if (!paintCtx) return;
+  const p = paintCtx;
+  p.globalCompositeOperation = 'source-over';
+  const sp = Math.hypot(dx, dy) || 1;
+  const nx = dx / sp, ny = dy / sp;
+  const px = -ny, py = nx;                       // perpendicular
+  const col = inkRGB || '49,150,104';
+  p.lineCap = 'round';
+  const count = 5 + Math.floor(Math.random() * 4);
+  for (let i = 0; i < count; i++) {
+    const d = 10 + Math.random() * 34;           // distance behind
+    const s = (Math.random() - 0.5) * 1.6;       // lateral spread
+    const bx = x - nx * d + px * s * 8;
+    const by = y - ny * d + py * s * 8;
+    const al = 0.22 + Math.random() * 0.2;
+    p.globalAlpha = al;
+    p.strokeStyle = 'rgb(' + col + ')';
+    p.lineWidth = 1 + Math.random() * 1.6;
+    p.beginPath();
+    p.moveTo(bx, by);
+    p.lineTo(bx - nx * (4 + Math.random() * 10) - px * s * 3, by - ny * (4 + Math.random() * 10) - py * s * 3);
+    p.stroke();
+  }
+  p.globalAlpha = 1;
+}
+
+// creeping a bucket leaves a thick saturated pool of that paint on the floor
+function stampSlowPool(o) {
+  ensurePaintLayer();
+  if (!paintCtx || !o) return;
+  const p = paintCtx;
+  p.globalCompositeOperation = 'source-over';
+  const col = orbColors[o.type].paint;
+  p.globalAlpha = 0.10;
+  p.fillStyle = 'rgb(' + col + ')';
+  p.beginPath(); p.arc(o.x, o.y, o.r * 1.7, 0, Math.PI * 2); p.fill();
+  p.globalAlpha = 0.16;
+  p.beginPath(); p.arc(o.x, o.y, o.r * 0.9, 0, Math.PI * 2); p.fill();
+  p.globalAlpha = 1;
+}
+
 function drawBackground() {
-  ensurePaperLayer();
-  if (paperLayer) {
-    ctx.drawImage(paperLayer, 0, 0);
+  const th = levelFloor();
+  const theme = th < 0 ? 0 : th;
+  ensurePaperLayer(theme);
+  if (paperLayers[theme]) {
+    ctx.drawImage(paperLayers[theme], 0, 0);
   } else {
-    ctx.fillStyle = '#f2ecdd';
+    ctx.fillStyle = ['#f2ecdd', '#ede1c6', '#16243f', '#221b19'][theme];
     ctx.fillRect(0, 0, W, H);
   }
 
@@ -3125,6 +4244,125 @@ function drawWalls() {
 // cached linear gradients for orb bodies, keyed by type + radius
 const orbBodyGrads = {};
 
+// Bucket expressions — the talking bucket (or the one being ridden) shows a
+// matching emotion on its tin body. feels: happy | wink | laugh | wow | sad | pout | annoyed | tongue
+function drawOrbFace(c, r, feel) {
+  const eyeY = r * 0.12, eyeDX = r * 0.4, eyeR = r * 0.22;
+  const ink = '#1a1510';
+  const mx = 0, my = r * 0.52;
+  ctx.lineCap = 'round';
+  ctx.lineWidth = Math.max(1, r * 0.09);
+
+  // default bean eyes (used by most moods)
+  function beanEyes(openL, openR) {
+    ctx.fillStyle = ink;
+    if (openL) { ctx.beginPath(); ctx.arc(-eyeDX, eyeY, eyeR, 0, Math.PI * 2); ctx.fill(); }
+    else { ctx.strokeStyle = ink; ctx.beginPath(); ctx.arc(-eyeDX, eyeY, eyeR, 0.15, Math.PI - 0.15); ctx.stroke(); }
+    if (openR) { ctx.beginPath(); ctx.arc(eyeDX, eyeY, eyeR, 0, Math.PI * 2); ctx.fill(); }
+    else { ctx.strokeStyle = ink; ctx.beginPath(); ctx.arc(eyeDX, eyeY, eyeR, 0.15, Math.PI - 0.15); ctx.stroke(); }
+    ctx.fillStyle = 'rgba(255,255,255,0.9)';
+    if (openL) { ctx.beginPath(); ctx.arc(-eyeDX - eyeR * 0.28, eyeY - eyeR * 0.32, eyeR * 0.34, 0, Math.PI * 2); ctx.fill(); }
+    if (openR) { ctx.beginPath(); ctx.arc(eyeDX - eyeR * 0.28, eyeY - eyeR * 0.32, eyeR * 0.34, 0, Math.PI * 2); ctx.fill(); }
+  }
+
+  ctx.strokeStyle = ink;
+  switch (feel) {
+    case 'laugh':   // big joyful open-mouth + happy closed eyes
+      ctx.lineWidth = Math.max(1, r * 0.1);
+      ctx.beginPath(); ctx.arc(-eyeDX, eyeY, eyeR, 0.2, Math.PI - 0.2); ctx.lineWidth = Math.max(1, r * 0.1); ctx.stroke();
+      ctx.beginPath(); ctx.arc(eyeDX, eyeY, eyeR, 0.2, Math.PI - 0.2); ctx.stroke();
+      ctx.fillStyle = ink;
+      ctx.beginPath();
+      ctx.ellipse(mx, my, r * 0.26, r * 0.2, 0, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    case 'wow':     // wide eyes, tiny o mouth
+      ctx.fillStyle = '#f6f3ea';
+      ctx.strokeStyle = ink;
+      ctx.lineWidth = 1.1;
+      ctx.beginPath(); ctx.arc(-eyeDX, eyeY, eyeR * 1.15, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.beginPath(); ctx.arc(eyeDX, eyeY, eyeR * 1.15, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = ink;
+      ctx.beginPath(); ctx.arc(-eyeDX, eyeY, eyeR * 0.55, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(eyeDX, eyeY, eyeR * 0.55, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath();
+      ctx.ellipse(mx, my + r * 0.04, r * 0.13, r * 0.16, 0, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    case 'sad':     // droopy lids + downturned mouth
+      beanEyes(true, true);
+      ctx.lineWidth = Math.max(1, r * 0.08);
+      // heavy lids
+      ctx.strokeStyle = 'rgba(26,21,16,0.7)';
+      ctx.beginPath(); ctx.moveTo(-eyeDX - eyeR, eyeY - eyeR); ctx.lineTo(-eyeDX + eyeR, eyeY - eyeR * 0.4); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(eyeDX + eyeR, eyeY - eyeR); ctx.lineTo(eyeDX - eyeR, eyeY - eyeR * 0.4); ctx.stroke();
+      // frown
+      ctx.strokeStyle = ink;
+      ctx.beginPath();
+      ctx.arc(mx, my + r * 0.28, r * 0.2, Math.PI * 1.15, Math.PI * 1.85);
+      ctx.stroke();
+      break;
+    case 'pout':    // annoyed flat mouth + ornery half-lidded eyes
+      beanEyes(true, true);
+      ctx.lineWidth = Math.max(1, r * 0.07);
+      ctx.strokeStyle = ink;
+      ctx.beginPath(); ctx.moveTo(-eyeDX - eyeR, eyeY - eyeR * 0.5); ctx.lineTo(-eyeDX + eyeR, eyeY + eyeR * 0.2); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(eyeDX + eyeR, eyeY - eyeR * 0.5); ctx.lineTo(eyeDX - eyeR, eyeY + eyeR * 0.2); ctx.stroke();
+      // tight little pout
+      ctx.lineWidth = Math.max(1, r * 0.1);
+      ctx.beginPath();
+      ctx.arc(mx, my, r * 0.18, Math.PI * 0.2, Math.PI * 0.8);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.ellipse(mx, my + r * 0.05, r * 0.14, r * 0.09, 0, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    case 'annoyed': // slanted eyes + grimace line
+      ctx.lineWidth = Math.max(1, r * 0.08);
+      ctx.strokeStyle = ink;
+      ctx.beginPath(); ctx.moveTo(-eyeDX - eyeR, eyeY); ctx.lineTo(-eyeDX + eyeR, eyeY - eyeR * 0.6); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(eyeDX - eyeR, eyeY - eyeR * 0.6); ctx.lineTo(eyeDX + eyeR, eyeY); ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(mx, my + r * 0.14, r * 0.16, Math.PI * 1.1, Math.PI * 1.9);
+      ctx.stroke();
+      break;
+    case 'tongue':  // goofy open mouth + pink tongue
+      beanEyes(true, true);
+      ctx.fillStyle = ink;
+      ctx.beginPath();
+      ctx.ellipse(mx, my, r * 0.24, r * 0.16, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#e4685c';
+      ctx.strokeStyle = 'rgba(150,60,52,0.6)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.ellipse(mx, my + r * 0.13, r * 0.11, r * 0.16, 0, 0, Math.PI * 2);
+      ctx.fill(); ctx.stroke();
+      ctx.fillStyle = 'rgba(255,255,255,0.35)';
+      ctx.beginPath();
+      ctx.ellipse(mx - r * 0.04, my + r * 0.08, r * 0.05, r * 0.05, 0, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    case 'wink':    // one eye closed, cheeky smirk
+      beanEyes(false, true);
+      ctx.strokeStyle = ink;
+      ctx.lineWidth = Math.max(1, r * 0.09);
+      ctx.beginPath();
+      ctx.arc(mx, my + r * 0.05, r * 0.24, -0.4, Math.PI * 0.68);
+      ctx.stroke();
+      break;
+    default:        // 'happy' - quiet smile
+      beanEyes(true, true);
+      ctx.strokeStyle = ink;
+      ctx.lineWidth = Math.max(1, r * 0.08);
+      ctx.beginPath();
+      ctx.arc(mx, my, r * 0.2, 0.3, Math.PI - 0.3);
+      ctx.stroke();
+      break;
+  }
+  ctx.lineCap = 'butt';
+}
+
 function drawOrbs() {
   level.orbs.forEach((o, i) => {
     const c = orbColors[o.type];
@@ -3215,14 +4453,12 @@ function drawOrbs() {
     ctx.arc(0, rimY - r * 0.1, r * 0.95, Math.PI, 0, false);
     ctx.stroke();
 
-    // bean eyes on the body
-    const eyeY = r * 0.12, eyeDX = r * 0.4, eyeR = r * 0.22;
-    ctx.fillStyle = '#1a1510';
-    ctx.beginPath(); ctx.arc(-eyeDX, eyeY, eyeR, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.arc(eyeDX, eyeY, eyeR, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = 'rgba(255,255,255,0.9)';
-    ctx.beginPath(); ctx.arc(-eyeDX - eyeR * 0.28, eyeY - eyeR * 0.32, eyeR * 0.34, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.arc(eyeDX - eyeR * 0.28, eyeY - eyeR * 0.32, eyeR * 0.34, 0, Math.PI * 2); ctx.fill();
+    // expression: talking bucket matches its line's mood; the attached bucket
+    // reacts to being ridden; everyone else just wears a quiet smile
+    let feel = 'happy';
+    if (orbSay && orbSayOrb === o && orbSay.life > 0)      feel = orbSay.feel;
+    else if (attached) feel = o.type === 'turbo' ? 'laugh' : (o.type === 'repel' ? 'wow' : 'happy');
+    drawOrbFace(c, r, feel);
 
     // type accents
     if (o.type === 'turbo') {
@@ -3240,7 +4476,7 @@ function drawOrbs() {
         ctx.stroke();
       }
     } else if (o.type === 'repel') {
-      // alizarin: dashed warning ring + chevrons
+      // repel: dashed warning ring + chevrons
       ctx.strokeStyle = 'rgba(181,55,42,0.95)';
       ctx.lineWidth = 1.8;
       ctx.setLineDash([4, 4]);
@@ -3262,6 +4498,32 @@ function drawOrbs() {
       }
     }
 
+    // palette-mix key badge (bobbles above the bucket)
+    if (o.req) {
+      const by = -r * 2.1;
+      ctx.lineCap = 'round';
+      if (!o.reqDone) {
+        const pr = 6 * (1 + Math.sin(time * 4 + i * 1.3) * 0.15);
+        ctx.strokeStyle = 'rgba(255,214,110,0.95)';
+        ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(0, by, pr, 0, Math.PI * 2); ctx.stroke();
+        ctx.strokeStyle = 'rgba(92,64,12,0.9)';
+        ctx.lineWidth = 1.7;
+        ctx.beginPath();
+        ctx.moveTo(-2.6, by); ctx.lineTo(2.6, by);
+        ctx.moveTo(0, by - 2.4); ctx.lineTo(0, by + 2.4);
+        ctx.stroke();
+      } else {
+        ctx.fillStyle = 'rgba(96,186,110,0.96)';
+        ctx.beginPath(); ctx.arc(0, by, 6, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = 'rgba(255,255,255,0.96)';
+        ctx.lineWidth = 2; ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(-2.2, by); ctx.lineTo(-0.7, by + 1.7); ctx.lineTo(2.6, by - 1.7);
+        ctx.stroke();
+      }
+    }
+
     ctx.restore();
   });
 }
@@ -3269,6 +4531,7 @@ function drawOrbs() {
 function drawGoal() {
   const g = level.goal;
   const pulse = g.r + Math.sin(time * 3) * 4;
+
   // soft sign-spot fill (cached - rebuilt only when the goal changes)
   if (!goalGrad) {
     goalGrad = ctx.createRadialGradient(g.x, g.y, 4, g.x, g.y, g.r * 0.9);
@@ -3308,11 +4571,15 @@ function drawGoal() {
   ctx.shadowBlur = 0;
 }
 
-// Soft arrow pointing at the goal while the ball is flying loose.
+// While flying loose, steer toward the next unvisited KEY bucket (in its paint
+// color); once the palette is mixed it points at the now-open signing spot.
 function drawBeacon() {
   if (status !== 'playing' || tethered) return;
-  const g = level.goal;
-  const dx = g.x - player.x, dy = g.y - player.y;
+  const key = nextReqOrb();
+  const tx = key ? key.x : level.goal.x;
+  const ty = key ? key.y : level.goal.y;
+  const col = key ? orbColors[key.type].paint : '138,85,184';
+  const dx = tx - player.x, dy = ty - player.y;
   const d = Math.hypot(dx, dy) || 1;
   const angle = Math.atan2(dy, dx);
   const x0 = player.x + Math.cos(angle) * (PLAYER_R + 10);
@@ -3320,7 +4587,7 @@ function drawBeacon() {
   const len = Math.min(80, 24 + d * 0.035);
 
   ctx.save();
-  ctx.strokeStyle = 'rgba(138,85,184,0.5)';
+  ctx.strokeStyle = 'rgba(' + col + ',0.5)';
   ctx.lineWidth = 2;
   ctx.setLineDash([5, 9]);
   ctx.beginPath();
@@ -3331,7 +4598,7 @@ function drawBeacon() {
 
   const hx = x0 + Math.cos(angle) * (len - 6);
   const hy = y0 + Math.sin(angle) * (len - 6);
-  ctx.fillStyle = 'rgba(172,132,216,0.8)';
+  ctx.fillStyle = 'rgba(' + col + ',0.85)';
   ctx.beginPath();
   ctx.moveTo(hx, hy);
   ctx.lineTo(hx - Math.cos(angle - 0.45) * 9, hy - Math.sin(angle - 0.45) * 9);
@@ -3424,7 +4691,7 @@ function drawTrail() {
   for (let i = 0; i < trail.length - 1; i += stride) {
     const t = 1 - i / trail.length;               // 1 near the player
     const a = Math.min(0.5, t * 0.4 * gain);
-    ctx.strokeStyle = 'rgba(' + paintRGB + ',' + a.toFixed(3) + ')';
+    ctx.strokeStyle = 'rgba(' + inkRGB + ',' + a.toFixed(3) + ')';
     ctx.lineWidth = (4 * t + 1.2) * (0.7 + 0.45 * gain) * brushScale;
     ctx.beginPath();
     ctx.moveTo(trail[i].x, trail[i].y);
@@ -3439,7 +4706,7 @@ function drawTrail() {
   // soft under-glow
   for (let i = from; i < trail.length - 1; i += stride) {
     const t = 1 - i / trail.length;
-    ctx.strokeStyle = 'rgba(' + paintRGB + ',' + (t * 0.14).toFixed(3) + ')';
+    ctx.strokeStyle = 'rgba(' + inkRGB + ',' + (t * 0.14).toFixed(3) + ')';
     ctx.lineWidth = wBase * 2.6 * (0.6 + 0.4 * t);
     ctx.beginPath();
     ctx.moveTo(trail[i].x, trail[i].y);
@@ -3583,55 +4850,172 @@ function drawPlayer() {
   ctx.arc(0, -R * 1.05, R * 0.3, 0, Math.PI * 2);
   ctx.stroke();
 
-  // glossy ball body - clean sphere, no wobbly silhouette
-  // body is pastel (mixed toward white) so the white eyes pop
+  // ---- organic paint-blob body: soft lumpy silhouette, not a perfect circle.
+  // The wobble is driven by speed (quivers harder/faster while flying) and a
+  // slow breathing ripple when idle, so the blob always feels alive.
+  const animT = performance.now() * 0.001;
+  const wobAmp = 0.05 + Math.min(0.10, spd * 0.006) + snap * 0.16;
+  const wobPh  = animT * (1.2 + Math.min(3.0, spd * 0.10));
+  function blobOutline(bR) {
+    const n = 10, pts = [];
+    for (let i = 0; i < n; i++) {
+      const a = (i / n) * Math.PI * 2;
+      const rad = bR * (1 + wobAmp * Math.sin(3 * a + wobPh));
+      pts.push([Math.cos(a) * rad, Math.sin(a) * rad]);
+    }
+    ctx.beginPath();
+    ctx.moveTo((pts[0][0] + pts[1][0]) / 2, (pts[0][1] + pts[1][1]) / 2);
+    for (let i = 0; i < n; i++) {
+      const j = (i + 1) % n, k = (i + 2) % n;
+      ctx.quadraticCurveTo(pts[i][0], pts[i][1], (pts[j][0] + pts[k][0]) / 2, (pts[j][1] + pts[k][1]) / 2);
+    }
+    ctx.closePath();
+  }
+
+  // body is pastel (mixed toward white) so the face pops.
+  // While riding a bucket he LEANS toward that paint (a real visible mix),
+  // then dries back to his own color after release (stainA fades).
   const rgb = (paintRGB + '').split(/,\s*/).map(Number);
-  const base = rgb.map(v => Math.round(v + (255 - v) * 0.55));
-  const grad = ctx.createRadialGradient(-R * 0.35, -R * 0.4, R * 0.15, 0, 0, R * 1.25);
+  let base = rgb.map(v => Math.round(v + (255 - v) * 0.55));
+  if (stainA > 0 && stainRGB) {
+    const tint = (stainRGB + '').split(/,\s*/).map(Number);
+    const k = stainA * 0.62;
+    base = base.map((v, i) => Math.round(v + (tint[i] - v) * k));
+  }
+  const grad = ctx.createRadialGradient(-R * 0.35, -R * 0.42, R * 0.15, 0, 0, R * 1.25);
   grad.addColorStop(0, 'rgb(' + Math.min(255, base[0] + 45) + ',' + Math.min(255, base[1] + 45) + ',' + Math.min(255, base[2] + 45) + ')');
   grad.addColorStop(0.55, 'rgb(' + base.join(',') + ')');
   grad.addColorStop(1, 'rgb(' + Math.max(0, base[0] - 32) + ',' + Math.max(0, base[1] - 32) + ',' + Math.max(0, base[2] - 32) + ')');
-  ctx.beginPath();
-  ctx.arc(0, 0, R, 0, Math.PI * 2);
+  blobOutline(R);
   ctx.fillStyle = grad;
   ctx.fill();
   ctx.strokeStyle = 'rgba(20,16,12,0.6)';
   ctx.lineWidth = 2.5;
   ctx.stroke();
 
-  // wet gloss sitting on the top-left
+  // wet gloss sitting near the top-left of the wobbly body
   ctx.fillStyle = 'rgba(255,255,255,0.4)';
   ctx.beginPath();
-  ctx.ellipse(-R * 0.36, -R * 0.44, R * 0.42, R * 0.24, -0.6, 0, Math.PI * 2);
+  ctx.ellipse(-R * 0.33, -R * 0.46, R * 0.42, R * 0.22, -0.6, 0, Math.PI * 2);
   ctx.fill();
 
-  // ball-guy eyes: white sclera + black pupil
-  const eyeY = -R * 0.24, eyeDX = R * 0.44, eyeR = R * 0.34;
-  ctx.fillStyle = '#f6f3ea';
-  ctx.strokeStyle = '#1a1510';
-  ctx.lineWidth = 1;
-  ctx.beginPath(); ctx.arc(-eyeDX, eyeY, eyeR, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-  ctx.beginPath(); ctx.arc(eyeDX, eyeY, eyeR, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-  // black eyeballs looking slightly toward motion
-  const pupR = eyeR * 0.55;
-  const look = Math.max(-0.18, Math.min(0.18, player.vx * 0.006));
-  ctx.fillStyle = '#1a1510';
-  ctx.beginPath(); ctx.arc(-eyeDX + look * eyeR, eyeY, pupR, 0, Math.PI * 2); ctx.fill();
-  ctx.beginPath(); ctx.arc(eyeDX + look * eyeR, eyeY, pupR, 0, Math.PI * 2); ctx.fill();
-  ctx.fillStyle = 'rgba(255,255,255,0.9)';
-  ctx.beginPath(); ctx.arc(-eyeDX - pupR * 0.3 + look * eyeR, eyeY - pupR * 0.3, pupR * 0.3, 0, Math.PI * 2); ctx.fill();
-  ctx.beginPath(); ctx.arc(eyeDX - pupR * 0.3 + look * eyeR, eyeY - pupR * 0.3, pupR * 0.3, 0, Math.PI * 2); ctx.fill();
+  // ---- face: big soft eyes that blink, cheeks, and a mouth that reacts ----
+  const eyeY = -R * 0.2, eyeDX = R * 0.42, eyeR = R * 0.40;
+  const look = Math.max(-0.22, Math.min(0.22, player.vx * 0.006));
+  const excited   = moving && spd > 9;      // whipping around = elated
+  const surprised = snap > 0.12;            // just grabbed a bucket
+  const pupR = eyeR * (excited ? 0.6 : 0.52);
 
-  // little smile while moving fast (ball-guy energy)
-  if (moving) {
+  // blink: closed lids for a beat every few seconds (pure time function)
+  const bPhase = (animT * 1.1) % 4.8;
+  const lids = bPhase > 4.35 ? Math.min(1, (bPhase - 4.35) * 3) : 0;
+
+  if (lids > 0.5) {
+    // closed lids - happy squeeze
     ctx.strokeStyle = '#1a1510';
-    ctx.lineWidth = Math.max(1, R * 0.08);
+    ctx.lineWidth = Math.max(1, R * 0.07);
     ctx.lineCap = 'round';
-    ctx.beginPath();
-    ctx.arc(0, R * 0.32, R * 0.28, 0.25, Math.PI - 0.25);
-    ctx.stroke();
+    const arcR = R * 0.42, arcUp = -R * 0.16;
+    ctx.beginPath(); ctx.arc(-eyeDX, arcUp, arcR, 0.15, Math.PI - 0.15); ctx.stroke();
+    ctx.beginPath(); ctx.arc(eyeDX, arcUp, arcR, 0.15, Math.PI - 0.15); ctx.stroke();
+    ctx.lineCap = 'butt';
+  } else {
+    // open eyes - white sclera + pupil looking toward motion
+    ctx.fillStyle = '#f6f3ea';
+    ctx.strokeStyle = '#1a1510';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.arc(-eyeDX, eyeY, eyeR, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    ctx.beginPath(); ctx.arc(eyeDX, eyeY, eyeR, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#1a1510';
+    ctx.beginPath(); ctx.arc(-eyeDX + look * eyeR, eyeY, pupR, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(eyeDX + look * eyeR, eyeY, pupR, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.92)';
+    ctx.beginPath(); ctx.arc(-eyeDX - pupR * 0.3 + look * eyeR, eyeY - pupR * 0.3, pupR * 0.34, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(eyeDX - pupR * 0.3 + look * eyeR, eyeY - pupR * 0.3, pupR * 0.34, 0, Math.PI * 2); ctx.fill();
+  }
+
+  // determined brows while swinging on a bucket
+  if (tethered) {
+    ctx.strokeStyle = '#1a1510';
+    ctx.lineWidth = Math.max(1, R * 0.06);
+    ctx.lineCap = 'round';
+    const bx = eyeR * 1.1, by = -eyeY - eyeR * 0.7;
+    ctx.beginPath(); ctx.moveTo(-eyeDX - bx, by + eyeR * 0.4); ctx.lineTo(-eyeDX + bx * 0.35, by); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(eyeDX + bx, by + eyeR * 0.4); ctx.lineTo(eyeDX - bx * 0.35, by); ctx.stroke();
     ctx.lineCap = 'butt';
   }
+
+  // blush cheeks (a little warmer when excited)
+  if (playing) {
+    const blA = 0.14 + (excited ? 0.10 : 0);
+    ctx.fillStyle = 'rgba(214,120,110,' + blA.toFixed(3) + ')';
+    ctx.beginPath(); ctx.ellipse(-eyeDX, R * 0.12, R * 0.2, R * 0.12, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(eyeDX, R * 0.12, R * 0.2, R * 0.12, 0, 0, Math.PI * 2); ctx.fill();
+  }
+
+  // mouth: surprised "o" on grab, happy open smile when fast, gentle smile otherwise
+  ctx.strokeStyle = '#1a1510';
+  ctx.lineWidth = Math.max(1, R * 0.08);
+  ctx.lineCap = 'round';
+  if (surprised) {
+    ctx.fillStyle = '#1a1510';
+    ctx.beginPath();
+    ctx.ellipse(0, R * 0.16, R * 0.15, R * 0.2, 0, 0, Math.PI * 2);
+    ctx.fill();
+  } else if (excited) {
+    ctx.fillStyle = '#1a1510';
+    ctx.beginPath();
+    ctx.ellipse(0, R * 0.2, R * 0.26, R * 0.18, 0, 0, Math.PI * 2);
+    ctx.fill();
+  } else if (moving) {
+    ctx.beginPath();
+    ctx.arc(0, R * 0.12, R * 0.3, 0.25, Math.PI - 0.25);
+    ctx.stroke();
+  } else {
+    ctx.beginPath();
+    ctx.arc(0, R * 0.16, R * 0.22, 0.3, Math.PI - 0.3);
+    ctx.stroke();
+  }
+  ctx.lineCap = 'butt';
+
+  // ---- spidey arms: long elastic paint-webs. Both hands grip the rope while
+  // swinging; in flight he flings a long strand forward and drags another
+  // behind, both sagging and stretching harder with speed ----
+  const bodyCol = 'rgb(' + base.join(',') + ')';
+  const darkBody = 'rgb(' + base.map(v => Math.max(0, v - 40)).join(',') + ')';
+  const spdN = Math.min(1, spd * 0.055);      // 0..1 normalised speed
+  let h1, h2;
+  if (tethered) {
+    h1 = [-R * 0.3, -R * 1.02]; h2 = [R * 0.3, -R * 1.02];       // both grip the line
+  } else if (moving) {
+    const sx = Math.sign(player.vx) || 1;
+    const reach = R * (1.35 + 1.5 * spdN);    // web flung ahead
+    const trail = R * (1.2 + 1.15 * spdN);    // web dragged behind
+    h1 = [sx * reach, -R * 0.5 - R * 0.9 * spdN];
+    h2 = [-sx * trail, R * 0.5 + R * 1.0 * spdN];
+  } else {
+    h1 = [-R * 0.95, R * 0.1]; h2 = [R * 0.95, R * 0.1];         // relaxed at sides
+  }
+  function webArm(hx, hy, sgn) {
+    const sx = sgn * R * 0.5, sy = -R * 0.5;
+    const mx = (sx + hx) / 2, my = (sy + hy) / 2 + R * (0.2 + 0.6 * spdN);   // sag
+    ctx.lineCap = 'round';
+    // thick strand, then a thinner strand on top for a tapered "web" look
+    ctx.strokeStyle = bodyCol;
+    ctx.lineWidth = R * 0.2;
+    ctx.beginPath(); ctx.moveTo(sx, sy); ctx.quadraticCurveTo(mx, my, hx, hy); ctx.stroke();
+    ctx.strokeStyle = darkBody;
+    ctx.lineWidth = R * 0.08;
+    ctx.beginPath(); ctx.moveTo(sx, sy); ctx.quadraticCurveTo(mx, my, hx, hy); ctx.stroke();
+    // hand at the tip
+    ctx.fillStyle = bodyCol;
+    ctx.strokeStyle = 'rgba(20,16,12,0.5)';
+    ctx.lineWidth = 1.1;
+    ctx.beginPath(); ctx.arc(hx, hy, R * 0.15, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+  }
+  webArm(h1[0], h1[1], -1);
+  webArm(h2[0], h2[1], 1);
+  ctx.lineCap = 'butt';
 
   ctx.restore();
 }
@@ -3734,6 +5118,7 @@ function draw() {
   }
   drawVignette();
   if (off.x || off.y) ctx.restore();
+  drawOrbSay();   // drawn after restore so it never shakes with the world
 }
 
 /* ============================================================
@@ -4183,30 +5568,81 @@ function playStarPop(stars) {
 }
 
 /* ============================================================
-   BACKGROUND MUSIC
-   A self-contained procedural lo-fi loop (no audio files).
-   Warm pad chords + soft bass + sparse pentatonic plucks at a
-   relaxed tempo, fed through musicGain so the 🔊 toggle works.
+   BACKGROUND MUSIC — THE ESCAPE SEQUENCE
+   Four floors, all in C minor, rising BPM (100 → 120 → 130 →
+   140). Warm waves only (sine / triangle, nothing above ~6kHz).
+   Tempo eases toward each floor's target (~2-3s) so transitions
+   breathe instead of jumping. Fed through musicGain so the 🔊
+   toggle works.
    ============================================================ */
 let bgmTimer = null;
 let bgmStep = 0;          // eighth-note step (8 per bar, 32-step loop = 4 bars)
 let bgmNext = 0;          // audio-clock time of the next step to schedule
-const BGM_BPM   = 100;
-const BGM_Q     = 60 / BGM_BPM;                       // quarter-note seconds
-const BGM_8TH   = BGM_Q / 2;                          // eighth-note seconds
+let bgmBpm = 100;         // live tempo, eases toward bgmBpmTarget
+let bgmBpmTarget = 100;   // floor target BPM (100 / 120 / 130 / 140)
+let bgmTrack = 0;         // which floor track is playing (0..3)
+let bgmFaded = false;     // win fanfare faded the loop out; resume on next level
 const mf = (m) => 440 * Math.pow(2, (m - 69) / 12);   // midi -> hz
-// Escape arc across 4 bars: home -> drift -> lift -> coil (dominant pull back to C).
-// The G7 keeps every loop leaning forward, like re-gripping the rope for the next swing.
-const BGM_CHORDS = [
-  { bass: 36, pad: [60, 64, 67, 71] },   // Cmaj7  - grounded, calm
-  { bass: 45, pad: [57, 60, 64, 67] },   // Am7    - drifting, weightless
-  { bass: 41, pad: [53, 57, 60, 64] },   // Fmaj7  - lift, opening up
-  { bass: 43, pad: [55, 59, 62, 65] }    // G7     - tension, reaching for the edge
+
+// Per-floor escape tracks. All C minor. drm = drum pattern, bass = bass feel.
+const BGM_TRACKS = [
+  { // ACT I (levels 1-10) — learning to climb. Steady, breathing, hopeful.
+    bpm: 100,
+    chords: [
+      { bass: 36, pad: [60, 63, 67, 70] },   // Cm    - rooted
+      { bass: 44, pad: [56, 60, 63, 67] },   // Abmaj7 - lifting
+      { bass: 41, pad: [53, 56, 60, 63] },   // Fm    - stride
+      { bass: 46, pad: [58, 62, 65, 69] },   // Bb    - reach
+    ],
+    lead: [60, 63, 67, 70, 67, 63, 60, 62, 63, 67, 70, 67, 63, 60, 62, 63],
+    kick: [0, 4], snare: [2, 6], hat: { step: 2, vol: 0.008 },
+    bass: 'walk', layer: false, leadDur: 1.0,
+  },
+  { // FLOOR 1 (levels 11-20) — the great escape. Adrenaline, driving.
+    bpm: 120,
+    chords: [
+      { bass: 36, pad: [60, 63, 67, 70] },   // Cm
+      { bass: 44, pad: [56, 60, 63, 67] },   // Abmaj7
+      { bass: 41, pad: [53, 56, 60, 63] },   // Fm
+      { bass: 43, pad: [55, 59, 62, 68] },   // G7b9 - darker coil
+    ],
+    lead: [60, 63, 67, 60, 63, 69, 60, 67, 63, 69, 67, 63, 60, 62, 63, 67],
+    kick: [0, 2, 4, 6], snare: [2, 6], hat: { step: 1, vol: 0.010 },
+    bass: 'pulse', layer: false, leadDur: 0.62,
+  },
+  { // FLOOR 2 (levels 21-30) — stamina. Double-pulse heartbeat, cycling.
+    bpm: 130,
+    chords: [
+      { bass: 36, pad: [60, 63, 67, 70] },   // Cm
+      { bass: 41, pad: [53, 56, 60, 63] },   // Fm
+      { bass: 36, pad: [60, 63, 67, 70] },   // Cm
+      { bass: 46, pad: [58, 62, 65, 69] },   // Bb
+    ],
+    lead: [63, 67, 70, 72, 70, 67, 63, 67, 70, 72, 74, 72, 70, 67, 63, 67],
+    kick: [0, 1, 2, 3, 4, 5, 6, 7], snare: [2, 6], hat: { step: 1, vol: 0.011 },
+    bass: 'double', layer: true, leadDur: 0.5,
+  },
+  { // FLOOR 3 (levels 31-40) — final push. Relentless, no rest, reaching.
+    bpm: 140,
+    chords: [
+      { bass: 36, pad: [60, 63, 67, 70] },   // Cm
+      { bass: 41, pad: [53, 56, 60, 63] },   // Fm
+      { bass: 46, pad: [58, 62, 65, 69] },   // Bb
+      { bass: 36, pad: [60, 63, 67, 70] },   // Cm
+    ],
+    lead: [67, 70, 72, 75, 72, 70, 67, 70, 72, 75, 77, 75, 72, 70, 67, 63],
+    kick: [0, 1, 2, 3, 4, 5, 6, 7], snare: [0, 2, 4, 6], hat: { step: 1, vol: 0.012 },
+    bass: 'relent', layer: true, leadDur: 0.42,
+  },
 ];
-// One 4-bar melody that CLIMBS (reaching up the canvas), peaking as the G7 pulls home.
-// All notes stay in C major pentatonic so they sing over every chord. Kept in a
-// comfortable mid range so nothing pierces.
-const BGM_LEAD = [60, 62, 64, 67,  69, 67, 72, 69,  72, 74, 76, 74,  76, 79, 80, 79];
+
+// pick the floor track for a built-in level index (11-20 → floor 1, etc.)
+function bgmFloorFor(idx) {
+  if (idx >= 30) return 3;
+  if (idx >= 20) return 2;
+  if (idx >= 10) return 1;
+  return 0;
+}
 
 function startBgm() {
   if (!audioCtx || bgmTimer) return;
@@ -4217,12 +5653,17 @@ function startBgm() {
 function stopBgm() {
   if (bgmTimer) { clearInterval(bgmTimer); bgmTimer = null; }
 }
+// Tempo eases toward the floor target (smooth ~2-3s floor transitions).
 function bgmTick() {
   if (!audioCtx) return;
+  if (Math.abs(bgmBpm - bgmBpmTarget) > 0.1) {
+    bgmBpm += (bgmBpmTarget - bgmBpm) * 0.035;
+  } else bgmBpm = bgmBpmTarget;
   const ahead = audioCtx.currentTime + 0.35;
+  const q = 60 / bgmBpm;
   while (bgmNext < ahead) {
-    bgmPlayStep(bgmNext);
-    bgmNext += BGM_8TH;
+    bgmPlayStep(bgmNext, q);
+    bgmNext += q / 2;
     bgmStep++;
   }
 }
@@ -4264,59 +5705,106 @@ function bgmKick(t, vol) {
 function bgmSnare(t, vol) {
   bgmNoise(t, 0.07, 1500, 800, 1.6, vol || 0.05);
 }
-function bgmPlayStep(t) {
+function bgmBassAt(t, q, midi, dur, vol) {
+  bgmVoice(t, 'sine', mf(midi), q * dur, vol, mf(midi - 12), 0.02);
+}
+function bgmPlayStep(t, q) {
+  const tr = BGM_TRACKS[bgmTrack];
   const e = bgmStep % 8;                 // eighth position within the bar
   const bar = Math.floor(bgmStep / 8);   // bar index (0..3 then loops)
-  const ch = BGM_CHORDS[bar % BGM_CHORDS.length];
-  const last = bar % BGM_CHORDS.length === BGM_CHORDS.length - 1;  // on the G7 (coil) bar
-  // light swing: push the off-beat eighths slightly late
-  const sw = (e % 2 === 1) ? BGM_8TH * 0.16 : 0;
-  const ts = t + sw;
+  const ch = tr.chords[bar % tr.chords.length];
 
-  // drums - soft/jazzy; a touch more hi-hat drive on the "reach" bar
-  if (e === 0 || e === 4)  bgmKick(ts);
-  if (e === 2 || e === 6)  bgmSnare(ts);
-  if (e % 2 === 1)         bgmNoise(ts, 0.03, 5600, 6400, 3, last ? 0.012 : 0.009);   // hat
-
-  // warm pad chord, re-struck each bar with a medium attack
-  if (e === 0) {
-    const padDur = BGM_Q * 3.8;
-    for (const m of ch.pad) bgmVoice(t, 'triangle', mf(m), padDur, 0.02, undefined, 0.25);
-    // subtle shimmer on the chord top (octave only - nothing too bright)
-    bgmVoice(t, 'sine', mf(ch.pad[3] + 12), padDur, 0.008, undefined, 0.25);
+  // ---- drums (steady, straight - tension builds, not swing) ----
+  if (tr.kick.includes(e)) bgmKick(t, tr === BGM_TRACKS[bgmTrack] && bgmTrack >= 2 ? 0.15 : 0.14);
+  if (tr.snare.includes(e)) bgmSnare(t, bgmTrack >= 2 ? 0.055 : 0.05);
+  if (e % tr.hat.step === 0 && e % 2 === 1) {
+    bgmNoise(t, 0.03, 4200, 5400, 3, tr.hat.vol);   // hats stay under 6kHz
   }
 
-  // walking bass: root on 1&3, fifth / octave on 2&4 for forward motion
-  if (e === 0)      bgmVoice(ts, 'sine', mf(ch.bass), BGM_Q * 0.8, 0.11, mf(ch.bass - 12), 0.02);
-  else if (e === 2) bgmVoice(ts, 'sine', mf(ch.bass + 7), BGM_Q * 0.6, 0.06, undefined, 0.02);
-  else if (e === 4) bgmVoice(ts, 'sine', mf(ch.bass + 12), BGM_Q * 0.7, 0.08, undefined, 0.02);
-  else if (e === 6) bgmVoice(ts, 'sine', mf(ch.bass + 7), BGM_Q * 0.5, 0.05, undefined, 0.02);
+  // ---- warm pad chord, re-struck each bar with a medium attack ----
+  if (e === 0) {
+    const padDur = q * 3.8;
+    for (const m of ch.pad) bgmVoice(t, 'triangle', mf(m), padDur, 0.02, undefined, 0.25);
+    bgmVoice(t, 'sine', mf(ch.pad[3] + 12), padDur, 0.006, undefined, 0.25);   // quiet shimmer
+  }
 
-  // lead melody climbing up the phrase; slightly louder on the coil bar
+  // ---- bass: per-floor feel ----
+  if (tr.bass === 'walk') {
+    if (e === 0)      bgmBassAt(t, q, ch.bass, 0.8, 0.11);
+    else if (e === 2) bgmBassAt(t, q, ch.bass + 7, 0.6, 0.06);
+    else if (e === 4) bgmBassAt(t, q, ch.bass + 12, 0.7, 0.08);
+    else if (e === 6) bgmBassAt(t, q, ch.bass + 7, 0.5, 0.05);
+  } else if (tr.bass === 'pulse') {
+    if (e % 2 === 0) bgmBassAt(t, q, e % 4 === 0 ? ch.bass : ch.bass + 12, 0.9, 0.10);   // heartbeat
+  } else if (tr.bass === 'double') {
+    if (e % 2 === 0) bgmBassAt(t, q, e % 4 === 0 ? ch.bass : ch.bass + 7, 0.8, 0.09);     // boom-boom
+  } else if (tr.bass === 'relent') {
+    bgmBassAt(t, q * 0.5, ch.bass, 0.55, 0.10);                                          // no rest
+  }
+
+  // ---- lead melody ----
   if (e % 2 === 0) {
-    const li = Math.floor(bgmStep / 2) % BGM_LEAD.length;
-    bgmVoice(ts, 'triangle', mf(BGM_LEAD[li]),
-             last ? 0.3 : 0.26, last ? 0.045 : 0.038, undefined, 0.005);
+    const li = Math.floor(bgmStep / 2) % tr.lead.length;
+    const m = tr.lead[li];
+    bgmVoice(t, 'triangle', mf(m), q * tr.leadDur, bgmTrack >= 3 ? 0.042 : 0.038, undefined, 0.005);
+    if (tr.layer) {
+      // second voice: quiet echo an octave down, layered desperation
+      bgmVoice(t + 0.02, 'triangle', mf(m - 12), q * tr.leadDur * 0.7, 0.014, undefined, 0.008);
+    }
   }
 }
 function setMusicMute(muted) {
   if (musicGain && audioCtx) {
-    musicGain.gain.setTargetAtTime(muted ? 0 : 1, audioCtx.currentTime, 0.06);
+    musicGain.gain.setTargetAtTime(muted || bgmFaded ? 0 : 1, audioCtx.currentTime, 0.06);
+  }
+}
+// Set the escape floor to follow a built-in level; resets the loop to the top of
+// the new track and let the tempo ease in over a couple of seconds.
+function setBgmFloor(idx) {
+  const floor = bgmFloorFor(idx);
+  if (floor !== bgmTrack) {
+    bgmTrack = floor;
+    bgmBpmTarget = BGM_TRACKS[floor].bpm;
+    bgmStep = 0;
+    if (audioCtx) bgmNext = audioCtx.currentTime + 0.12;
   }
 }
 
-// Bright "free" resolution when a level is cleared: a quick rising arpeggio that
-// lands on a high C, lighting up just after the splash SFX. Pure garnish — the
-// bgm loop simply continues underneath. Music-off is still respected via musicGain.
-let bgmSwellFlash = null;   // temporary gain node for the swell, if active
+// After a win faded the loop out, bring it back as the next level begins.
+function bgmResumeAfterFade() {
+  if (bgmFaded && audioCtx && musicGain) {
+    bgmFaded = false;
+    // cancel the win-fanfare fade still parked on the automation timeline,
+    // so a fast NEXT-LEVEL tap can't let it fire and mute us mid-level
+    musicGain.gain.cancelScheduledValues(audioCtx.currentTime);
+    musicGain.gain.setTargetAtTime(musicOn ? 1 : 0, audioCtx.currentTime, 0.5);
+  }
+}
+
+// The escape resolved (level cleared). A warm C-major "exhale -> rise" fanfare:
+// a long sigh drops, stillness, then a climbing arpeggio lands on home. The loop
+// rides underneath for a beat, then fades so the story screen breathes in silence.
 function playMusicWin() {
   if (!audioCtx || !musicGain || !musicOn) return;
   const t0 = audioCtx.currentTime + 0.06;
-  // gentle rising resolve in a warm mid register - no piercing top notes
-  const arp = [48, 52, 55, 60, 64, 67, 72];
-  arp.forEach((m, i) => {
-    bgmVoice(t0 + i * 0.06, 'triangle', mf(m), 0.7, 0.04, undefined, 0.008);
+  // exhale: soft sine slides down a breathing-out sigh
+  bgmVoice(t0, 'sine', mf(72), 0.55, 0.045, mf(60), 0.15);
+  // stillness: a held warm C major chord under the pause
+  bgmVoice(t0 + 0.5, 'triangle', mf(48), 0.9, 0.02, undefined, 0.4);
+  const pad = [60, 64, 67];   // C major triad - safety
+  pad.forEach((m) => bgmVoice(t0 + 0.5, 'sine', mf(m), 0.9, 0.012, undefined, 0.4));
+  // rise: warm triangle arpeggio climbs, landing on home (C)
+  const rise = [48, 52, 55, 60, 64, 67, 72];
+  rise.forEach((m, i) => {
+    bgmVoice(t0 + 0.72 + i * 0.08, 'triangle', mf(m), 0.7, 0.028, undefined, 0.008);
   });
+  // resolve: soft low root lets the loop hand off to silence
+  bgmVoice(t0 + 1.35, 'sine', mf(36), 1.0, 0.03, undefined, 0.1);
+  // fade the loop out so the story/win screen feels like a held breath
+  bgmFaded = true;
+  if (audioCtx && musicGain) {
+    musicGain.gain.setTargetAtTime(0, audioCtx.currentTime + 1.55, 0.7);
+  }
 }
 
 /* ============================================================
@@ -4482,6 +5970,14 @@ if (elStory) {
   });
 }
 
+// Mission briefing: START (and only START) closes it — reading is required.
+// The overlay swallows pointer events so a stray tap doesn't launch the ball.
+bindButton(elMissionStart, () => { ensureAudio(); playTick(); dismissMission(); });
+if (elMission) {
+  elMission.addEventListener('mousedown', (e) => e.stopPropagation());
+  elMission.addEventListener('touchstart', (e) => { e.stopPropagation(); }, { passive: false });
+}
+
 // NEXT LEVEL: advance (or wrap to level 1 after the last). For a custom
 // level this button reads "PLAY AGAIN" and reloads the same JSON level.
 bindButton(elNextBtn, () => {
@@ -4524,6 +6020,8 @@ function returnToMenu() {
   status = 'paused';
   setRush(0);
   stopTurboBed();
+  hideMission();
+  missionShownFor = -1;             // reselecting a level re-briefs its mission
   elMsg.classList.add('hidden');
   closeLevelSelect();
   const titleEl2 = document.getElementById('title');
@@ -4532,6 +6030,46 @@ function returnToMenu() {
 }
 bindButton(document.getElementById('menuBtnMsg'), () => { ensureAudio(); playTick(); returnToMenu(); });
 bindButton(document.getElementById('menuBtnHud'), () => { ensureAudio(); playTick(); returnToMenu(); });
+
+// ---------- Paint picker (signature identity color) ----------
+function signatureIndex() {
+  try {
+    const save = loadSave();
+    if (save.paint == null) return 0;
+    return Math.max(0, Math.min(PAINT_POTS.length - 1, save.paint | 0));
+  } catch (e) { return 0; }
+}
+function renderPaintPicker() {
+  const wrap = document.getElementById('menuPaintSwatches');
+  if (!wrap) return;
+  const idx = signatureIndex();
+  wrap.innerHTML = '';
+  PAINT_POTS.forEach((p, i) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'paintSwatch' + (i === idx ? ' sel' : '');
+    b.style.background = 'rgb(' + p.rgb + ')';
+    b.title = p.name + ' paint';
+    b.setAttribute('aria-label', 'Choose ' + p.name + ' paint');
+    b.setAttribute('aria-pressed', i === idx ? 'true' : 'false');
+    b.addEventListener('click', () => { ensureAudio(); playTick(); choosePaint(i, b); });
+    wrap.appendChild(b);
+  });
+}
+function choosePaint(i, btn) {
+  signatureRGB = PAINT_POTS[i].rgb;
+  paintRGB = signatureRGB;
+  inkRGB = signatureRGB;
+  setPaintWell(signatureRGB);
+  try {
+    const s = loadSave();
+    s.paint = i;
+    writeSave(s);
+  } catch (e) {}
+  renderPaintPicker();
+}
+// set the blob's identity from the saved pot before any level loads
+signatureRGB = PAINT_POTS[signatureIndex()].rgb;
 
 // ---------- Level Select overlay ----------
 const elLevelSelect = document.getElementById('levelSelect');
@@ -4898,6 +6436,7 @@ function loop(now) {
 
   // VISUALS: draw on every rAF frame (native refresh: 60/120/144Hz…)
   draw();
+  drawWinBuddy();   // big cheering blob on the win overlay (DOM canvas)
 
   // FPS meter — counts rendered frames over real time
   fpsFrames++;
@@ -4911,7 +6450,65 @@ function loop(now) {
   requestAnimationFrame(loop);
 }
 
+// ---------- Art card: save / share ----------
+function cardFileName() {
+  const base = (cardInfo && cardInfo.title)
+    ? String(cardInfo.title).toLowerCase().replace(/[^a-z0-9]+/gi, '-').replace(/^-+|-+$/g, '')
+    : 'masterpiece';
+  return 'orbit-' + (base || 'masterpiece') + '.png';
+}
+
+function downloadCardPng() {
+  ensureAudio(); playTick();
+  const cv = document.getElementById('galleryCanvas');
+  if (!cv) return;
+  const done = (url) => {
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = cardFileName();
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  };
+  if (cv.toBlob) {
+    cv.toBlob((blob) => {
+      if (!blob) return;
+      const url = URL.createObjectURL(blob);
+      done(url);
+      setTimeout(() => URL.revokeObjectURL(url), 4000);
+      toast('Masterpiece saved!');
+    }, 'image/png');
+  } else {
+    done(cv.toDataURL('image/png'));
+    toast('Masterpiece saved!');
+  }
+}
+
+async function shareCardPng() {
+  ensureAudio(); playTick();
+  const cv = document.getElementById('galleryCanvas');
+  if (!cv) return;
+  try {
+    const blob = await new Promise((res) => cv.toBlob ? cv.toBlob(res, 'image/png') : res(null));
+    if (blob && navigator.canShare && navigator.canShare({ files: [new File([blob], cardFileName(), { type: 'image/png' })] })) {
+      await navigator.share({
+        files: [new File([blob], cardFileName(), { type: 'image/png' })],
+        title: 'My Orbit masterpiece',
+        text: 'Painted it, framed it \u2014 my run as art!'
+      });
+      return;
+    }
+  } catch (e) { return; }   // user cancelled or share unsupported
+  downloadCardPng();
+}
+
+const saveCardBtnEl = document.getElementById('saveCardBtn');
+const shareCardBtnEl = document.getElementById('shareCardBtn');
+if (saveCardBtnEl) saveCardBtnEl.addEventListener('click', downloadCardPng);
+if (shareCardBtnEl) shareCardBtnEl.addEventListener('click', shareCardPng);
+
 fitLayout();
+renderPaintPicker();
 loadLevel(0);
 requestAnimationFrame(loop);
 </script>
