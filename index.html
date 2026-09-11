@@ -450,6 +450,22 @@
   }
   #message.cardMode #galleryWrap { display: block; animation: buddyPop 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) backwards; }
   #message.cardMode #winBuddyBox { display: flex; }
+  /* Win screen: stop centering everything — the painting hangs LEFT, the
+     blob buddy plants RIGHT, spread across the screen */
+  #message.cardMode #cardRow {
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    gap: 20px;
+    padding: 0 3vw;
+  }
+  #message.cardMode #galleryWrap {
+    max-width: min(58vw, 560px);
+  }
+  #message.cardMode #winBuddyBox {
+    margin-right: 2vw;
+  }
   #galleryLabel {
     font-size: 11px;
     font-weight: 700;
@@ -944,6 +960,10 @@
   @media (max-width: 720px), (max-height: 560px) {
     #menuBtns { flex-direction: row; flex-wrap: wrap; justify-content: center; }
     #menuBtns .menuBtn { width: 46%; min-width: 148px; white-space: nowrap; }
+    /* too narrow for card-left / blob-right: fall back to a centered stack */
+    #message.cardMode #cardRow { flex-wrap: wrap; justify-content: center; padding: 0; }
+    #message.cardMode #galleryWrap { max-width: min(88vw, 520px); }
+    #message.cardMode #winBuddyBox { margin-right: 0; }
   }
   #menuTitle { font-size: clamp(32px, 8vmin, 72px); font-weight: bold; letter-spacing: 0.3em; color: var(--ink); text-shadow: 0 2px 0 rgba(255,255,255,0.85), 0 3px 10px rgba(80, 60, 30, 0.3); }
   #menuSub {
