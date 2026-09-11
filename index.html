@@ -388,13 +388,11 @@
   }
   #winBuddyCv {
     width: 150px;
-    height: 132px;
+    height: 150px;
     position: relative;
     z-index: 1;
   }
   #winBuddySay {
-    position: absolute;
-    top: -18px;
     z-index: 2;
     font-size: 15px;
     font-weight: 700;
@@ -404,9 +402,13 @@
     border: 1.5px solid rgba(97, 76, 48, 0.35);
     border-bottom-width: 3px;
     border-radius: 12px;
-    padding: 7px 14px;
+    padding: 7px 12px;
+    margin-bottom: 14px;
     box-shadow: 0 3px 0 rgba(80, 60, 30, 0.18);
-    white-space: nowrap;
+    white-space: normal;
+    max-width: 230px;
+    text-align: center;
+    line-height: 1.3;
     animation: buddyPop 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
   }
   #winBuddySay::after {
@@ -424,18 +426,26 @@
     60%  { transform: scale(1.15); opacity: 1; }
     100% { transform: scale(1); opacity: 1; }
   }
+  #cardRow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 26px;
+    width: 100%;
+    flex-wrap: wrap;
+  }
   #galleryWrap {
     display: none;
     position: relative;
     width: fit-content;
-    max-width: min(68vw, 520px);
+    max-width: min(88vw, 720px);
     padding: 10px 12px 12px;
     background: linear-gradient(180deg, #6b5638, #4a3a26);
-    border-radius: 6px;
+    border-radius: 0;
     box-shadow: 0 4px 0 rgba(40, 28, 16, 0.35), 0 10px 26px rgba(40, 28, 16, 0.35);
   }
   #message.cardMode #galleryWrap { display: block; animation: buddyPop 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) backwards; }
-  #message.cardMode #winBuddyBox { display: none; }
+  #message.cardMode #winBuddyBox { display: flex; }
   #galleryLabel {
     font-size: 11px;
     font-weight: 700;
@@ -446,10 +456,10 @@
   }
   #galleryCanvas {
     display: block;
-    width: min(68vw, 520px, calc(44vh * 1.333));
+    width: min(86vw, 700px, calc(58vh * 1.333));
     height: auto;
     max-width: 100%;
-    border-radius: 3px;
+    border-radius: 0;
     border: 2px solid #f3ecdc;
     box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.15);
     background: #f3ecdc;
@@ -509,6 +519,11 @@
     flex-direction: column;
     align-items: stretch;
   }
+  #pauseResumeBtn, #menuBtnMsg { display: none; }
+  #msgBtns.ready #menuBtnMsg,
+  #msgBtns.win #menuBtnMsg,
+  #msgBtns.paused #pauseResumeBtn,
+  #msgBtns.paused #menuBtnMsg { display: block; }
   #msgBtns.ready #menuBtnMsg {
     order: -1;
     align-self: flex-end;
@@ -516,6 +531,24 @@
     padding: 8px 16px;
     font-size: 12px;
   }
+  #msgBtns.paused { flex-direction: column; align-items: center; }
+  #msgBtns.paused #pauseResumeBtn {
+    font-family: inherit;
+    font-size: 17px;
+    letter-spacing: 0.16em;
+    color: var(--ink);
+    background: #f7f2e4;
+    border: 1.5px solid rgba(97, 76, 48, 0.4);
+    border-bottom-width: 3px;
+    border-bottom-color: var(--neon-cyan);
+    box-shadow: 0 2px 0 rgba(80, 60, 30, 0.18);
+    padding: 13px 34px;
+    border-radius: 6px;
+    cursor: pointer;
+    min-height: 44px;
+  }
+  #msgBtns.paused #pauseResumeBtn:hover { background: #fdf9ee; }
+  #msgBtns.paused #pauseResumeBtn:active { transform: scale(0.97); }
   #nextLevelBtn {
     font-family: inherit;
     font-size: 18px;
@@ -631,6 +664,198 @@
   }
   #missionStartBtn { background: rgba(255, 220, 140, 0.92); }
 
+  /* ------- Act gallery overlay (boss levels 10/20/30/40) ------- */
+  #actGallery {
+    position: fixed;
+    inset: 0;
+    z-index: 920;
+    display: none;
+    padding: 22px 18px;
+    background:
+      radial-gradient(120% 120% at 50% 30%, rgba(90, 88, 110, 0.35) 0%, transparent 60%),
+      linear-gradient(180deg, #26252f 0%, #1d1c24 100%);
+    text-align: center;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  #actGallery:not(.hidden) { display: flex; }
+  /* Inner column stays centered when it fits, but scrolls freely when it
+     overflows (flexbox centering + overflow clips the start otherwise). */
+  #actGalleryInner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    margin: auto;
+    padding-bottom: 96px;   /* clear the fixed button bar */
+  }
+  #actGalleryKick {
+    font-size: 13px;
+    letter-spacing: 0.4em;
+    color: #ffd97a;
+    text-shadow: 0 1px 2px rgba(20, 15, 5, 0.6);
+    margin-bottom: 4px;
+  }
+  #actGalleryTitle {
+    font-size: clamp(22px, 5vmin, 44px);
+    font-weight: bold;
+    letter-spacing: 0.16em;
+    color: #fdf7e8;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.22), 0 3px 12px rgba(10, 8, 5, 0.5);
+    margin-bottom: 8px;
+  }
+  #actGalleryTitle.gold { color: #ffd97a; }
+  #actGalleryCanvas {
+    width: auto;
+    height: auto;
+    max-width: 94vw;
+    max-height: 48vh;
+    border-radius: 6px;
+    box-shadow: 0 12px 46px rgba(0, 0, 0, 0.55);
+  }
+  #actGalleryBtns {
+    position: fixed;
+    left: 50%;
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 14px);
+    transform: translateX(-50%);
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    margin-top: 0;
+    z-index: 2;
+    background: rgba(29, 28, 36, 0.88);
+    padding: 10px 18px;
+    border-radius: 999px;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45);
+  }
+  #actGalleryContBtn {
+    background: #fdf1d0;
+    border: 1.5px solid #d8a41e;
+    border-bottom-width: 3px;
+    color: #5c4305;
+    font-weight: 700;
+  }
+  #actGalleryContBtn { background: rgba(255, 250, 235, 0.88); }
+
+  /* ------- Gallery viewer (browse act walls from the menu) ------- */
+  #galleryViewer {
+    position: fixed;
+    inset: 0;
+    z-index: 915;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 24px 18px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    background:
+      radial-gradient(120% 120% at 50% 30%, rgba(90, 88, 110, 0.35) 0%, transparent 60%),
+      linear-gradient(180deg, #26252f 0%, #1d1c24 100%);
+    text-align: center;
+  }
+  #galleryViewer:not(.hidden) { display: flex; }
+  #gvHeader {
+    font-size: clamp(22px, 5vmin, 40px);
+    font-weight: bold;
+    letter-spacing: 0.3em;
+    color: #ffd97a;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.18), 0 3px 12px rgba(10, 8, 5, 0.5);
+  }
+  #gvSub {
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    color: #c9c2b2;
+    margin: 8px 0 18px;
+  }
+  #gvGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 14px;
+    width: 100%;
+    max-width: 760px;
+  }
+  .gvCard {
+    font-family: inherit;
+    color: #fdf7e8;
+    background: rgba(38, 37, 47, 0.75);
+    border: 1.5px solid rgba(255, 217, 122, 0.35);
+    border-radius: 10px;
+    padding: 16px 12px;
+    cursor: pointer;
+    text-align: center;
+    min-height: 108px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+  }
+  .gvCard:hover { background: rgba(52, 50, 66, 0.85); border-color: rgba(255, 217, 122, 0.7); }
+  .gvCard:active { transform: scale(0.98); }
+  .gvCard .gvKick {
+    font-size: 11px;
+    letter-spacing: 0.34em;
+    color: #ffd97a;
+    margin-bottom: 6px;
+  }
+  .gvCard .gvTitle {
+    font-size: 15px;
+    font-weight: bold;
+    letter-spacing: 0.08em;
+    margin-bottom: 8px;
+  }
+  .gvCard .gvCount {
+    font-size: 12px;
+    color: #c9c2b2;
+    letter-spacing: 0.1em;
+  }
+
+  /* ------- Finale end screen (after all 40) ------- */
+  #finaleOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 925;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 18px;
+    background:
+      radial-gradient(120% 120% at 50% 25%, rgba(255, 217, 122, 0.13) 0%, transparent 55%),
+      radial-gradient(120% 120% at 50% 75%, rgba(90, 88, 110, 0.4) 0%, transparent 60%),
+      linear-gradient(180deg, #1f1e27 0%, #14131a 100%);
+    text-align: center;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  #finaleOverlay:not(.hidden) { display: flex; }
+  #finaleKick {
+    font-size: 14px;
+    letter-spacing: 0.44em;
+    color: #ffd97a;
+    margin-bottom: 8px;
+  }
+  #finaleTitle {
+    font-size: clamp(28px, 7vmin, 60px);
+    font-weight: bold;
+    letter-spacing: 0.2em;
+    color: #fff3d6;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.2), 0 4px 18px rgba(216, 164, 30, 0.35);
+    margin-bottom: 14px;
+  }
+  #finaleStats {
+    font-size: clamp(13px, 2.6vmin, 18px);
+    letter-spacing: 0.16em;
+    color: #fdf7e8;
+    margin-bottom: 18px;
+  }
+  #finaleMsg {
+    font-size: clamp(13px, 2.6vmin, 18px);
+    line-height: 1.8;
+    letter-spacing: 0.08em;
+    color: #c9c2b2;
+    max-width: 560px;
+    margin-bottom: 22px;
+  }
+  #finaleBtns { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; }
+
   #toast {
     position: absolute;
     top: 14px;
@@ -692,6 +917,19 @@
     padding: 28px 14px 28px 14px;
   }
   #menu.hidden { display: none; }
+  #menuBtns {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+  }
+  /* side-by-side on compact screens so every button (incl. Add a Level) stays
+     visible without hunting for the scroll bar */
+  @media (max-width: 720px), (max-height: 560px) {
+    #menuBtns { flex-direction: row; flex-wrap: wrap; justify-content: center; }
+    #menuBtns .menuBtn { width: 46%; min-width: 148px; white-space: nowrap; }
+  }
   #menuTitle { font-size: clamp(32px, 8vmin, 72px); font-weight: bold; letter-spacing: 0.3em; color: var(--ink); text-shadow: 0 2px 0 rgba(255,255,255,0.85), 0 3px 10px rgba(80, 60, 30, 0.3); }
   #menuSub {
     font-size: 15px;
@@ -770,6 +1008,16 @@
   .menuBtn:hover { background: rgba(255, 250, 235, 0.9); }
   .menuBtn:active { transform: scale(0.98); }
   .levelsInfo { font-size: 12px; color: #6b5f4f; letter-spacing: 0.1em; }
+  #menuHowto {
+    font-size: 12px;
+    color: #6b5f4f;
+    letter-spacing: 0.06em;
+    text-align: center;
+    max-width: 480px;
+    line-height: 1.5;
+    margin: 14px auto 2px;
+  }
+  #menuContBtn { border-color: rgba(176, 106, 42, 0.6); }
   /* ------- JSON level import overlay ------- */
   #jsonOverlay {
     position: fixed;
@@ -860,6 +1108,13 @@
     background: rgba(242, 236, 221, 0.94);
   }
   #levelSelect:not(.hidden) { display: flex; }
+  #levelSelectMeter {
+    font-size: 13px;
+    color: #6b5f4f;
+    letter-spacing: 0.08em;
+    margin-bottom: 6px;
+  }
+  #levelSelectMeter.gold { color: #a87917; font-weight: bold; }
   .dot {
     display: inline-block;
     width: 9px;
@@ -1119,62 +1374,6 @@
     #rotatePrompt.dismissed { display: none; }
   }
 
-  /* ------- Endless Run HUD ------- */
-  #hudEndless {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 0;
-  }
-  #hudEndless.hidden { display: none; }
-  #coinCounter {
-    font-size: 15px;
-    font-weight: bold;
-    letter-spacing: 0.1em;
-    color: #8a6a1c;
-    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
-    white-space: nowrap;
-  }
-  #ultimateWrap {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    width: 100%;
-    max-width: 170px;
-  }
-  #ultimateTrack {
-    flex: 1;
-    height: 8px;
-    border-radius: 4px;
-    background: rgba(80, 60, 30, 0.25);
-    overflow: hidden;
-    position: relative;
-  }
-  #ultimateFill {
-    height: 100%;
-    width: 0%;
-    border-radius: 4px;
-    background: linear-gradient(90deg, #8a55b8, #c9a6e0);
-    transition: width 0.15s ease;
-  }
-  #ultimateBtn {
-    font-size: 18px;
-    color: #6a4a8a;
-    border-color: rgba(138, 85, 184, 0.5);
-    flex: 0 0 auto;
-  }
-  #ultimateBtn.active {
-    background: rgba(138, 85, 184, 0.35);
-    color: #fff;
-    border-color: #a87fc8;
-    animation: ultPulse 0.6s ease-in-out infinite;
-  }
-  @keyframes ultPulse {
-    0%, 100% { transform: scale(1); box-shadow: 0 0 0 rgba(138, 85, 184, 0); }
-    50%      { transform: scale(1.15); box-shadow: 0 0 18px rgba(138, 85, 184, 0.8); }
-  }
-  #ultimateBtn[disabled] { opacity: 0.4; }
 </style>
 </head>
 <body>
@@ -1193,12 +1392,16 @@
       <div id="menuPaintLabel">YOUR&nbsp;PAINT</div>
       <div id="menuPaintSwatches"></div>
     </div>
+<div id="menuBtns">
 <button class="menuBtn" id="menuStartBtn" aria-label="Start game">Play</button>
+<button class="menuBtn" id="menuContBtn" aria-label="Continue from furthest level" style="display:none;">Continue</button>
 <button class="menuBtn" id="menuLevelSelectBtn" aria-label="Level select">Level Select</button>
+<button class="menuBtn" id="menuGalerBtn" aria-label="Browse act galleries">Galleries</button>
 <button class="menuBtn" id="menuSfxBtn" aria-label="Toggle sound effects">Sound FX: ON</button>
 <button class="menuBtn" id="menuMusicBtn" aria-label="Toggle background music">Music: ON</button>
-<button class="menuBtn menuBtnDisabled" id="menuEndlessBtn" aria-label="Endless run" disabled style="border-color:rgba(138,85,184,0.5);">Endless Run</button>
 <button class="menuBtn" id="menuJsonBtn" aria-label="Play a level from JSON" style="border-color:rgba(97,76,48,0.5);">Add a Level</button>
+    </div>
+    <div id="menuHowto">Hold = grab &amp; swing &middot; release = fly &middot; dip every <span style="color:#b06a2a;font-weight:bold;">KEY</span> bucket &middot; sign the spot.</div>
     <div class="levelsInfo">Levels 1–40</div>
   </div>
 
@@ -1259,6 +1462,7 @@
       <!-- Level Select overlay (hidden by default) -->
       <div id="levelSelect" class="hidden">
         <h3 style="font-size:clamp(24px,5vmin,48px);font-weight:bold;letter-spacing:0.2em;margin-bottom:16px;">PICK A CANVAS</h3>
+        <div id="levelSelectMeter" aria-live="polite"></div>
         <div id="levelSelectScroll" style="flex:0 0 auto;width:100%;max-width:420px;padding:4px 10px;">
           <div id="levelSelectGrid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(80px,1fr));gap:8px;width:100%;"></div>
         </div>
@@ -1276,21 +1480,24 @@
         <div id="msgScore"></div>
         <div id="msgObj"></div>
         <div id="msgSub"></div>
-        <div id="galleryWrap" aria-hidden="true">
-          <div id="galleryLabel">YOUR MASTERPIECE</div>
-          <canvas id="galleryCanvas" width="1280" height="960" aria-label="Your run, framed as art"></canvas>
-          <div id="artCardBtns">
-            <button type="button" class="artBtn" id="saveCardBtn" aria-label="Save masterpiece as PNG">SAVE PNG</button>
-            <button type="button" class="artBtn" id="shareCardBtn" aria-label="Share masterpiece">SHARE</button>
+        <div id="cardRow">
+          <div id="galleryWrap" aria-hidden="true">
+            <div id="galleryLabel">YOUR MASTERPIECE</div>
+            <canvas id="galleryCanvas" width="1280" height="960" aria-label="Your run, framed as art"></canvas>
+            <div id="artCardBtns">
+              <button type="button" class="artBtn" id="saveCardBtn" aria-label="Save masterpiece as PNG">SAVE PNG</button>
+              <button type="button" class="artBtn" id="shareCardBtn" aria-label="Share masterpiece">SHARE</button>
+            </div>
           </div>
-        </div>
-        <div id="winBuddyBox" aria-hidden="true">
-          <div id="winBuddySay"></div>
-          <canvas id="winBuddyCv" width="0" height="0"></canvas>
+          <div id="winBuddyBox" aria-hidden="true">
+            <div id="winBuddySay"></div>
+            <canvas id="winBuddyCv" width="0" height="0"></canvas>
+          </div>
         </div>
         <div id="msgBtns">
 <button id="restartBtn" aria-label="Restart level">RESTART LEVEL</button>
-<button id="menuBtnMsg" class="menuBtn" aria-label="Back to menu" style="display:none;">MENU</button>
+<button id="pauseResumeBtn" aria-label="Resume game">RESUME</button>
+<button id="menuBtnMsg" class="menuBtn" aria-label="Back to menu">MENU</button>
 <button id="nextLevelBtn" aria-label="Next level">NEXT LEVEL &#8594;</button>
         </div>
       </div>
@@ -1310,6 +1517,44 @@
         <div id="missionBody"></div>
         <div id="missionHint"></div>
         <button class="menuBtn" id="missionStartBtn" aria-label="Start level">START</button>
+      </div>
+
+      <!-- Act gallery: the ten finished paintings of an act, hung as one wall.
+           Shown from NEXT LEVEL after conquering levels 10 / 20 / 30 / 40. -->
+      <div id="actGallery" class="hidden">
+        <div id="actGalleryInner">
+          <div id="actGalleryKick"></div>
+          <div id="actGalleryTitle"></div>
+          <canvas id="actGalleryCanvas" width="1280" height="960" aria-label="Your act's ten paintings, hung as one gallery"></canvas>
+          <div id="actGalleryBtns">
+            <button type="button" class="artBtn" id="actGallerySaveBtn" aria-label="Save gallery as PNG">SAVE PNG</button>
+            <button type="button" class="menuBtn" id="actGalleryContBtn" aria-label="Continue">CONTINUE</button>
+          </div>
+          <div class="levelsInfo">tap anywhere to continue</div>
+        </div>
+      </div>
+
+      <!-- Gallery viewer: browse all four act walls from the menu -->
+      <div id="galleryViewer" class="hidden">
+        <div id="gvHeader">THE GALLERY</div>
+        <div id="gvSub">A wall per act. Tap a wall to view every signed canvas.</div>
+        <div id="gvGrid"></div>
+        <div style="display:flex;gap:12px;margin-top:16px;flex-wrap:wrap;justify-content:center;">
+          <button type="button" class="menuBtn" id="gvMenuBtn" aria-label="Back to menu">BACK TO MENU</button>
+        </div>
+      </div>
+
+      <!-- Finale: all 40 canvases signed -->
+      <div id="finaleOverlay" class="hidden">
+        <div id="finaleKick">THE GALLERY IS OPEN</div>
+        <div id="finaleTitle">ALL 40 SIGNED</div>
+        <div id="finaleStats"></div>
+        <div id="finaleMsg">THE END &mdash; thanks for playing!<br>Want more? You can add your own level &mdash; hit &lsquo;Add a Level&rsquo; on the menu.</div>
+        <div id="finaleBtns">
+          <button type="button" class="artBtn" id="finaleViewBtn" aria-label="View the four act walls">VIEW GALLERIES</button>
+          <button type="button" class="menuBtn" id="finaleNewgameBtn" aria-label="Start a new game from level 1">NEW GAME</button>
+          <button type="button" class="menuBtn" id="finaleMenuBtn" aria-label="Back to menu">MENU</button>
+        </div>
       </div>
 
       <div id="toast" aria-live="polite"></div>
@@ -1358,14 +1603,6 @@
         <div class="instr-item">release / tap = launch</div>
       </div>
 
-      <!-- Endless Run HUD (hidden unless endless mode) -->
-      <div id="hudEndless" class="hidden">
-        <div id="coinCounter">🪙 0</div>
-        <div id="ultimateWrap">
-          <div id="ultimateTrack"><div id="ultimateFill"></div></div>
-          <button class="hud-btn" id="ultimateBtn" aria-label="Magic raid ultimate">&#10022;</button>
-        </div>
-      </div>
     </div>
   </div>
 </div>
@@ -1423,22 +1660,8 @@ const BURST_CFG = [
   { sparks: 80, spMin: 2.5,  spMax: 9.5, sizeMin: 2.0, sizeMax: 4.5, rings: [{ r: 10, vr: 12, life: 0.8 }, { r: 6, vr: 9, life: 0.6 }, { r: 3, vr: 7, life: 0.5 }] },
 ];
 const OUT_MARGIN    = 10;      // death buffer beyond canvas edges (matches visible red band)
-
-// ---------- Endless Run constants ----------
-const GAME_MODES = { LEVELS: 'levels', ENDLESS: 'endless' };
-const CHUNK_W         = 1500;  // horizontal width of each generated chunk
-const CHUNK_AHEAD     = 800;   // generate new chunk when player is this close to its end
-const CHUNK_CULL      = 600;   // remove chunks this far behind the camera
-const ORIGIN_RESET    = 50000; // shift world every 50k px to avoid float jitter
-const ULT_COST        = 100;   // meter cost to activate ultimate
-const ULT_DURATION    = 4.5;   // seconds of slow-mo + magnet
-const ULT_DRAIN       = 25;    // meter drain per second
-const ULT_SLOW        = 0.3;   // time scale while ultimate active
-const ULT_MAGNET_R    = 280;   // coin magnet radius
-const ULT_METER_COIN  = 6;     // meter gain per coin
-const ULT_METER_ORB   = 2;     // meter gain per orb attach
-const ULT_METER_REPEL = 3;     // meter gain per repel escape
-const SPEED_RAMP      = 0.0004; // difficulty increase per meter of distance
+const GAME_MODES = { LEVELS: 'levels' };
+let gameMode = GAME_MODES.LEVELS;
 
 // ---------- Levels ----------
 const LEVELS = [
@@ -1475,142 +1698,172 @@ const LEVELS = [
     walls: [ wall(400, 300, 260, 40), wall(400, 560, 260, 60) ] },
 
   { name: 'SQUEEZE IN',  player: {x:120, y:720, vx:0, vy:0}, goal: {x:1240, y:480, r:44},
-    orbs:  [ orb(280, 660, 'normal'), orb(640, 560, 'normal'), orb(860, 600, 'turbo'), orb(1080, 500, 'normal') ],
-    walls: [ wall(400, 380, 220, 36) ] },
+    orbs:  [ orb(280, 660, 'normal', true), orb(640, 560, 'normal'), orb(860, 600, 'turbo', true), orb(1080, 500, 'normal') ],
+    walls: [ wall(400, 380, 220, 36) ],
+  },
 
   { name: 'TURBO CASCADE', player: {x:100, y:640, vx:0, vy:0}, goal: {x:1330, y:500, r:42},
-    orbs:  [ orb(300, 640, 'turbo'), orb(540, 500, 'normal'), orb(780, 640, 'turbo'), orb(1000, 460, 'normal'), orb(1200, 600, 'turbo') ], walls: [] },
+    orbs:  [ orb(300, 640, 'turbo'), orb(540, 500, 'normal', true), orb(780, 640, 'turbo'), orb(1000, 460, 'normal', true), orb(1200, 600, 'turbo') ], walls: [],
+  },
 
   { name: 'REPEL RUN',     player: {x:100, y:550, vx:0, vy:0}, goal: {x:1330, y:550, r:42},
-    orbs:  [ orb(300, 550, 'normal'), orb(520, 380, 'repel'), orb(520, 720, 'repel'), orb(680, 550, 'normal'), orb(1040, 550, 'turbo') ], walls: [] },
+    orbs:  [ orb(300, 550, 'normal', true), orb(520, 380, 'repel'), orb(520, 720, 'repel'), orb(680, 550, 'normal', true), orb(1040, 550, 'turbo') ], walls: [],
+  },
 
   { name: 'THE RIBBON',   player: {x:110, y:500, vx:0, vy:0}, goal: {x:1300, y:300, r:40},
-    orbs:  [ orb(280, 500, 'normal'), orb(560, 320, 'turbo'), orb(870, 520, 'normal'), orb(1120, 320, 'turbo') ],
-    walls: [ wall(400, 400, 60, 250), wall(720, 150, 60, 250), wall(1040, 400, 60, 250) ] },
+    orbs:  [ orb(280, 500, 'normal', true), orb(560, 320, 'turbo'), orb(870, 520, 'normal', true), orb(1120, 320, 'turbo') ],
+    walls: [ wall(400, 400, 60, 250), wall(720, 150, 60, 250), wall(1040, 400, 60, 250) ],
+  },
 
   { name: 'DOUBLE DIP', player: {x:110, y:450, vx:0, vy:0}, goal: {x:1280, y:450, r:40},
-    orbs:  [ orb(280, 450, 'normal'), orb(480, 300, 'repel'), orb(480, 600, 'repel'), orb(660, 450, 'normal'),
+    orbs:  [ orb(280, 450, 'normal', true), orb(480, 300, 'repel'), orb(480, 600, 'repel'), orb(660, 450, 'normal', true),
              orb(860, 300, 'repel'), orb(860, 600, 'repel'), orb(1040, 450, 'turbo') ],
-    walls: [ wall(700, 120, 200, 40), wall(700, 690, 200, 40) ] },
+    walls: [ wall(700, 120, 200, 40), wall(700, 690, 200, 40) ],
+  },
 
   { name: 'ROPE TWIST',  player: {x:110, y:250, vx:0, vy:0}, goal: {x:1200, y:220, r:40},
-    orbs:  [ orb(300, 250, 'turbo'), orb(480, 600, 'normal'), orb(760, 340, 'normal') ],
-    walls: [ wall(420, 350, 220, 40), wall(700, 450, 220, 40) ] },
+    orbs:  [ orb(300, 250, 'turbo', true), orb(480, 600, 'normal'), orb(760, 340, 'normal', true) ],
+    walls: [ wall(420, 350, 220, 40), wall(700, 450, 220, 40) ],
+  },
 
   { name: 'THE FUNNEL', player: {x:110, y:400, vx:0, vy:0}, goal: {x:1260, y:400, r:42},
-    orbs:  [ orb(280, 400, 'normal'), orb(480, 330, 'repel'), orb(660, 470, 'normal'), orb(840, 350, 'repel'), orb(1020, 430, 'turbo') ],
-    walls: [ wall(300, 180, 800, 40), wall(300, 580, 800, 40) ] },
+    orbs:  [ orb(280, 400, 'normal', true), orb(480, 330, 'repel'), orb(660, 470, 'normal', true), orb(840, 350, 'repel'), orb(1020, 430, 'turbo') ],
+    walls: [ wall(300, 180, 800, 40), wall(300, 580, 800, 40) ],
+  },
 
   { name: 'VARNISH ROOM',  player: {x:110, y:700, vx:0, vy:0}, goal: {x:1290, y:690, r:42},
-    orbs:  [ orb(300, 620, 'normal'), orb(660, 450, 'turbo'), orb(660, 310, 'repel'), orb(660, 590, 'repel'), orb(1040, 440, 'normal') ],
-    walls: [ wall(600, 220, 260, 40), wall(600, 600, 260, 40) ] },
+    orbs:  [ orb(300, 620, 'normal'), orb(660, 450, 'turbo', true), orb(660, 310, 'repel'), orb(660, 590, 'repel'), orb(1040, 440, 'normal') ],
+    walls: [ wall(600, 220, 260, 40), wall(600, 600, 260, 40) ],
+  },
 
   { name: 'DRYING TIME', player: {x:110, y:700, vx:0, vy:0}, goal: {x:1340, y:500, r:40},
-    orbs:  [ orb(300, 600, 'turbo'), orb(560, 720, 'normal'), orb(800, 500, 'turbo'), orb(1020, 580, 'normal'), orb(1220, 400, 'turbo') ],
-    walls: [ wall(540, 460, 220, 36), wall(920, 240, 36, 200), wall(1180, 420, 160, 36) ] },
+    orbs:  [ orb(300, 600, 'turbo'), orb(560, 720, 'normal', true), orb(800, 500, 'turbo'), orb(1020, 580, 'normal', true), orb(1220, 400, 'turbo') ],
+    walls: [ wall(540, 460, 220, 36), wall(920, 240, 36, 200), wall(1180, 420, 160, 36) ],
+  },
 
   { name: 'MASTERPIECE', player: {x:100, y:700, vx:0, vy:0}, goal: {x:1330, y:540, r:40},
-    orbs:  [ orb(300, 620, 'turbo'), orb(560, 500, 'normal'), orb(840, 340, 'turbo'), orb(1040, 460, 'normal'), orb(900, 540, 'repel') ],
-    walls: [ wall(700, 360, 40, 220), wall(1180, 240, 150, 40) ] },
+    orbs:  [ orb(300, 620, 'turbo'), orb(560, 500, 'normal', true), orb(840, 340, 'turbo'), orb(1040, 460, 'normal', true), orb(900, 540, 'repel') ],
+    walls: [ wall(700, 360, 40, 220), wall(1180, 240, 150, 40) ],
+  },
 
   { name: 'THE DROP', player: {x:150, y:80, vx:0, vy:0}, goal: {x:1230, y:720, r:40},
-    orbs:  [ orb(320, 170, 'normal'), orb(520, 240, 'turbo'), orb(720, 340, 'normal'), orb(900, 420, 'turbo'), orb(1080, 520, 'normal'), orb(1240, 640, 'turbo') ], walls: [] },
+    orbs:  [ orb(320, 170, 'normal', true), orb(520, 240, 'turbo', true), orb(720, 340, 'normal', true), orb(900, 420, 'turbo'), orb(1080, 520, 'normal'), orb(1240, 640, 'turbo') ], walls: [],
+  },
 
   { name: 'THE U-TURN', player: {x:130, y:700, vx:0, vy:0}, goal: {x:340, y:160, r:38},
-    orbs:  [ orb(300, 660, 'normal'), orb(590, 700, 'turbo'), orb(900, 660, 'normal'), orb(1180, 700, 'turbo'), orb(1180, 460, 'normal'), orb(900, 320, 'turbo'), orb(590, 240, 'normal') ], walls: [] },
+    orbs:  [ orb(300, 660, 'normal', true), orb(590, 700, 'turbo'), orb(900, 660, 'normal'), orb(1180, 700, 'turbo'), orb(1180, 460, 'normal', true), orb(900, 320, 'turbo'), orb(590, 240, 'normal') ], walls: [],
+  },
 
   { name: 'CORKSCREW', player: {x:140, y:90, vx:0, vy:0}, goal: {x:260, y:740, r:36},
-    orbs:  [ orb(300, 150, 'normal'), orb(560, 300, 'turbo'), orb(820, 180, 'normal'), orb(1080, 340, 'turbo'), orb(900, 520, 'normal'), orb(560, 660, 'turbo') ],
-    walls: [ wall(50, 90, 60, 660), wall(1250, 90, 60, 660) ] },
+    orbs:  [ orb(300, 150, 'normal', true), orb(560, 300, 'turbo'), orb(820, 180, 'normal'), orb(1080, 340, 'turbo'), orb(900, 520, 'normal', true), orb(560, 660, 'turbo') ],
+    walls: [ wall(50, 90, 60, 660), wall(1250, 90, 60, 660) ],
+  },
 
   { name: 'OVER THE DRIPS', player: {x:120, y:720, vx:0, vy:0}, goal: {x:1320, y:600, r:36},
-    orbs:  [ orb(300, 660, 'normal'), orb(620, 660, 'turbo'), orb(920, 660, 'normal'), orb(1220, 620, 'turbo') ],
-    walls: [ wall(430, 690, 50, 160), wall(780, 690, 50, 160), wall(1090, 690, 50, 160) ] },
+    orbs:  [ orb(300, 660, 'normal', true), orb(620, 660, 'turbo'), orb(920, 660, 'normal', true), orb(1220, 620, 'turbo') ],
+    walls: [ wall(430, 690, 50, 160), wall(780, 690, 50, 160), wall(1090, 690, 50, 160) ],
+  },
 
   { name: 'FULL GLOSS', player: {x:110, y:500, vx:0, vy:0}, goal: {x:1335, y:440, r:30},
-    orbs:  [ orb(320, 400, 'turbo'), orb(500, 260, 'repel'), orb(520, 400, 'repel'), orb(540, 560, 'repel'),
-             orb(700, 400, 'normal'), orb(900, 260, 'repel'), orb(920, 400, 'repel'), orb(940, 560, 'repel'),
-             orb(1060, 400, 'turbo'), orb(1200, 360, 'repel') ], walls: [] },
+    orbs:  [ orb(320, 400, 'turbo', true), orb(500, 260, 'repel'), orb(520, 400, 'repel'), orb(540, 560, 'repel'),
+             orb(700, 400, 'normal', true), orb(900, 260, 'repel'), orb(920, 400, 'repel'), orb(940, 560, 'repel'),
+             orb(1060, 400, 'turbo'), orb(1200, 360, 'repel') ], walls: [],
+  },
 
   { name: 'PALETTE TEARS', player: {x:110, y:640, vx:0, vy:0}, goal: {x:1300, y:600, r:26},
-    orbs:  [ orb(300, 620, 'turbo'), orb(470, 480, 'normal'), orb(640, 640, 'repel'), orb(810, 460, 'turbo'),
-             orb(990, 620, 'normal'), orb(1160, 440, 'repel'), orb(1240, 600, 'turbo') ],
-    walls: [ wall(540, 300, 40, 250) ] },
+    orbs:  [ orb(300, 620, 'turbo'), orb(470, 480, 'normal', true), orb(640, 640, 'repel'), orb(810, 460, 'turbo'),
+             orb(990, 620, 'normal', true), orb(1160, 440, 'repel'), orb(1240, 600, 'turbo') ],
+    walls: [ wall(540, 300, 40, 250) ],
+  },
 
   { name: 'GILDED CAGE', player: {x:110, y:700, vx:0, vy:0}, goal: {x:1300, y:180, r:26},
-    orbs:  [ orb(300, 660, 'normal'), orb(520, 700, 'turbo'), orb(700, 520, 'repel'), orb(880, 660, 'turbo'),
-             orb(1060, 360, 'normal'), orb(1200, 220, 'repel'), orb(1260, 260, 'turbo') ],
-    walls: [ wall(760, 140, 40, 200), wall(760, 520, 40, 160), wall(1020, 100, 40, 160) ] },
+    orbs:  [ orb(300, 660, 'normal', true), orb(520, 700, 'turbo'), orb(700, 520, 'repel'), orb(880, 660, 'turbo'),
+             orb(1060, 360, 'normal', true), orb(1200, 220, 'repel'), orb(1260, 260, 'turbo') ],
+    walls: [ wall(760, 140, 40, 200), wall(760, 520, 40, 160), wall(1020, 100, 40, 160) ],
+  },
 
   { name: 'PRIMER WALLS', player: {x:110, y:500, vx:0, vy:0}, goal: {x:1310, y:500, r:25},
-    orbs:  [ orb(300, 500, 'turbo'), orb(500, 360, 'normal'), orb(500, 640, 'repel'), orb(700, 500, 'turbo'),
-             orb(900, 360, 'repel'), orb(900, 640, 'turbo'), orb(1100, 500, 'normal'), orb(1200, 420, 'repel') ],
-    walls: [ wall(690, 200, 140, 30), wall(690, 620, 140, 30), wall(850, 240, 30, 120), wall(850, 500, 30, 120) ] },
+    orbs:  [ orb(300, 500, 'turbo', true), orb(500, 360, 'normal'), orb(500, 640, 'repel'), orb(700, 500, 'turbo'),
+             orb(900, 360, 'repel'), orb(900, 640, 'turbo'), orb(1100, 500, 'normal', true), orb(1200, 420, 'repel') ],
+    walls: [ wall(690, 200, 140, 30), wall(690, 620, 140, 30), wall(850, 240, 30, 120), wall(850, 500, 30, 120) ],
+  },
 
   { name: 'THE STORM', player: {x:120, y:200, vx:0, vy:0}, goal: {x:1290, y:680, r:24},
-    orbs:  [ orb(300, 240, 'turbo'), orb(460, 380, 'normal'), orb(620, 240, 'repel'), orb(780, 420, 'turbo'),
-             orb(940, 260, 'normal'), orb(1100, 460, 'repel'), orb(1200, 600, 'turbo'), orb(1240, 700, 'normal') ],
-    walls: [ wall(700, 120, 30, 120), wall(900, 320, 30, 120), wall(1080, 620, 30, 140) ] },
+    orbs:  [ orb(300, 240, 'turbo'), orb(460, 380, 'normal', true), orb(620, 240, 'repel'), orb(780, 420, 'turbo'),
+             orb(940, 260, 'normal', true), orb(1100, 460, 'repel'), orb(1200, 600, 'turbo'), orb(1240, 700, 'normal') ],
+    walls: [ wall(700, 120, 30, 120), wall(900, 320, 30, 120), wall(1080, 620, 30, 140) ],
+  },
 
   { name: 'THE MASTERWORK', player: {x:110, y:480, vx:0, vy:0}, goal: {x:1330, y:480, r:25},
-    orbs:  [ orb(300, 480, 'turbo'), orb(460, 320, 'repel'), orb(460, 640, 'repel'), orb(620, 480, 'turbo'),
+    orbs:  [ orb(300, 480, 'turbo', true), orb(460, 320, 'repel'), orb(460, 640, 'repel'), orb(620, 480, 'turbo'),
              orb(780, 320, 'normal'), orb(780, 640, 'normal'), orb(940, 480, 'repel'), orb(1100, 320, 'turbo'),
-             orb(1100, 640, 'turbo'), orb(1220, 480, 'normal') ],
-    walls: [ wall(560, 150, 160, 30), wall(560, 680, 160, 30), wall(1040, 150, 160, 30), wall(1040, 680, 160, 30) ] },
+             orb(1100, 640, 'turbo'), orb(1220, 480, 'normal', true) ],
+    walls: [ wall(560, 150, 160, 30), wall(560, 680, 160, 30), wall(1040, 150, 160, 30), wall(1040, 680, 160, 30) ],
+  },
 
   { name: 'GALLERY HALL', player: {x:110, y:500, vx:0, vy:0}, goal: {x:1330, y:500, r:25},
-    orbs:  [ orb(320, 420, 'turbo'), orb(320, 620, 'normal'), orb(560, 330, 'repel'), orb(560, 670, 'repel'),
-             orb(800, 420, 'turbo'), orb(800, 620, 'normal'), orb(1040, 330, 'repel'), orb(1040, 670, 'repel'),
+    orbs:  [ orb(320, 420, 'turbo', true), orb(320, 620, 'normal'), orb(560, 330, 'repel'), orb(560, 670, 'repel'),
+             orb(800, 420, 'turbo'), orb(800, 620, 'normal', true), orb(1040, 330, 'repel'), orb(1040, 670, 'repel'),
              orb(1210, 500, 'turbo') ],
-    walls: [] },
+    walls: [],
+  },
 
   { name: 'FRAMED', player: {x:120, y:80, vx:0, vy:0}, goal: {x:1270, y:760, r:24},
-    orbs:  [ orb(300, 140, 'normal'), orb(480, 260, 'turbo'), orb(660, 180, 'repel'), orb(840, 360, 'normal'),
+    orbs:  [ orb(300, 140, 'normal', true), orb(480, 260, 'turbo'), orb(660, 180, 'repel'), orb(840, 360, 'normal', true),
              orb(1020, 300, 'turbo'), orb(1180, 480, 'repel'), orb(1260, 680, 'turbo') ],
-    walls: [ wall(400, 180, 30, 300), wall(700, 480, 30, 300), wall(1000, 120, 30, 140) ] },
+    walls: [ wall(400, 180, 30, 300), wall(700, 480, 30, 300), wall(1000, 120, 30, 140) ],
+  },
 
   { name: 'FINISHING GLAZE', player: {x:110, y:500, vx:0, vy:0}, goal: {x:1320, y:420, r:24},
-    orbs:  [ orb(300, 500, 'turbo'), orb(470, 380, 'repel'), orb(640, 560, 'turbo'), orb(810, 400, 'normal'),
-             orb(980, 560, 'normal'), orb(1160, 440, 'turbo'), orb(1240, 520, 'repel') ],
-    walls: [ wall(800, 200, 120, 30), wall(800, 620, 120, 30), wall(1010, 240, 30, 140), wall(1010, 500, 30, 140) ] },
+    orbs:  [ orb(300, 500, 'turbo', true), orb(470, 380, 'repel'), orb(640, 560, 'turbo'), orb(810, 400, 'normal'),
+             orb(980, 560, 'normal', true), orb(1160, 440, 'turbo'), orb(1240, 520, 'repel') ],
+    walls: [ wall(800, 200, 120, 30), wall(800, 620, 120, 30), wall(1010, 240, 30, 140), wall(1010, 500, 30, 140) ],
+  },
 
   { name: 'GILDED RUN', player: {x:120, y:700, vx:0, vy:0}, goal: {x:1300, y:180, r:24},
-    orbs:  [ orb(320, 660, 'turbo'), orb(520, 520, 'normal'), orb(720, 660, 'turbo'), orb(920, 400, 'normal'),
+    orbs:  [ orb(320, 660, 'turbo'), orb(520, 520, 'normal', true), orb(720, 660, 'turbo'), orb(920, 400, 'normal', true),
              orb(1120, 660, 'turbo'), orb(1200, 320, 'repel'), orb(1250, 200, 'turbo') ],
-    walls: [ wall(480, 180, 30, 260), wall(700, 240, 30, 200), wall(900, 140, 30, 200), wall(1080, 220, 30, 260) ] },
+    walls: [ wall(480, 180, 30, 260), wall(700, 240, 30, 200), wall(900, 140, 30, 200), wall(1080, 220, 30, 260) ],
+  },
 
   { name: 'CASTS & CORNICES', player: {x:110, y:500, vx:0, vy:0}, goal: {x:1330, y:500, r:23},
-    orbs:  [ orb(300, 500, 'turbo'), orb(460, 360, 'repel'), orb(620, 500, 'turbo'), orb(780, 360, 'repel'),
-             orb(940, 620, 'normal'), orb(1100, 400, 'turbo'), orb(1220, 560, 'repel') ],
-    walls: [ wall(690, 140, 30, 180), wall(690, 540, 30, 180), wall(960, 180, 30, 160), wall(960, 540, 30, 140) ] },
+    orbs:  [ orb(300, 500, 'turbo', true), orb(460, 360, 'repel'), orb(620, 500, 'turbo'), orb(780, 360, 'repel'),
+             orb(940, 620, 'normal', true), orb(1100, 400, 'turbo'), orb(1220, 560, 'repel') ],
+    walls: [ wall(690, 140, 30, 180), wall(690, 540, 30, 180), wall(960, 180, 30, 160), wall(960, 540, 30, 140) ],
+  },
 
   { name: 'THE LONG GALLERY', player: {x:120, y:120, vx:0, vy:0}, goal: {x:1310, y:700, r:23},
-    orbs:  [ orb(300, 200, 'normal'), orb(480, 360, 'turbo'), orb(660, 200, 'repel'), orb(840, 400, 'turbo'),
+    orbs:  [ orb(300, 200, 'normal', true), orb(480, 360, 'turbo', true), orb(660, 200, 'repel'), orb(840, 400, 'turbo'),
              orb(1020, 240, 'normal'), orb(1200, 480, 'repel'), orb(1280, 640, 'turbo') ],
-    walls: [ wall(500, 440, 30, 120), wall(700, 120, 30, 140), wall(900, 540, 30, 140), wall(1100, 160, 30, 120) ] },
+    walls: [ wall(500, 440, 30, 120), wall(700, 120, 30, 140), wall(900, 540, 30, 140), wall(1100, 160, 30, 120) ],
+  },
 
   { name: 'RESTORATION', player: {x:110, y:500, vx:0, vy:0}, goal: {x:1310, y:440, r:23},
-    orbs:  [ orb(300, 500, 'turbo'), orb(450, 380, 'repel'), orb(450, 620, 'repel'), orb(610, 500, 'turbo'),
+    orbs:  [ orb(300, 500, 'turbo', true), orb(450, 380, 'repel'), orb(450, 620, 'repel'), orb(610, 500, 'turbo'),
              orb(770, 380, 'normal'), orb(770, 620, 'normal'), orb(930, 500, 'repel'), orb(1090, 380, 'turbo'),
-             orb(1090, 620, 'turbo'), orb(1220, 480, 'normal') ],
-    walls: [ wall(690, 140, 30, 160), wall(690, 560, 30, 160), wall(1010, 140, 30, 160), wall(1010, 560, 30, 160) ] },
+             orb(1090, 620, 'turbo'), orb(1220, 480, 'normal', true) ],
+    walls: [ wall(690, 140, 30, 160), wall(690, 560, 30, 160), wall(1010, 140, 30, 160), wall(1010, 560, 30, 160) ],
+  },
 
   { name: 'FINAL COAT', player: {x:110, y:500, vx:0, vy:0}, goal: {x:1330, y:520, r:22},
-    orbs:  [ orb(300, 500, 'turbo'), orb(440, 360, 'repel'), orb(440, 640, 'repel'), orb(590, 500, 'turbo'),
+    orbs:  [ orb(300, 500, 'turbo', true), orb(440, 360, 'repel'), orb(440, 640, 'repel'), orb(590, 500, 'turbo'),
              orb(740, 360, 'normal'), orb(740, 640, 'normal'), orb(890, 500, 'repel'), orb(1040, 360, 'turbo'),
-             orb(1040, 640, 'turbo'), orb(1180, 500, 'normal'), orb(1260, 440, 'repel') ],
-    walls: [ wall(500, 200, 30, 130), wall(500, 520, 30, 130), wall(820, 200, 30, 130), wall(820, 520, 30, 130), wall(1140, 160, 30, 130) ] },
+             orb(1040, 640, 'turbo'), orb(1180, 500, 'normal', true), orb(1260, 440, 'repel') ],
+    walls: [ wall(500, 200, 30, 130), wall(500, 520, 30, 130), wall(820, 200, 30, 130), wall(820, 520, 30, 130), wall(1140, 160, 30, 130) ],
+  },
 
   { name: 'THE MASTERWORKS', player: {x:120, y:600, vx:0, vy:0}, goal: {x:1310, y:320, r:22},
-    orbs:  [ orb(300, 560, 'turbo'), orb(460, 660, 'repel'), orb(620, 420, 'turbo'), orb(780, 620, 'normal'),
-             orb(940, 380, 'repel'), orb(1100, 560, 'turbo'), orb(1200, 400, 'normal'), orb(1270, 340, 'repel') ],
-    walls: [ wall(550, 160, 30, 140), wall(750, 640, 30, 140), wall(950, 160, 30, 140), wall(1150, 320, 30, 160) ] },
+    orbs:  [ orb(300, 560, 'turbo', true), orb(460, 660, 'repel'), orb(620, 420, 'turbo'), orb(780, 620, 'normal'),
+             orb(940, 380, 'repel'), orb(1100, 560, 'turbo'), orb(1200, 400, 'normal', true), orb(1270, 340, 'repel') ],
+    walls: [ wall(550, 160, 30, 140), wall(750, 640, 30, 140), wall(950, 160, 30, 140), wall(1150, 320, 30, 160) ],
+  },
 
   { name: 'THE ARTIST', player: {x:110, y:500, vx:0, vy:0}, goal: {x:1330, y:480, r:22},
-    orbs:  [ orb(290, 500, 'turbo'), orb(430, 360, 'repel'), orb(430, 640, 'repel'), orb(570, 500, 'turbo'),
+    orbs:  [ orb(290, 500, 'turbo', true), orb(430, 360, 'repel'), orb(430, 640, 'repel'), orb(570, 500, 'turbo'),
              orb(710, 360, 'normal'), orb(710, 640, 'normal'), orb(850, 500, 'repel'), orb(990, 360, 'turbo'),
-             orb(990, 640, 'turbo'), orb(1130, 500, 'normal'), orb(1240, 420, 'repel'), orb(1280, 560, 'turbo') ],
-    walls: [ wall(480, 200, 30, 130), wall(480, 520, 30, 130), wall(790, 200, 30, 130), wall(790, 520, 30, 130), wall(1100, 200, 30, 130), wall(1100, 520, 30, 130) ] }
+             orb(990, 640, 'turbo'), orb(1130, 500, 'normal', true), orb(1240, 420, 'repel'), orb(1280, 560, 'turbo') ],
+    walls: [ wall(480, 200, 30, 130), wall(480, 520, 30, 130), wall(790, 200, 30, 130), wall(790, 520, 30, 130), wall(1100, 200, 30, 130), wall(1100, 520, 30, 130) ],
+  }
 ];
 
 function orb(x, y, type, req) {
@@ -1667,13 +1920,46 @@ function starsForTime(li, t) {
   return 0;
 }
 
-// Mastery grading: on levels with a palette-mix quest the stars are earned by
-// the MISSION (all key buckets dipped = 3★, anything less = 0★). The goal is
-// always open, but a one-shot to the signing spot pays no stars. Levels
-// without a quest keep the time-based par table above.
+// ---------- Missions (varied per level) ----------
+// kinds:
+//   dip    touch EVERY key bucket = 3★ · some = 1★ · one-shot/none = 0★
+//   speed  reach a top-swing target once = 3★ · finishing = 1★
+//   clean  finish without grabbing a repel bucket = 3★ · brushed one = 1★
+//   time   beat par = 3★ (tiers) · any finish banks at least 1★
+// A level with key buckets but no `mission` field is a dip mission (all levels).
+function getMission(lv) {
+  return (lv && lv.mission) || null;
+}
+
+// Mastery grading is per-level mission; the signing spot itself stays open.
 function starsForLevel(li, t) {
-  if (levelHasKeys()) return reqPending() === 0 ? 3 : 0;
+  const lv = LEVELS[li] || null;
+  const m = lv && getMission(lv);
+  if (lv && m && m.kind) {
+    if (m.kind === 'speed') return runMaxSpeed >= (m.target || 30) ? 3 : 1;
+    if (m.kind === 'clean') return touchedRepel ? 1 : 3;
+    if (m.kind === 'time')  return Math.max(1, starsForTime(li, t));
+    // dip falls through to the key logic below
+  }
+  if (levelHasKeys()) {
+    const total = countReqOrbs(level);
+    const done = total - Math.min(reqPending(), total);
+    if (done >= total) return 3;
+    return done > 0 ? 1 : 0;
+  }
   return starsForTime(li, t);
+}
+
+// Short objective line shown under TAP TO LAUNCH + inside the mission overlay.
+function missionObjectiveText(li) {
+  const mk = (li != null ? getMission(LEVELS[li]) : getMission(level));
+  const kind = (mk && mk.kind) ? mk.kind : (levelHasKeys() ? 'dip' : '');
+  if (kind === 'dip')  return 'MISSION: dip into every KEY bucket to earn your 3 stars \u00b7 spot is always open';
+  if (kind === 'speed') return 'MISSION: hit TOP SWING SPEED ' + ((mk && mk.target) || 30) + ' once \u00b7 spot is always open';
+  if (kind === 'clean') return 'MISSION: sign without touching a RED bucket \u00b7 spot is always open';
+  if (kind === 'time')  return 'MISSION: sign fast \u00b7 spot is always open';
+  if (level && level.walls && level.walls.length) return 'OBJECTIVE: swing past the tape to the signing spot';
+  return 'OBJECTIVE: reach the signing spot';
 }
 
 // ---------- Runtime state ----------
@@ -1688,6 +1974,8 @@ let tethered = false;
 let tether = null;                // { orb, angVel(rad/frame), dist, angle, repel, turbo }
 let runTime = 0;                  // seconds spent in 'playing' on the current level
 let runMaxSpeed = 0;              // fastest swing line-speed this attempt (for the art card)
+let touchedRepel = false;         // mission "clean": true if any repel bucket was grabbed
+let speedAcked = false;           // mission "speed": toast the target once it's hit
 let trail = [];
 let snap = 0;         // attach "pop" 0..1, decays out
 let stretchEase = 1;  // smoothed player stretch (1 = round)
@@ -1845,18 +2133,6 @@ function drawOrbSay() {
   ctx.textBaseline = 'alphabetic';
 }
 
-// ---------- Endless Run state ----------
-let gameMode = GAME_MODES.LEVELS;
-let cameraX = 0;
-let runDistance = 0;
-let runCoins = 0;
-let ultMeter = 0;
-let ultActive = false;
-let ultTimer = 0;
-let trackChunks = [];          // { startX, orbs, walls, coins }
-let parallaxLayers = [];       // { speed, w, h, canvas }
-let seedCounter = 0;
-let endlessEl = null;          // DOM handles (created once)
 
 const playerColor  = { core: '#f3f6f8', ring: '#8b99a5', glow: 'rgba(139,153,165,0.55)' };
 const orbColors = {
@@ -1869,6 +2145,7 @@ const orbColors = {
 };
 // the player's chosen identity paint (one pick from the menu - his one color)
 const PAINT_POTS = [
+
   { name: 'MINT',    rgb: '49,150,104' },
   { name: 'CYAN',    rgb: '31,138,156' },
   { name: 'LEMON',   rgb: '201,154,46' },
@@ -1895,6 +2172,12 @@ const elMsgS   = document.getElementById('msgSub');
 const elMsgBtns = document.getElementById('msgBtns');
 const elRestart= document.getElementById('restartBtn');
 const elNextBtn = document.getElementById('nextLevelBtn');
+const elActGallery = document.getElementById('actGallery');
+const elActGalleryTitle = document.getElementById('actGalleryTitle');
+const elActGalleryCanvas = document.getElementById('actGalleryCanvas');
+const elActGallerySave = document.getElementById('actGallerySaveBtn');
+const elActGalleryCont = document.getElementById('actGalleryContBtn');
+let pendingActGallery = -1;   // act # (0..3) to reveal from NEXT on a boss level, else -1
 const elLevelTitle = document.getElementById('levelTitle');
 const elHud    = document.getElementById('hud');
 const elHudInfo = document.getElementById('hudInfo');
@@ -1933,7 +2216,8 @@ function loadSave() {
       const s = JSON.parse(raw);
       if (Array.isArray(s.unlocked)) {
         if (s.paint == null) s.paint = 0;    // older saves: default to the first pot
-        return { unlocked: s.unlocked, best: s.best || {}, paint: s.paint };
+        if (s.art == null) s.art = {};       // older saves: no saved paintings yet
+        return { unlocked: s.unlocked, best: s.best || {}, paint: s.paint, art: s.art };
       }
     }
     // migrate legacy neonOrbitCompleted array -> unlocked list
@@ -1984,14 +2268,11 @@ function showReadyUI(on) {
     elMsg.classList.remove('hidden');
     elMsgT.textContent = 'TAP TO LAUNCH';
     elMsgObj.style.display = '';
-    elMsgObj.textContent = levelHasKeys()
-      ? 'MISSION: dip into every KEY bucket to earn your 3 stars \u00b7 spot is always open'
-      : (level && level.walls && level.walls.length
-        ? 'OBJECTIVE: swing past the tape to the signing spot'
-        : 'OBJECTIVE: reach the signing spot');
+    elMsgObj.textContent = missionObjectiveText(levelIndex);
     elMsgS.textContent = 'tap to start \u00b7 then hold to swing, release to fly';
     elRestart.style.display = 'none';
     elNextBtn.style.display = 'none';
+    elMsgBtns.classList.remove('paused', 'win');
     elMsgBtns.classList.add('ready');
   } else {
     elMsg.classList.add('hidden');
@@ -2009,7 +2290,10 @@ function showPauseUI(on) {
     elMsgS.textContent = 'tap anywhere to resume';
     elRestart.style.display = 'none';
     elNextBtn.style.display = 'none';
+    elMsgBtns.classList.remove('ready', 'win');
+    elMsgBtns.classList.add('paused');
   } else {
+    elMsgBtns.classList.remove('paused');
     elMsg.classList.add('hidden');
   }
 }
@@ -2022,6 +2306,7 @@ const CUSTOM_IDX = -2;       // levelIndex sentinel used while a custom level is
 // object (level.player/goal/orbs/walls); label is the HUD title text.
 function resetLevel(lv, label) {
   clearPaintLayer();   // new canvas to mangle each level
+  pendingActGallery = -1;
   slowPoolCd = 0;
   level = lv;
   for (const o of lv.orbs) if (o.req) o.reqDone = false;   // fresh quest each attempt
@@ -2030,6 +2315,8 @@ function resetLevel(lv, label) {
   orbSay = null; orbSayCd = 0; orbSayLastIdx = -1; orbSayOrb = null;
   player = { x: lv.player.x, y: lv.player.y, vx: 0, vy: 0 };
   runMaxSpeed = 0;
+  touchedRepel = false;
+  speedAcked = false;
   goalGrad = null;
   tethered = false;
   tether = null;
@@ -2087,13 +2374,17 @@ function loadLevel(idx) {
   const opener = STORY.openers[openerKey];
   // brief a freshly-entered level once (NEXT / level-select). Retries reuse it.
   const fresh = missionShownFor !== idx;
+  // When the main menu is up (boot preload), the story + briefing must NOT
+  // cover it. Leave freshness untouched so Play's real entry re-briefs it.
+  const menuIsOpen = elMenu && !elMenu.classList.contains('hidden');
+  if (menuIsOpen) return;
   missionShownFor = idx;
   if (opener && !storySeen[openerKey]) {
     storySeen[openerKey] = true;
-    if (fresh) missionOnContinue = () => showMission(lv);
+    if (fresh) missionOnContinue = () => showMission(lv, idx);
     showStory(opener);
   } else if (fresh) {
-    showMission(lv);
+    showMission(lv, idx);
   }
 }
 
@@ -2105,7 +2396,7 @@ function loadCustomLevel(lv) {
   setBgmFloor(0);                    // custom levels play on the ACT I floor
   bgmResumeAfterFade();
   bindRestartBtn();
-  EndlessRun.showHUD(false);
+
   const name = (lv.name && String(lv.name).trim()) ? String(lv.name).trim() : 'CUSTOM LEVEL';
   resetLevel(lv, 'CUSTOM \u2014 ' + name);
   const titleEl = document.getElementById('title');
@@ -2147,6 +2438,7 @@ if (best.type === 'turbo') {
     angVel *= TURBO_MULT;                   // turbo: double the spin on attach
     toast('TURBO \u2014 keep holding to pile on the spin!');
   } else if (best.type === 'repel') {
+    touchedRepel = true;   // any red interaction blemishes a "clean" mission
 
     if (dist > REPEL_LIMIT) {               // too far out: just a gentle shove
       const rx = dx / dist, ry = dy / dist;
@@ -2160,6 +2452,10 @@ if (best.type === 'turbo') {
     const reversed = -Math.sign(signedTangSpeed || 1) *
                      Math.max(Math.abs(angVel) * 0.8, MIN_SPIN);
     angVel = reversed;
+    const cleanMission = getMission(level);
+    if (cleanMission && cleanMission.kind === 'clean' && toastTimer <= 0) {
+      toast('RED BRUSHED \u2014 clean 3 \u2605 dropped to 1 \u2605');
+    }
   }
 
   // guarantee a minimum spin so the swing never feels dead
@@ -2214,7 +2510,6 @@ function release() {
 }
 
 function update(dt) {
-  if (gameMode === GAME_MODES.ENDLESS) { EndlessRun.update(dt); return; }
   time += dt;
   updateShake(dt);
   updateOrbSay(dt);
@@ -2273,7 +2568,14 @@ function update(dt) {
   // air-rush bed follows the spin: whisper -> screaming at turbo cap
   if (tethered) {
     const tspd = Math.abs(tether.angVel) * tether.dist;
-    if (tspd > runMaxSpeed) runMaxSpeed = tspd;
+    if (tspd > runMaxSpeed) {
+      runMaxSpeed = tspd;
+      const spdMission = getMission(level);
+      if (spdMission && spdMission.kind === 'speed' && runMaxSpeed >= (spdMission.target || 30) && !speedAcked) {
+        speedAcked = true;
+        if (toastTimer <= 0) toast('TOP SPEED HIT \u2014 3 \u2605 READY!');
+      }
+    }
     setRush(Math.min(1, Math.max(0, (tspd - 3) / 14)));
     // creeping the bucket slow = wet paint pools under it
     if (gameMode === GAME_MODES.LEVELS && tspd < 5.5) {
@@ -2566,20 +2868,36 @@ const elMissionStart = document.getElementById('missionStartBtn');
 let missionOnContinue = null;   // mission queued behind an act opener
 let missionShownFor = -1;       // last level that received its briefing
 
-function showMission(lv) {
+function showMission(lv, idx) {
   if (elMissionTitle) elMissionTitle.textContent = (lv && lv.name) || '';
-  const keys = countReqOrbs(lv);
-  if (elMissionBody) elMissionBody.textContent = keys > 0
-    ? 'Dip into every KEY bucket, then swing to the signing spot.\n'
-    + 'The spot is ALWAYS open \u2014 but a one-shot straight to it banks 0 stars.'
-    : 'Swing to the signing spot and land your masterpiece.';
+  const m = getMission(lv);
+  const kind = (m && m.kind) ? m.kind : (countReqOrbs(lv) > 0 ? 'dip' : '');
+  let body = 'Swing to the signing spot and land your masterpiece.';
+  let hint = null;
+  if (kind === 'dip') {
+    const keys = countReqOrbs(lv);
+    body = 'Dip into every KEY bucket, then swing to the signing spot.\n'
+      + 'The spot is ALWAYS open \u2014 a one-shot banks no stars, partway banks 1 \u2605.';
+    hint = 'KEY BUCKETS: ' + keys + '  \u00b7  dip them ALL for 3 \u2605';
+  } else if (kind === 'speed') {
+    const target = (m && m.target) || 30;
+    body = 'Swing one blast to TOP SPEED ' + target + ', then sign the spot.\n'
+      + 'A single killer swing locks the gold \u2014 no bucket-hunting here.';
+    hint = 'TOP SWING: ' + target + '  \u00b7  hit it once = 3 \u2605  \u00b7  any finish = 1 \u2605';
+  } else if (kind === 'clean') {
+    body = 'Sign the spot without ever touching a RED (repel) bucket.\n'
+      + 'Clean hands earn the gold \u2014 one brush drops it to a silver.';
+    hint = 'CLEAN HANDS  \u00b7  no red touch = 3 \u2605  \u00b7  brushed one = 1 \u2605';
+  } else if (kind === 'time') {
+    const par = (idx != null && PAR3[idx]) ? PAR3[idx] : null;
+    body = 'Carve a fast, seamless line through the studio and sign.\n'
+      + 'Finishing always banks at least a star; beating the par banks gold.';
+    hint = (par != null ? ('PAR ' + fmtTime(par) + ' = 3 \u2605  \u00b7  ') : '') + 'any finish = 1 \u2605';
+  }
+  if (elMissionBody) elMissionBody.textContent = body;
   if (elMissionHint) {
-    if (keys > 0) {
-      elMissionHint.style.display = '';
-      elMissionHint.textContent = 'KEY BUCKETS: ' + keys + '  \u00b7  dip them ALL for 3 \u2605';
-    } else {
-      elMissionHint.style.display = 'none';
-    }
+    if (hint) { elMissionHint.style.display = ''; elMissionHint.textContent = hint; }
+    else elMissionHint.style.display = 'none';
   }
   if (elMission) {
     elMission.classList.remove('hidden');
@@ -2622,6 +2940,8 @@ function win() {
   stopTurboBed();
   elMsg.classList.remove('lost');
   elMsg.classList.add('won');
+  elMsgBtns.classList.remove('ready', 'paused');
+  elMsgBtns.classList.add('win');
   elMsg.classList.remove('hidden');
   elMsgObj.style.display = 'none';
   cheerWinBuddy();
@@ -2636,13 +2956,14 @@ function win() {
     elRestart.style.display = 'none';
     elNextBtn.style.display = '';
     elNextBtn.textContent = 'PLAY AGAIN \u21bb';
-    showCard({
+    winCardInfo = {
       title: (level.name ? level.name : 'UNTITLED'),
       subtitle: 'CUSTOM LEVEL',
       timeText: fmtTime(runTime),
       stars: 3,
       newBest: false
-    });
+    };
+    scheduleCardReveal();
     return;
   }
 
@@ -2671,6 +2992,13 @@ function win() {
   // ---- boss / checkpoint story screens (levels 10, 20, 30, 40) ----
   const bossKey = levelIndex + 1;
   const boss = STORY.bosses[bossKey];
+  winCardInfo = {
+    title: LEVELS[levelIndex].name,
+    subtitle: last ? 'THE GALLERY' : 'LEVEL ' + (levelIndex + 1),
+    timeText: fmtTime(t),
+    stars: stars,
+    newBest: wasNewBest
+  };
   if (boss) {
     // checkpoint first: hide the win results until the story is dismissed,
     // so both never fight for the screen at once
@@ -2680,7 +3008,10 @@ function win() {
     showStory(boss, () => {
       elMsg.classList.remove('hidden');   // reveal the results on top now
       cheerWinBuddy();
+      scheduleCardReveal();
     });
+  } else {
+    scheduleCardReveal();   // results + buddy first, the art card after a beat
   }
 
   // ---- results on the win overlay ----
@@ -2698,17 +3029,14 @@ function win() {
   elMsgScore.textContent = fmtTime(t) + (bestTxt ? '  \u00b7  ' + bestTxt : '');
   elMsgScore.className = wasNewBest ? 'newbest' : '';
   elMsgT.textContent = stars === 3 ? 'FLAWLESS!' : last ? 'ALL ' + LEVELS.length + ' SIGNED!' : 'LEVEL COMPLETE!';
-  elMsgS.textContent = last ? 'Back around to FIRST STEPS...' : 'Next: ' + LEVELS[levelIndex + 1].name + ' \u2192';
-  elRestart.style.display = 'none';
+  elMsgS.textContent = last ? 'The Gallery is open \u2014 hang your final wall!' : 'Next: ' + LEVELS[levelIndex + 1].name + ' \u2192';
+  elRestart.style.display = '';   // replay the SAME level to chase the 3rd star
   elNextBtn.style.display = '';
-  elNextBtn.textContent = last ? 'PLAY AGAIN' : 'NEXT LEVEL \u2192';
-  showCard({
-    title: LEVELS[levelIndex].name,
-    subtitle: last ? 'THE GALLERY' : 'LEVEL ' + (levelIndex + 1),
-    timeText: fmtTime(t),
-    stars: stars,
-    newBest: wasNewBest
-  });
+  elNextBtn.textContent = last ? 'VIEW GALLERY' : 'NEXT LEVEL \u2192';
+  // a finished painting joins the act wall; finishing 10/20/30/40 bends a gallery
+  // into VIEW when the player presses NEXT (CONTINUE there advances onward)
+  captureLevelArt(levelIndex);
+  pendingActGallery = (levelIndex % 10 === 9) ? Math.floor(levelIndex / 10) : -1;
 }
 
 // Trash talk for the game-over screen. Cheeky, never mean.
@@ -2750,6 +3078,23 @@ function clearConfetti() {
 // ============================================================
 let cardInfo = null;
 
+// The big cheering buddy gets the limelight first: the art card is deferred
+// ~1.1s after the result reveal so he isn't hidden the instant he appears.
+let winCardInfo = null;
+let winCardTimer = null;
+function scheduleCardReveal() {
+  if (winCardTimer) { clearTimeout(winCardTimer); winCardTimer = null; }
+  if (!winCardInfo) return;
+  winCardTimer = setTimeout(() => {
+    winCardTimer = null;
+    if (winCardInfo) { showCard(winCardInfo); winCardInfo = null; }
+  }, 1100);
+}
+function cancelCardReveal() {
+  if (winCardTimer) { clearTimeout(winCardTimer); winCardTimer = null; }
+  winCardInfo = null;
+}
+
 function showCard(info) {
   cardInfo = info || null;
   const label = document.getElementById('galleryLabel');
@@ -2763,8 +3108,35 @@ function showCard(info) {
 }
 
 function hideCard() {
+  cancelCardReveal();
   cardInfo = null;
   elMsg.classList.remove('cardMode');
+}
+
+// ---- The act wall: each finished painting is saved so acts combine ----
+const ACT_INFO = [
+  { kick: 'ACT I',   title: 'TRAPPED ON THE PALETTE' },
+  { kick: 'FLOOR 1', title: 'THE GREAT ESCAPE' },
+  { kick: 'FLOOR 2', title: 'THE ARTIST EMERGES' },
+  { kick: 'FLOOR 3', title: 'THE GALLERY' },
+];
+
+// Persist a small JPEG thumbnail of this level's finished canvas. Rewinning a
+// level re-captures with the newest painting.
+function captureLevelArt(idx) {
+  if (idx < 0 || !paintCanvas || typeof document === 'undefined') return;
+  try {
+    const tw = 420, th = Math.round(tw * H / W);
+    const c = document.createElement('canvas');
+    c.width = tw; c.height = th;
+    const g = c.getContext('2d');
+    g.drawImage(paintCanvas, 0, 0, W, H, 0, 0, tw, th);
+    const url = c.toDataURL('image/jpeg', 0.72);
+    const save = loadSave();
+    if (!save.art) save.art = {};
+    save.art[idx] = url;
+    writeSave(save);
+  } catch (e) { /* storage full or unavailable — gallery just skips this one */ }
 }
 
 // Vertical crop: keep the action (spawn, orbs, goal), trim dead sky/floor.
@@ -2806,24 +3178,23 @@ function composeArtCard() {
   gc.lineWidth = 2;
   gc.strokeRect(mat + 4, mat + 4, CW - mat * 2 - 8, CH - mat * 2 - 8);
 
-  // painting: contain the (smart-cropped) paint layer inside the art well
+  // painting: fill the WHOLE art well as one perfect rectangle — the smart
+  // crop is scale-fit with overflow so no dead mat ever gaps the print
   const crop = cardSourceCrop();
-  const srcA = W / crop.sh;                 // source aspect (>= 1400/850)
-  const artH = 580, artY0 = 118;
-  const artW = Math.min(1180, artH * srcA); // may leave side mat for tall crops
-  const scale = Math.min(artW / W, artH / crop.sh);
+  const artX = (CW - 1180) / 2, artY = 118, artW = 1180, artH = 580;
+  const scale = Math.max(artW / W, artH / crop.sh);
   const pw = W * scale, ph = crop.sh * scale;
-  const px = (CW - pw) / 2;
-  const py = artY0 + Math.max(0, (artH - ph)) * 0.5;
+  const px = artX - (pw - artW) / 2;
+  const py = artY - (ph - artH) / 2;
 
   // mounting shadow lifts the print off the mat
   gc.fillStyle = 'rgba(48,32,16,0.20)';
-  gc.fillRect(px + 6, py + 8, pw, ph);
+  gc.fillRect(artX + 6, artY + 8, artW, artH);
   gc.drawImage(paintCanvas, 0, crop.sy, W, crop.sh, px, py, pw, ph);
-  // crisp hairline around the print
+  // crisp hairline square around the print
   gc.strokeStyle = 'rgba(60,42,24,0.35)';
   gc.lineWidth = 1.5;
-  gc.strokeRect(px - 0.75, py - 0.75, pw + 1.5, ph + 1.5);
+  gc.strokeRect(artX - 0.75, artY - 0.75, artW + 1.5, artH + 1.5);
 
   // ---- plaque (bottom-left on the mat) ----
   const ink = '#33281a', soft = '#7c6244', gold = '#a97a16';
@@ -2886,6 +3257,232 @@ function composeArtCard() {
   drawWinBuddyBlob(gc, CW - 122, 862, 52, 'cool', 3);
 }
 
+// ---- Act gallery: ten finished paintings hung as one museum wall ----
+// Frame one cell of the 5×2 grid. `imgUrl` may be absent (that painting is
+// still un-earned) — then the mat shows an "awaiting signature" ghost.
+function drawGalleryFrame(gc, fx, fy, bw, fh, mw, mh, imgUrl, label) {
+  const cx = fx + bw / 2;
+  // drop shadow lifts the frame off the wall
+  gc.fillStyle = 'rgba(0,0,0,0.38)';
+  gc.fillRect(fx + 6, fy + 8, bw, fh);
+  // wood frame with an inner lip
+  gc.fillStyle = '#4f3820';
+  gc.fillRect(fx, fy, bw, fh);
+  gc.fillStyle = '#7a5a33';
+  gc.fillRect(fx + 5, fy + 5, bw - 10, fh - 10);
+  gc.fillStyle = '#8f6b3d';
+  gc.fillRect(fx + 7, fy + 7, bw - 14, fh - 14);
+  // mat
+  gc.fillStyle = '#efe8d8';
+  gc.fillRect(fx + 10, fy + 10, bw - 20, fh - 20);
+  const ix = fx + 10 + 12, iy = fy + 10 + 12;
+  if (imgUrl) {
+    const im = new Image();
+    im.onload = () => { if (gc && im.width) gc.drawImage(im, ix, iy, mw, mh); };
+    im.src = imgUrl;
+  } else {
+    gc.strokeStyle = 'rgba(146,124,90,0.85)';
+    gc.setLineDash([5, 5]);
+    gc.lineWidth = 2;
+    gc.strokeRect(ix + 8, iy + 8, mw - 16, mh - 16);
+    gc.setLineDash([]);
+    gc.fillStyle = 'rgba(122,112,92,0.9)';
+    gc.font = '600 15px Georgia, serif';
+    gc.textAlign = 'center';
+    gc.textBaseline = 'middle';
+    gc.fillText('AWAITING SIGNATURE', ix + mw / 2, iy + mh / 2);
+  }
+  // mat hairline
+  gc.strokeStyle = 'rgba(60,42,24,0.28)';
+  gc.lineWidth = 1.5;
+  gc.strokeRect(fx + 10, fy + 10, bw - 20, fh - 20);
+  // number plate under the frame
+  gc.fillStyle = 'rgba(255,250,235,0.9)';
+  gc.font = '600 16px Verdana, sans-serif';
+  gc.textAlign = 'center';
+  gc.textBaseline = 'middle';
+  gc.fillText(String(label).padStart(2, '0'), cx, fy + fh + 20);
+}
+
+function composeActGallery(act) {
+  if (!elActGalleryCanvas) return;
+  const gc = elActGalleryCanvas.getContext('2d');
+  const CW = elActGalleryCanvas.width, CH = elActGalleryCanvas.height;
+  gc.clearRect(0, 0, CW, CH);
+
+  // gallery wall + light from a high skylight
+  const wall = gc.createLinearGradient(0, 0, 0, CH);
+  wall.addColorStop(0, '#3b3a49');
+  wall.addColorStop(0.85, '#2a2934');
+  wall.addColorStop(1, '#1f1e27');
+  gc.fillStyle = wall;
+  gc.fillRect(0, 0, CW, CH);
+  gc.fillStyle = 'rgba(255,255,255,0.05)';
+  gc.fillRect(0, 0, CW, 6);
+  gc.fillStyle = 'rgba(0,0,0,0.3)';
+  gc.fillRect(0, CH - 24, CW, 24);
+  const skylight = gc.createRadialGradient(CW / 2, -80, 40, CW / 2, -80, CH * 0.6);
+  skylight.addColorStop(0, 'rgba(255,244,214,0.14)');
+  skylight.addColorStop(1, 'rgba(255,244,214,0)');
+  gc.fillStyle = skylight;
+  gc.fillRect(0, 0, CW, CH);
+
+  const save = loadSave();
+  const art = (save && save.art) || {};
+
+  const cols = 5, rows = 2;
+  const gapX = 22, gapY = 52;
+  const headerH = 106, footH = 70;
+  const innerT = headerH, innerH = CH - headerH - footH;
+  const imgA = W / H;                       // the paintings' landscape aspect
+  const frame = 5, mat = 12;
+  const bw = (CW - 2 * 64 - gapX * (cols - 1)) / cols;
+  const mw = bw - frame * 2 - mat * 2;
+  const mh = mw / imgA;
+  const fh = mh + mat * 2 + frame * 2;
+  const gridH = fh * rows + gapY * (rows - 1);
+  const y0 = innerT + (innerH - gridH) * 0.5;
+
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const li = act * 10 + r * cols + c;   // levels index within the act
+      const fx = 64 + c * (bw + gapX);
+      const fy = y0 + r * (fh + gapY);
+      drawGalleryFrame(gc, fx, fy, bw, fh, mw, mh, art[String(li)], li + 1);
+    }
+  }
+
+  // bottom plaque: one wall owns ten works
+  gc.fillStyle = 'rgba(255,250,235,0.55)';
+  gc.font = '500 22px Georgia, serif';
+  gc.textAlign = 'center';
+  gc.textBaseline = 'middle';
+  gc.fillText('TEN SIGNED WORKS \u00b7 ONE ACT', CW / 2, CH - footH / 2 + 4);
+}
+
+let actGalleryViewer = false;   // wall opened from the menu/finale viewer (CONTINUE = BACK)
+
+function showActGallery(act) {
+  const info = ACT_INFO[Math.min(3, Math.max(0, act))];
+  const kick = document.getElementById('actGalleryKick');
+  if (kick) kick.textContent = (info.kick || '') + '  \u00b7  A WALL OF YOUR WORK';
+  if (elActGalleryTitle) {
+    elActGalleryTitle.textContent = info.title || ('ACT ' + (act + 1));
+    elActGalleryTitle.classList.toggle('gold', act === 3);
+  }
+  if (elActGalleryCont) {
+    elActGalleryCont.textContent = actGalleryViewer ? 'BACK' : 'CONTINUE';
+    elActGalleryCont.setAttribute('aria-label', actGalleryViewer ? 'Back to the gallery' : 'Continue');
+  }
+  hideCard();
+  elMsg.classList.add('hidden');
+  composeActGallery(act);
+  if (elActGallery) {
+    elActGallery.scrollTop = 0;
+    elActGallery.classList.remove('hidden');
+  }
+}
+
+// The act gallery is a hard stop: either CONTINUE/tap-anywhere resumes play.
+function continueFromActGallery() {
+  if (!elActGallery || elActGallery.classList.contains('hidden')) return;
+  hideActGallery();
+  pendingActGallery = -1;
+  if (actGalleryViewer) { actGalleryViewer = false; openGalleryViewer(); return; }
+  if (customLevel) { reloadCurrentLevel(); return; }
+  if (levelIndex === LEVELS.length - 1) { showFinale(); return; }   // all 40 signed!
+  const nextIdx = levelIndex + 1;
+  loadLevel(nextIdx >= LEVELS.length ? 0 : nextIdx);
+}
+
+function hideActGallery() {
+  if (elActGallery) elActGallery.classList.add('hidden');
+}
+
+// ---------- Gallery viewer (menu / finale: browse all act walls) ----------
+const elGalleryViewer = document.getElementById('galleryViewer');
+const elGvGrid = document.getElementById('gvGrid');
+
+function openGalleryViewer() {
+  renderGalleryViewer();
+  elGalleryViewer.classList.remove('hidden');
+}
+
+function hideGalleryViewer() {
+  elGalleryViewer.classList.add('hidden');
+}
+
+function renderGalleryViewer() {
+  let signed = {};
+  try { signed = (loadSave().art) || {}; } catch (e) {}
+  elGvGrid.innerHTML = ACT_INFO.map((info, a) => {
+    let n = 0;
+    for (let i = a * 10; i < a * 10 + 10; i++) if (signed[i]) n++;
+    return ''
+      + '<button type="button" class="gvCard" data-act="' + a + '">'
+      +   '<div class="gvKick">' + (info.kick || '') + '</div>'
+      +   '<div class="gvTitle">' + (info.title || '') + '</div>'
+      +   '<div class="gvCount">' + n + ' / 10 signed</div>'
+      + '</button>';
+  }).join('');
+  elGvGrid.querySelectorAll('button').forEach(b => {
+    b.addEventListener('click', () => {
+      ensureAudio(); playTick();
+      actGalleryViewer = true;                  // walls from the viewer always go BACK
+      showActGallery(parseInt(b.dataset.act, 10));
+    });
+  });
+}
+
+// ---------- Finale end screen (all 40 signed) ----------
+const elFinale = document.getElementById('finaleOverlay');
+const elFinaleStats = document.getElementById('finaleStats');
+
+function showFinale() {
+  let stars = 0, totTime = 0, signed = 0;
+  try {
+    const save = loadSave();
+    for (const idx of Object.keys(save.best || {})) {
+      const rec = save.best[idx];
+      if (rec) { stars += rec.stars || 0; totTime += rec.time || 0; }
+    }
+    signed = Object.keys(save.art || {}).length;
+  } catch (e) { /* storage unavailable */ }
+  elFinaleStats.textContent = stars + ' / ' + (LEVELS.length * 3) + ' stars  \u00b7  total time '
+    + fmtTime(totTime) + '  \u00b7  ' + signed + ' / ' + LEVELS.length + ' signed';
+  elFinale.classList.remove('hidden');
+}
+
+function hideFinale() {
+  elFinale.classList.add('hidden');
+}
+
+function startNewGame() {
+  hideFinale();
+  hideGalleryViewer();
+  // fresh campaign: unlocked resets to level 1, but the gallery's framed
+  // records (best, art, signature) are kept
+  try {
+    const save = loadSave();
+    save.unlocked = [0];
+    writeSave(save);
+  } catch (e) { /* storage unavailable */ }
+  gameMode = GAME_MODES.LEVELS;
+  bindRestartBtn();
+  elMenu.classList.add('hidden');
+  const titleEl5 = document.getElementById('title');
+  if (titleEl5) titleEl5.style.display = 'none';
+  showReadyUI(true);
+  status = 'ready';
+  levelIndex = 0;
+  loadLevel(levelIndex);
+}
+
+bindButton(document.getElementById('gvMenuBtn'), () => { ensureAudio(); playTick(); hideGalleryViewer(); returnToMenu(); });
+bindButton(document.getElementById('finaleViewBtn'), () => { ensureAudio(); playTick(); hideFinale(); openGalleryViewer(); });
+bindButton(document.getElementById('finaleNewgameBtn'), () => { ensureAudio(); playTick(); startNewGame(); });
+bindButton(document.getElementById('finaleMenuBtn'), () => { ensureAudio(); playTick(); hideFinale(); hideGalleryViewer(); returnToMenu(); });
+
 // A big cheering version of the blob congratulates you on the win screen —
 // personal and warm instead of a confetti shower. Each line tags an emotion
 // (e) so the buddy dances/mugs differently every time.
@@ -2927,9 +3524,10 @@ function drawWinBuddy() {
   const cx = cv.getContext('2d');
   cx.setTransform(dpr, 0, 0, dpr, 0, 0);
   cx.clearRect(0, 0, cw, ch);
-  // fully center the buddy so the arms + body + bounce never clip
+  // fully center the buddy so the arms + body + bounce never clip,
+  // but keep it in the LOWER half so the speech bubble above never touches it
   const R = Math.min(40, cw * 0.32, ch * 0.42);
-  const y = Math.max(R + 4, (ch + R * 0.3) / 2);
+  const y = Math.max(R + 4, (ch + R * 0.3) / 2 + Math.floor(ch * 0.1));
   const emote = winBuddyEmote || 'cheer';
   const hop = emote === 'hype' ? 10 : emote === 'shy' ? 3 : emote === 'cool' ? 5 : 7;
   drawWinBuddyBlob(cx, cw / 2, y, R, emote, hop);
@@ -3122,654 +3720,11 @@ function lose() {
   elMsgS.textContent = pickTrashTalk() + ' \u2014 tap to retry';
   elRestart.style.display = '';
   elNextBtn.style.display = 'none';
+  elMsgBtns.classList.remove('ready', 'paused', 'win');
   loseCause = '';
 }
 
 /* ============================================================
-   ENDLESS RUN MODE
-   ============================================================ */
-// Seeded PRNG (mulberry32)
-function sRand(seed) {
-  let s = seed | 0;
-  return function() {
-    s = (s + 0x6D2B79F5) | 0;
-    let t = Math.imul(s ^ (s >>> 15), 1 | s);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
-
-const EndlessRun = {
-
-  /* ---- INIT ---- */
-  init() {
-    hideCard();                  // endless never shows the art card
-    // reset state
-    this._paintBlitFrame = 0;
-    trackChunks = [];
-    flatOrbs = [];
-    flatWalls = [];
-    flatCoins = [];
-    cameraX = 0;
-    runDistance = 0;
-    runCoins = 0;
-    ultMeter = 0;
-    ultActive = false;
-    ultTimer = 0;
-    seedCounter = Date.now() & 0x7FFFFFFF;
-
-    // fake level so existing draw/physics functions work unchanged
-    level = { name: 'ENDLESS', player: { x: 150, y: 425 }, goal: { x: -9999, y: -9999, r: 0 }, orbs: [], walls: [] };
-    levelIndex = -1;
-
-    // player start
-    player = { x: 150, y: 425, vx: 2.5, vy: 0 };
-    tethered = false;
-    tether = null;
-    trail = [];
-    sparks.length = 0;
-    rings.length = 0;
-    beams.length = 0;
-    tetherParticles.length = 0;
-    snap = 0;
-    stretchEase = 1;
-    tetherSproing = 0;
-    paintRGB = signatureRGB;
-    inkRGB = signatureRGB;          // endless start: brush loads with his paint
-    setPaintWell(paintRGB);
-    clearPaintLayer();
-
-    // parallax
-    this.buildParallax();
-
-    // generate initial chunks
-    for (let i = 0; i < 3; i++) this.generateChunk(i * CHUNK_W);
-
-    // rebuild level arrays from chunks
-    this.rebuildArrays();
-
-    status = 'playing';
-    statusTimer = 0;
-    runTime = 0;
-
-    // hide death/win overlay
-    elMsg.classList.add('hidden');
-    elMsg.classList.remove('lost');
-    elMsg.classList.remove('won');
-
-    // HUD
-    elLevelTitle.textContent = 'ENDLESS RUN';
-    this.showHUD(true);
-  },
-
-  /* ---- PARALLAX ---- */
-  buildParallax() {
-    parallaxLayers = [];
-    if (typeof document === 'undefined') return;
-    const pw = 2200, ph = H;
-
-    // layer 0 — sky gradient
-    const c0 = document.createElement('canvas'); c0.width = pw; c0.height = ph;
-    const g0 = c0.getContext('2d');
-    const grad0 = g0.createLinearGradient(0, 0, 0, ph);
-    grad0.addColorStop(0, '#8ec5d6'); grad0.addColorStop(0.6, '#b8d8e3'); grad0.addColorStop(1, '#e8dfd0');
-    g0.fillStyle = grad0; g0.fillRect(0, 0, pw, ph);
-    // faint paint flecks
-    g0.globalAlpha = 0.15;
-    for (let i = 0; i < 40; i++) {
-      g0.fillStyle = Math.random() < 0.5 ? '#7ab89a' : '#c9a86c';
-      g0.beginPath(); g0.arc(Math.random() * pw, Math.random() * ph, 2 + Math.random() * 5, 0, Math.PI * 2); g0.fill();
-    }
-    g0.globalAlpha = 1;
-    parallaxLayers.push({ speed: 0.05, canvas: c0 });
-
-    // layer 1 — distant paint strokes (mountain-like)
-    const c1 = document.createElement('canvas'); c1.width = pw; c1.height = ph;
-    const g1 = c1.getContext('2d');
-    g1.clearRect(0, 0, pw, ph);
-    g1.globalAlpha = 0.25;
-    const cols1 = ['#9fb89f', '#8fa888', '#a0b498'];
-    for (let i = 0; i < 12; i++) {
-      g1.fillStyle = cols1[i % cols1.length];
-      const bx = Math.random() * pw;
-      const bw = 80 + Math.random() * 250;
-      const bh = 40 + Math.random() * 180;
-      const by = ph * 0.45 + Math.random() * ph * 0.25 - bh * 0.5;
-      g1.beginPath();
-      g1.moveTo(bx, by + bh); g1.lineTo(bx + bw * 0.1, by);
-      g1.lineTo(bx + bw * 0.35, by + bh * 0.3);
-      g1.lineTo(bx + bw * 0.6, by - bh * 0.1);
-      g1.lineTo(bx + bw * 0.85, by + bh * 0.4);
-      g1.lineTo(bx + bw, by + bh);
-      g1.closePath(); g1.fill();
-    }
-    g1.globalAlpha = 1;
-    parallaxLayers.push({ speed: 0.15, canvas: c1 });
-
-    // layer 2 — foreground paint drips
-    const c2 = document.createElement('canvas'); c2.width = pw; c2.height = ph;
-    const g2 = c2.getContext('2d');
-    g2.clearRect(0, 0, pw, ph);
-    g2.globalAlpha = 0.12;
-    for (let i = 0; i < 25; i++) {
-      g2.fillStyle = ['#d4a66a', '#b89070', '#8a957a', '#c8a878'][i % 4];
-      const dx = Math.random() * pw;
-      const dw = 4 + Math.random() * 14;
-      const dh = 30 + Math.random() * 120;
-      const dy = Math.random() * ph * 0.4 + ph * 0.3;
-      g2.beginPath(); g2.ellipse(dx, dy, dw * 0.5, dh, 0, 0, Math.PI * 2); g2.fill();
-    }
-    g2.globalAlpha = 1;
-    parallaxLayers.push({ speed: 0.4, canvas: c2 });
-  },
-
-  /* ---- SEEDED PRNG for chunks ---- */
-  rng() { return sRand(seedCounter++); },
-
-  /* ---- GENERATE A CHUNK ---- */
-  generateChunk(startX) {
-    const r = this.rng();
-    const distFactor = Math.min(1, startX / 80000);   // ramps 0→1 over 80k px
-    const difficulty = 0.2 + distFactor * 0.8;
-
-    const orbs = [];
-    const walls = [];
-    const coins = [];
-
-    // --- orbs: place 5-8 per chunk ensuring TETHER_RANGE chain ---
-    const orbCount = 5 + Math.floor(r() * 4);
-    let lastY = H * 0.5 + (r() - 0.5) * 300;
-    for (let i = 0; i < orbCount; i++) {
-      const ox = startX + 160 + i * (CHUNK_W - 320) / (orbCount - 1 || 1);
-      const oy = Math.max(80, Math.min(H - 80, lastY + (r() - 0.5) * 280));
-      lastY = oy;
-
-      // type weighted by difficulty
-      const roll = r();
-      let type;
-      if (roll < 0.15 + difficulty * 0.15) type = 'repel';
-      else if (roll < 0.35 + difficulty * 0.1) type = 'turbo';
-      else type = 'normal';
-
-      orbs.push({ x: ox, y: oy, r: 16, type });
-    }
-
-    // --- walls: 0-2 per chunk at higher difficulty ---
-    if (difficulty > 0.3 && r() < difficulty * 0.7) {
-      const wx = startX + 300 + r() * (CHUNK_W - 600);
-      const wallH = 60 + r() * 200;
-      const wallY = r() < 0.5 ? (H - wallH) * r() : H - wallH - r() * 60;
-      const wallW = 30 + r() * 20;
-      // gap: leave a gap of at least 160px for the blob to swing through
-      const gapCenter = wallY + wallH * (0.3 + r() * 0.4);
-      walls.push({ x: wx, y: wallY, w: wallW, h: gapCenter - wallY - 80 });
-      if (wallY + wallH - gapCenter - 80 > 40)
-        walls.push({ x: wx, y: gapCenter + 80, w: wallW, h: wallY + wallH - gapCenter - 80 });
-    }
-
-    // --- coins: placed in arcs between orbs ---
-    for (let i = 0; i < orbs.length - 1; i++) {
-      if (r() < 0.7) {
-        const a = orbs[i], b = orbs[i + 1];
-        const count = 2 + Math.floor(r() * 3);
-        for (let k = 0; k < count; k++) {
-          const t = (k + 1) / (count + 1);
-          coins.push({
-            x: a.x + (b.x - a.x) * t + (r() - 0.5) * 50,
-            y: a.y + (b.y - a.y) * t + (r() - 0.5) * 60 - 30,
-            r: 7,
-            collected: false
-          });
-        }
-      }
-    }
-
-    trackChunks.push({ startX, orbs, walls, coins });
-  },
-
-  /* ---- REBUILD flat arrays from active chunks ---- */
-  rebuildArrays() {
-    flatOrbs.length = 0;
-    flatWalls.length = 0;
-    flatCoins.length = 0;
-    for (const c of trackChunks) {
-      flatOrbs.push(...c.orbs);
-      flatWalls.push(...c.walls);
-      // only keep uncollected coins
-      for (const coin of c.coins) if (!coin.collected) flatCoins.push(coin);
-    }
-    level.orbs = flatOrbs;
-    level.walls = flatWalls;
-  },
-
-  /* ---- RECYCLE + GENERATE chunks ---- */
-  recycleChunks() {
-    const playerChunk = Math.floor(player.x / CHUNK_W);
-    // cull chunks far behind
-    trackChunks = trackChunks.filter(c => c.startX + CHUNK_W > cameraX - CHUNK_CULL);
-    // generate ahead
-    const needEnd = cameraX + W + CHUNK_AHEAD;
-    let lastEnd = trackChunks.length ? trackChunks[trackChunks.length - 1].startX + CHUNK_W : 0;
-    while (lastEnd < needEnd) {
-      this.generateChunk(lastEnd);
-      lastEnd = trackChunks[trackChunks.length - 1].startX + CHUNK_W;
-    }
-    // keep chunk containing tethered orb alive
-    if (tethered && tether) {
-      const orbChunk = trackChunks.find(c => c.orbs.includes(tether.orb));
-      if (!orbChunk) {
-        // orb's chunk was recycled — release
-        release();
-      }
-    }
-    this.rebuildArrays();
-  },
-
-  /* ---- FLOAT PRECISION RESET ---- */
-  shiftOrigin() {
-    const dx = ORIGIN_RESET;
-    player.x -= dx;
-    cameraX -= dx;
-    if (tether) {
-      // tether.orb is a reference to an object in a chunk, already shifted below
-    }
-    for (const c of trackChunks) {
-      c.startX -= dx;
-      for (const o of c.orbs) o.x -= dx;
-      for (const w of c.walls) w.x -= dx;
-      for (const coin of c.coins) coin.x -= dx;
-    }
-    level.goal.x -= dx;
-  },
-
-  /* ---- ULTIMATE ---- */
-  tryUltimate() {
-    if (ultMeter < ULT_COST || ultActive) return;
-    ultActive = true;
-    ultTimer = ULT_DURATION;
-    ultMeter -= ULT_COST;
-    this.updateMeterUI();
-  },
-
-  updateUltimate(dt) {
-    if (!ultActive) return;
-    ultTimer -= dt / 60;
-    if (ultTimer <= 0) {
-      ultActive = false;
-      ultTimer = 0;
-    }
-    this.updateMeterUI();
-  },
-
-  updateMeterUI() {
-    const fill = document.getElementById('ultimateFill');
-    if (fill) fill.style.width = Math.min(100, ultMeter).toFixed(0) + '%';
-    const btn = document.getElementById('ultimateBtn');
-    if (btn) {
-      if (ultActive) { btn.classList.add('active'); btn.textContent = '✦'; }
-      else if (ultMeter >= ULT_COST) { btn.classList.remove('active'); btn.textContent = '✦'; btn.style.animation = 'pulse 1s infinite'; }
-      else { btn.classList.remove('active'); btn.textContent = '✦'; btn.style.animation = ''; }
-    }
-  },
-
-  /* ---- COIN PICKUP ---- */
-  checkCoins() {
-    for (let i = flatCoins.length - 1; i >= 0; i--) {
-      const c = flatCoins[i];
-      if (c.collected) continue;
-      // magnet: pull toward player
-      if (ultActive) {
-        const dx = player.x - c.x, dy = player.y - c.y;
-        const d = Math.hypot(dx, dy);
-        if (d < ULT_MAGNET_R && d > 1) {
-          c.x += dx / d * 8;
-          c.y += dy / d * 8;
-        }
-      }
-      const d = Math.hypot(player.x - c.x, player.y - c.y);
-      if (d < PLAYER_R + c.r + 4) {
-        c.collected = true;
-        runCoins++;
-        ultMeter = Math.min(ULT_COST, ultMeter + ULT_METER_COIN);
-        // FX
-        pushSpark({
-          x: c.x, y: c.y, vx: (Math.random() - 0.5) * 3, vy: (Math.random() - 0.5) * 3,
-          life: 0.6, size: 2, color: '#e0af3c'
-        });
-        flatCoins.splice(i, 1);  // remove immediately to keep array small
-        this.updateMeterUI();
-      }
-    }
-  },
-
-  /* ---- COLLISION CHECKS ---- */
-  checkEndlessWalls() {
-    for (const w of level.walls) {
-      const cx = Math.max(w.x, Math.min(player.x, w.x + w.w));
-      const cy = Math.max(w.y, Math.min(player.y, w.y + w.h));
-      if (Math.hypot(player.x - cx, player.y - cy) <= PLAYER_R) return true;
-    }
-    return false;
-  },
-
-  checkEndlessBounds() {
-    // left edge = death; top/bottom = death; right edge = no wall (endless)
-    return player.x < cameraX - OUT_MARGIN || player.y < -OUT_MARGIN || player.y > H + OUT_MARGIN;
-  },
-
-  /* ---- DEATH ---- */
-  death() {
-    hideCard();                  // no art card in endless
-    clearPaintLayer();           // fresh run — wipe the old paint layer
-    clearConfetti();             // no confetti on a loss
-    if (tethered) release();
-    status = 'lost';
-    statusTimer = 2.0;   // seconds the RUN ENDED screen lingers before auto-restart
-    deathSplatter(player.x, player.y);
-    stopTurboBed();
-    playLose('TOO SLOW!');
-    this.showHUD(false);
-
-    // save best
-    let bestDist = 0, bestCoins = 0;
-    try {
-      const save = loadSave();
-      const eb = save.endlessBest || { distance: 0, coins: 0 };
-      bestDist = eb.distance || 0;
-      bestCoins = eb.coins || 0;
-      if (runDistance > bestDist) {
-        save.endlessBest = { distance: runDistance, coins: runCoins };
-        writeSave(save);
-        bestDist = runDistance;
-        bestCoins = runCoins;
-      }
-    } catch (e) {}
-
-    elMsg.classList.add('lost');
-    elMsg.classList.remove('won');
-    elMsg.classList.remove('hidden');
-    elMsgT.textContent = 'RUN ENDED';
-    elMsgStars.textContent = '';
-    elMsgObj.style.display = 'none';
-    elMsgScore.innerHTML = '<b>' + runDistance + '</b> m  ·  ' + runCoins + ' coins'
-      + (runDistance >= bestDist && bestDist > 0 ? '  ·  <span class="newbest">NEW BEST!</span>' : '')
-      + (bestDist > 0 && runDistance < bestDist ? '  ·  best ' + bestDist + 'm' : '');
-    elMsgS.textContent = pickTrashTalk() + ' \u2014 tap to run again';
-    elRestart.style.display = '';
-    elNextBtn.style.display = 'none';
-    bindRestartBtn();
-  },
-
-  /* ---- HUD VISIBILITY ---- */
-  showHUD(on) {
-    const hudEl = document.getElementById('hudEndless');
-    if (hudEl) hudEl.classList.toggle('hidden', !on);
-    if (on) this.updateMeterUI();
-  },
-
-  /* ---- MAIN UPDATE ---- */
-  update(dt) {
-    time += dt;
-
-    // toast timer (shared)
-    if (toastTimer > 0) {
-      toastTimer -= dt;
-      if (toastTimer <= 0) elToast.classList.remove('show');
-    }
-
-    if (status === 'paused' || status === 'ready') return;
-
-    if (status === 'lost') {
-      // game-over screen lingers until tapped (no auto-restart)
-      for (let i = sparks.length - 1; i >= 0; i--) {
-        const p = sparks[i]; p.life -= dt / 60; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 0.02 * dt;
-        if (p.life <= 0) sparks.splice(i, 1);
-      }
-      return;
-    }
-
-    if (status !== 'playing') return;
-
-    // slow-mo from ultimate
-    const effDt = ultActive ? dt * ULT_SLOW : dt;
-
-    runTime += dt / 60;
-    runDistance = Math.floor(player.x / 50);
-
-    // camera follow (player at 30% from left)
-    cameraX = player.x - W * 0.3;
-
-    // recycle & generate chunks
-    this.recycleChunks();
-
-    // ultimate timer
-    this.updateUltimate(dt);
-
-    // speed ramp: increase difficulty
-    // (handled via difficulty in generateChunk based on distance)
-
-    // air-rush bed
-    if (tethered) {
-      const tspd = Math.abs(tether.angVel) * tether.dist;
-      setRush(Math.min(1, Math.max(0, (tspd - 3) / 14)));
-    } else {
-      const fspd = Math.hypot(player.vx, player.vy);
-      setRush(Math.min(0.3, Math.max(0, (fspd - 6) / 40)));
-    }
-
-    // swipe-to-steer nudge: decays over a few frames, only while flying loose
-    if (swipeTrack !== 0) {
-      const nudge = swipeTrack * effDt * 0.5;  // smooth the impulse over ~2 frames
-      player.vx += nudge;
-      swipeTrack *= Math.pow(0.5, effDt);
-      if (Math.abs(swipeTrack) < 0.3) swipeTrack = 0;
-    }
-
-    // ---- physics (same as core update) ----
-    if (!tethered) {
-      player.vx *= Math.pow(DRAG, effDt);
-      player.vy *= Math.pow(DRAG, effDt);
-      player.vy += GRAVITY * effDt;
-      player.x  += player.vx * effDt;
-      player.y  += player.vy * effDt;
-    } else {
-      const t = tether, o = t.orb;
-      if (t.turbo) {
-        t.angVel = Math.min(t.angVel * Math.pow(TURBO_ACCEL, effDt), TURBO_CAP);
-        updateTurboBed(Math.abs(t.angVel) / TURBO_CAP);
-      }
-      if (t.repel) {
-        t.dist = Math.min(t.dist + REPEL_EXPAND * effDt, REPEL_LIMIT);
-        if (t.dist >= REPEL_LIMIT) {
-          ultMeter = Math.min(ULT_COST, ultMeter + ULT_METER_REPEL);
-          this.updateMeterUI();
-          playKick();
-          release(); return;
-        }
-      }
-      const prevX = player.x, prevY = player.y;
-      t.angle += t.angVel * effDt;
-      player.x = o.x + Math.cos(t.angle) * t.dist;
-      player.y = o.y + Math.sin(t.angle) * t.dist;
-      if (effDt > 0) {
-        player.vx = (player.x - prevX) / effDt;
-        player.vy = (player.y - prevY) / effDt;
-      }
-      const below = player.y > o.y + 6;
-      if (below && !lastBelow && creakCd <= 0 && Math.abs(t.angVel) * t.dist > 5) {
-        playCreak(); creakCd = 0.4;
-      }
-      lastBelow = below;
-      if (creakCd > 0) creakCd -= effDt / 60;
-      dripAcc -= effDt;
-      if (dripAcc <= 0) {
-        dripAcc = Math.max(0.12, 1.1 - Math.abs(t.angVel) * t.dist * 0.05);
-        if (Math.random() < 0.55) playDrip(0.032);
-      }
-    }
-
-    // paint bucket drip (tethered)
-    if (tethered && tether) {
-      const o = tether.orb, c = orbColors[o.type];
-      o.bucketDrip = (o.bucketDrip || 0) - effDt;
-      if (o.bucketDrip <= 0) {
-        o.bucketDrip = 0.16 + Math.random() * 0.12;
-        const a = Math.random() * Math.PI * 2;
-        pushTetherParticle({
-          x: o.x + Math.cos(a) * o.r * 0.8, y: o.y - o.r * 0.5 + Math.random() * o.r * 0.3,
-          vx: (Math.random() - 0.5) * 2.6, vy: 1 + Math.random() * 3.2,
-          r: 1.8 + Math.random() * 3, life: 0.6 + Math.random() * 0.6, color: c.paint
-        });
-      }
-    }
-
-    // tether particles
-    for (let i = tetherParticles.length - 1; i >= 0; i--) {
-      const p = tetherParticles[i];
-      p.life -= effDt / 60; p.y += p.vy * effDt; p.x += p.vx * effDt; p.vy += 0.04 * effDt;
-      if (p.life <= 0) tetherParticles.splice(i, 1);
-    }
-
-    // coin pickup + magnet
-    this.checkCoins();
-
-    // ultimate meter gain from orb attach
-    if (tethered && tether && !tether._metered) {
-      ultMeter = Math.min(ULT_COST, ultMeter + ULT_METER_ORB);
-      tether._metered = true;
-      this.updateMeterUI();
-    }
-    if (!tethered && tether) tether._metered = false;
-
-    // collision checks
-    if (this.checkEndlessWalls()) { this.death(); return; }
-    if (this.checkEndlessBounds()) { this.death(); return; }
-    // fell behind camera = death
-    if (player.x < cameraX - 200) { this.death(); return; }
-
-    // trail
-    trail.unshift({ x: player.x, y: player.y });
-    const targetLen = 22 + Math.min(18, Math.hypot(player.vx, player.vy) * 2.2);
-    while (trail.length > targetLen) trail.pop();
-
-    snap *= Math.pow(0.84, effDt);
-    tetherSproing *= Math.pow(0.88, effDt);
-    stainA = tethered ? 1 : stainA * Math.pow(0.9, effDt);
-    if (stainA < 0.01) stainA = 0;
-
-    // spark/ring anim (shared)
-    for (let i = sparks.length - 1; i >= 0; i--) {
-      const p = sparks[i]; p.life -= dt / 60; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 0.02 * dt;
-      if (p.life <= 0) sparks.splice(i, 1);
-    }
-    for (let i = rings.length - 1; i >= 0; i--) {
-      const r = rings[i]; r.r += r.vr * dt; r.life -= dt / 60;
-      if (r.life <= 0) rings.splice(i, 1);
-    }
-
-    // float precision reset
-    if (player.x > ORIGIN_RESET) this.shiftOrigin();
-
-    // HUD
-    elHudTimer.textContent = runDistance + 'm';
-  },
-
-  /* ---- MAIN DRAW ---- */
-  draw() {
-    // paint layer is only composited every 10th frame here (huge canvas)
-    if (paintCanvas && (++EndlessRun._paintBlitFrame % 10 === 1)) {
-      ctx.drawImage(paintCanvas, 0, 0);
-    }
-
-    // parallax layers (screen space)
-    if (parallaxLayers.length) {
-      for (const layer of parallaxLayers) {
-        const cw = layer.canvas.width;
-        const off = (cameraX * layer.speed) % cw;
-        ctx.drawImage(layer.canvas, -off, 0);
-        ctx.drawImage(layer.canvas, -off + cw, 0);
-      }
-    } else {
-      drawBackground();
-    }
-
-    // world space
-    ctx.save();
-    ctx.translate(-cameraX, 0);
-
-    drawWalls();
-    drawOrbs();
-    drawTether();
-    drawTrail();
-    drawTetherParticles();
-    drawPlayer();
-
-    // coins (solid fills + vertical culling for speed)
-    for (const c of flatCoins) {
-      if (c.collected) continue;
-      if (c.x < cameraX - 40 || c.x > cameraX + W + 40) continue;
-      if (Math.abs(c.y - player.y) > 100) continue;   // skip vertically far coins
-      ctx.save();
-      ctx.translate(c.x, c.y);
-      // gold paint drop — solid colors keep the gold look, no gradient cost
-      const pulse = 1 + Math.sin(time * 5 + c.x * 0.01) * 0.15;
-      ctx.scale(pulse, pulse);
-      ctx.fillStyle = '#e0af3c';
-      ctx.beginPath();
-      ctx.arc(0, 0, c.r, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = '#ffe680';
-      ctx.beginPath();
-      ctx.arc(-c.r * 0.28, -c.r * 0.28, c.r * 0.42, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.strokeStyle = '#b8871b';
-      ctx.lineWidth = 1.2;
-      ctx.beginPath();
-      ctx.arc(0, 0, c.r, 0, Math.PI * 2);
-      ctx.stroke();
-      ctx.restore();
-    }
-
-    ctx.restore(); // back to screen space
-
-    // sparks & rings (screen space — draw at camera offset)
-    ctx.lineWidth = 2.5;
-    for (const r of rings) {
-      ctx.strokeStyle = 'rgba(224,175,60,' + (r.life * 1.4).toFixed(3) + ')';
-      ctx.beginPath();
-      ctx.arc(r.x - cameraX, r.y, r.r, 0, Math.PI * 2);
-      ctx.stroke();
-    }
-    for (const sp of sparks) {
-      ctx.globalAlpha = Math.max(0, sp.life);
-      ctx.fillStyle = sp.color;
-      ctx.beginPath();
-      ctx.arc(sp.x - cameraX, sp.y, sp.size * sp.life, 0, Math.PI * 2);
-      ctx.fill();
-    }
-    ctx.globalAlpha = 1;
-
-    // ultimate vignette overlay
-    if (ultActive) {
-      const frac = ultTimer / ULT_DURATION;
-      const alpha = 0.12 + 0.18 * Math.sin(time * 8);
-      ctx.fillStyle = 'rgba(155,111,208,' + (alpha * frac).toFixed(3) + ')';
-      ctx.fillRect(0, 0, W, H);
-      // edge glow
-      ctx.shadowColor = 'rgba(155,111,208,0.7)';
-      ctx.shadowBlur = 40;
-      ctx.strokeStyle = 'rgba(172,132,216,' + (0.6 * frac).toFixed(3) + ')';
-      ctx.lineWidth = 3;
-      ctx.strokeRect(8, 8, W - 16, H - 16);
-      ctx.shadowBlur = 0;
-    }
-  }
-};
-
-// flat arrays (rebuilt by EndlessRun.rebuildArrays)
-let flatOrbs = [];
-let flatWalls = [];
-let flatCoins = [];
 
 /* ============================================================
    RENDERING
@@ -3809,10 +3764,10 @@ function makeCtx() {
   return { el: c, ctx: c.getContext('2d') };
 }
 
-// Act themes: 0 Palette(parchment) 1 Floor1(linen) 2 Floor2(blueprint)
-// 3 Floor3(gallery card stock). Endless draws its own sky, custom = Palette.
+
+
+// act theme for the current level: 0-3, one paper texture per gallery act
 function levelFloor() {
-  if (gameMode === GAME_MODES.ENDLESS) return -1;
   if (levelIndex === CUSTOM_IDX) return 0;
   return Math.min(3, Math.floor(levelIndex / 10));
 }
@@ -4369,28 +4324,6 @@ function drawOrbs() {
     const r = o.r;
     const attached = tethered && tether && tether.orb === o;
 
-    // world-space culling + far-orb simplification (endless mode only,
-    // where many chunks of orbs exist off-screen / at a distance)
-    if (gameMode === GAME_MODES.ENDLESS) {
-      const scrX = o.x - cameraX;
-      if (!attached && (scrX < -80 || scrX > W + 80)) return;   // skip off-screen
-
-      // far orbs (>600px from camera center): cheap flat circle, no detail
-      if (!attached && Math.abs(o.x - (cameraX + W * 0.5)) > 600) {
-        ctx.save();
-        ctx.translate(o.x, o.y);
-        ctx.shadowColor = c.glow;
-        ctx.shadowBlur = 10;
-        ctx.fillStyle = c.fill;
-        ctx.beginPath();
-        ctx.arc(0, 0, r, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.shadowBlur = 0;
-        ctx.restore();
-        return;
-      }
-    }
-
     // tilt toward the brush while it rides this bucket
     const tilt = attached
       ? Math.max(-0.32, Math.min(0.32, Math.atan2(player.y - o.y, player.x - o.x) * 0.5))
@@ -4571,11 +4504,12 @@ function drawGoal() {
   ctx.shadowBlur = 0;
 }
 
-// While flying loose, steer toward the next unvisited KEY bucket (in its paint
-// color); once the palette is mixed it points at the now-open signing spot.
+// While flying loose, steer toward the next unvisited KEY bucket on dip
+// missions (in its paint color); every other mission points straight at the
+// always-open signing spot.
 function drawBeacon() {
   if (status !== 'playing' || tethered) return;
-  const key = nextReqOrb();
+  const key = levelHasKeys() ? nextReqOrb() : null;
   const tx = key ? key.x : level.goal.x;
   const ty = key ? key.y : level.goal.y;
   const col = key ? orbColors[key.type].paint : '138,85,184';
@@ -5094,7 +5028,6 @@ function drawTetherParticles() {
 }
 
 function draw() {
-  if (gameMode === GAME_MODES.ENDLESS) { EndlessRun.draw(); return; }
   const off = shakeOffset();
   if (off.x || off.y) ctx.save();
   if (off.x) ctx.translate(off.x, 0);
@@ -5843,15 +5776,9 @@ function fitLayout() {
 window.addEventListener('resize', fitLayout);
 window.addEventListener('orientationchange', fitLayout);
 
-// ---------- Endless swipe-to-steer state ----------
-let swipeStartX = 0, swipeStartY = 0, swipeStartT = 0;
-let swipeTrack = 0;  // horizontal nudge impulse queued for the next update frame
-function onEndlessRestart() { EndlessRun.init(); }
 function onScreenTap() {
   if (status === 'lost') {
-    // tap to restart: endless regenerates a fresh track, levels reload the current one
-    if (gameMode === GAME_MODES.ENDLESS) onEndlessRestart();
-    else reloadCurrentLevel();
+    reloadCurrentLevel();   // tap to retry after a wipe
     return;
   }
   if (status === 'ready') { launchBall(); return; }
@@ -5863,7 +5790,6 @@ function mouseDown() {
   if (Date.now() - lastTouch < 500) return;  // ignore synthetic mouse after touch
   ensureAudio();
   onScreenTap();
-  swipeTrack = 0;   // taps don't steer; only explicit swipes do
 }
 function mouseUp() {
   elCtrlCircle.classList.remove('held');
@@ -5882,9 +5808,6 @@ wrap.addEventListener('touchstart', (e) => {
   if (t && t.closest && t.closest('button')) return;   // presses on controls aren't gameplay
   if (t === canvas) e.preventDefault();                // stop scroll/zoom on the game surface
   ensureAudio();
-  swipeStartX = t && t.clientX !== undefined ? t.clientX : (e.touches[0] && e.touches[0].clientX) || 0;
-  swipeStartY = t && t.clientY !== undefined ? t.clientY : (e.touches[0] && e.touches[0].clientY) || 0;
-  swipeStartT = Date.now();
   onScreenTap();
 }, { passive: false });
 
@@ -5895,16 +5818,6 @@ wrap.addEventListener('touchmove', (e) => { if (e.target === canvas) e.preventDe
 document.addEventListener('touchend', (e) => {
   lastTouch = Date.now();
   elCtrlCircle.classList.remove('held');
-  // swipe-to-steer: a quick horizontal flick nudges the blob's trajectory
-  if (gameMode === GAME_MODES.ENDLESS && e.changedTouches && e.changedTouches[0]) {
-    const ch = e.changedTouches[0];
-    const dx = ch.clientX - swipeStartX;
-    const dy = ch.clientY - swipeStartY;
-    const dtMs = Date.now() - swipeStartT;
-    if (dtMs < 400 && Math.abs(dx) > 28 && Math.abs(dx) > Math.abs(dy) * 1.3) {
-      swipeTrack += Math.sign(dx) * 7;
-    }
-  }
   release();
 }, { passive: true });
 document.addEventListener('touchcancel', (e) => { lastTouch = Date.now(); elCtrlCircle.classList.remove('held'); release(); }, { passive: true });
@@ -5943,9 +5856,7 @@ function bindButton(el, handler) {
 // Restart button (also stop it from triggering an attach)
 // Restart button (also stop it from triggering an attach)
 function bindRestartBtn() {
-  const handler = gameMode === GAME_MODES.ENDLESS
-    ? () => { ensureAudio(); playTick(); EndlessRun.init(); }
-    : () => { ensureAudio(); playTick(); reloadCurrentLevel(); };
+  const handler = () => { ensureAudio(); playTick(); reloadCurrentLevel(); };
   // Use the same pattern as bindButton for proper event handling
   elRestart.onclick = null;  // clear old onclick
   elRestart.addEventListener('mousedown', (e) => e.stopPropagation());
@@ -5980,12 +5891,58 @@ if (elMission) {
 
 // NEXT LEVEL: advance (or wrap to level 1 after the last). For a custom
 // level this button reads "PLAY AGAIN" and reloads the same JSON level.
+// After conquering 10/20/30/40 it first opens the act gallery — CONTINUE
+// there takes over the advance.
 bindButton(elNextBtn, () => {
   ensureAudio(); playTick();
   if (customLevel) { reloadCurrentLevel(); return; }
+  if (pendingActGallery >= 0) { showActGallery(pendingActGallery); return; }
   const nextIdx = levelIndex + 1;
   loadLevel(nextIdx >= LEVELS.length ? 0 : nextIdx);
 });
+
+// Act gallery buttons
+if (elActGallerySave) bindButton(elActGallerySave, () => {
+  ensureAudio(); playTick();
+  const cv = elActGalleryCanvas;
+  if (!cv) return;
+  const act = pendingActGallery >= 0 ? pendingActGallery + 1 : 1;
+  const done = (url) => {
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'orbit-act-' + act + '-gallery.png';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  };
+  if (cv.toBlob) {
+    cv.toBlob((blob) => {
+      if (!blob) return;
+      const url = URL.createObjectURL(blob);
+      done(url);
+      setTimeout(() => URL.revokeObjectURL(url), 4000);
+      toast('Gallery saved!');
+    }, 'image/png');
+  } else {
+    done(cv.toDataURL('image/png'));
+    toast('Gallery saved!');
+  }
+});
+if (elActGalleryCont) bindButton(elActGalleryCont, () => {
+  ensureAudio(); playTick();
+  continueFromActGallery();
+});
+// tap anywhere on the gallery backdrop to leave too (not on the buttons)
+if (elActGallery) {
+  elActGallery.addEventListener('mousedown', (e) => e.stopPropagation());
+  elActGallery.addEventListener('touchstart', (e) => { e.stopPropagation(); }, { passive: false });
+  elActGallery.addEventListener('click', (e) => {
+    if (e.target === elActGallery || e.target === elActGalleryTitle || e.target === document.getElementById('actGalleryKick')) {
+      ensureAudio(); playTick();
+      continueFromActGallery();
+    }
+  });
+}
 
 // ---------- HUD buttons ----------
 function togglePause() {
@@ -6022,14 +5979,20 @@ function returnToMenu() {
   stopTurboBed();
   hideMission();
   missionShownFor = -1;             // reselecting a level re-briefs its mission
+  hideCard();                       // kill the pending art-card reveal, if any
+  hideActGallery();
+  hideGalleryViewer();
+  hideFinale();
   elMsg.classList.add('hidden');
   closeLevelSelect();
   const titleEl2 = document.getElementById('title');
   if (titleEl2) titleEl2.style.display = '';
   elMenu.classList.remove('hidden');
+  refreshContinueBtn();
 }
 bindButton(document.getElementById('menuBtnMsg'), () => { ensureAudio(); playTick(); returnToMenu(); });
 bindButton(document.getElementById('menuBtnHud'), () => { ensureAudio(); playTick(); returnToMenu(); });
+bindButton(document.getElementById('pauseResumeBtn'), () => { ensureAudio(); playTick(); togglePause(); });
 
 // ---------- Paint picker (signature identity color) ----------
 function signatureIndex() {
@@ -6078,6 +6041,18 @@ const elLevelSelectClose = document.getElementById('levelSelectClose');
 
 function renderLevelSelect() {
   const save = loadSave();
+  const meter = document.getElementById('levelSelectMeter');
+  let total = 0;
+  for (const idx of Object.keys(save.best || {})) {
+    const rec = save.best[idx];
+    if (rec && rec.stars) total += rec.stars;
+  }
+  const full = total >= LEVELS.length * 3;
+  if (meter) {
+    meter.textContent = total + ' / ' + (LEVELS.length * 3) + ' stars'
+      + (full ? '  \u00b7  ALL GOLD \u2014 every canvas signed!' : '');
+    meter.classList.toggle('gold', full);
+  }
   let html = '';
   for (let i = 1; i <= LEVELS.length; i++) {
     const idx = i - 1;
@@ -6143,17 +6118,40 @@ elResetProgress.addEventListener('click', () => {
 });
 
 // ---------- Menu screen ----------
-const elMenu = document.getElementById('menu');
-const elMenuStart = document.getElementById('menuStartBtn');
-const elMenuLevelSelect = document.getElementById('menuLevelSelectBtn');
-const elMenuEndless = document.getElementById('menuEndlessBtn');
-const elUltimateBtn = document.getElementById('ultimateBtn');
+ const elMenu = document.getElementById('menu');
+ const elMenuStart = document.getElementById('menuStartBtn');
+ const elMenuLevelSelect = document.getElementById('menuLevelSelectBtn');
+ const elMenuCont = document.getElementById('menuContBtn');
+ const elMenuGaler = document.getElementById('menuGalerBtn');
+
+// Continue picks the farthest level the player has opened but not yet
+// completed record-wise (best), so mid-campaign at Level 5 it says Level 5,
+// and a fresh save ([0] unlocked, no bests) says Level 1 — never skips ahead.
+function continueLevelIndex(save) {
+  let next = -1;
+  if (!save || !save.unlocked || !save.unlocked.length) return 0;
+  const u = save.unlocked.slice().sort((a, b) => b - a);   // highest first
+  for (const idx of u) {
+    if (!(save.best && save.best[idx])) { next = idx; break; }   // opened, unfinished
+  }
+  if (next < 0) next = u[0];       // everything finished: hold on the farthest opened
+  return Math.max(0, Math.min(LEVELS.length - 1, next));
+}
+
+function refreshContinueBtn() {
+  if (!elMenuCont) return;
+  try {
+    const save = loadSave();
+    elMenuCont.style.display = '';
+    elMenuCont.textContent = 'Continue \u00B7 Level ' + (continueLevelIndex(save) + 1);
+  } catch (e) { /* storage unavailable */ }
+}
 
 elMenuStart.addEventListener('click', () => {
   gameMode = GAME_MODES.LEVELS;
   bindRestartBtn();
   elMenu.classList.add('hidden');
-  EndlessRun.showHUD(false);
+
   // hide game title during gameplay
   const titleEl3 = document.getElementById('title');
   if (titleEl3) titleEl3.style.display = 'none';
@@ -6178,16 +6176,34 @@ elMenuStart.addEventListener('click', () => {
   }
 });
 
+elMenuCont.addEventListener('click', () => {
+  gameMode = GAME_MODES.LEVELS;
+  bindRestartBtn();
+  elMenu.classList.add('hidden');
+  const titleEl4 = document.getElementById('title');
+  if (titleEl4) titleEl4.style.display = 'none';
+  showReadyUI(true);
+  status = 'ready';
+  let nxt = 0;
+  try { nxt = continueLevelIndex(loadSave()); } catch (e) { /* storage unavailable */ }
+  levelIndex = nxt;
+  loadLevel(levelIndex);
+});
+
+elMenuGaler.addEventListener('click', () => {
+  ensureAudio(); playTick();
+  elMenu.classList.add('hidden');
+  openGalleryViewer();
+});
+
 elMenuLevelSelect.addEventListener('click', () => {
   gameMode = GAME_MODES.LEVELS;
   elMenu.classList.add('hidden');
   openLevelSelect();
 });
 
-elMenuEndless.addEventListener('click', () => {
-  // Endless Run disabled for now (perf) — button is hidden/disabled in the menu.
-  return;
-});
+refreshContinueBtn();
+
 
 // ---------- Add a Level (admin) ----------
 const ADMIN_PASS = 'canvas123';    // change me to pick a new admin password
