@@ -5968,6 +5968,38 @@ function togglePause() {
 }
 bindButton(elPause, togglePause);
 
+// Leaving the tab / closing / home-buttoning the app: silence everything and
+// park an active run, so sound never bleeds outside the game. Returning gives
+// a Pause screen with music resumed exactly where it was.
+function suspendGameAudio() {
+  try {
+    stopBgm();
+    setRush(0);
+    stopTurboBed();
+    if (audioCtx && typeof audioCtx.suspend === 'function') audioCtx.suspend();
+  } catch (e) { /* audio unavailable */ }
+}
+function resumeGameAudio() {
+  try {
+    if (audioCtx && audioCtx.state === 'suspended' && typeof audioCtx.resume === 'function') audioCtx.resume();
+    if (audioCtx && !bgmTimer && musicOn) startBgm();
+  } catch (e) { /* audio unavailable */ }
+}
+if (typeof document !== 'undefined' && typeof document.addEventListener === 'function') {
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      if (status === 'playing') togglePause();   // park a live run behind the Pause screen
+      suspendGameAudio();
+    } else {
+      resumeGameAudio();
+    }
+  });
+}
+if (typeof window !== 'undefined' && typeof window.addEventListener === 'function') {
+  window.addEventListener('pagehide', suspendGameAudio);
+  window.addEventListener('pageshow', () => { if (typeof document === 'undefined' || !document.hidden) resumeGameAudio(); });
+}
+
 // ---------- Sound toggle (HUD 🔊 = master mute for both channels) ----------
 bindButton(elSnd, () => {
   ensureAudio();
