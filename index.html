@@ -450,22 +450,55 @@
   }
   #message.cardMode #galleryWrap { display: block; animation: buddyPop 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) backwards; }
   #message.cardMode #winBuddyBox { display: flex; }
-  /* Win screen: stop centering everything — the painting hangs LEFT, the
-     blob buddy plants RIGHT, spread across the screen */
+  /* Win screen: the painting hangs LEFT, the blob buddy plants RIGHT — and
+     the whole composition shrinks to FIT the viewport so nothing is ever
+     hidden under the fold (no scroll on phones). */
+  #message.won.cardMode {
+    justify-content: center;
+    gap: clamp(6px, 1.4vh, 14px);
+    padding: clamp(6px, 2vh, 18px) clamp(6px, 2vw, 20px) 0;
+    overflow: hidden;
+  }
+  #message.won.cardMode #msgTitle { font-size: clamp(15px, 3.6vh, 30px); margin: 0; }
+  #message.won.cardMode #msgStars, #message.won.cardMode #msgScore { margin: 0; }
   #message.cardMode #cardRow {
     flex-wrap: nowrap;
     justify-content: space-between;
     align-items: center;
     width: 100%;
-    gap: 20px;
-    padding: 0 3vw;
+    gap: clamp(8px, 2vw, 24px);
+    padding: 0 1vw;
   }
   #message.cardMode #galleryWrap {
-    max-width: min(58vw, 560px);
+    position: relative;
+    max-width: min(74vw, 640px);
   }
-  #message.cardMode #winBuddyBox {
-    margin-right: 2vw;
+  #message.cardMode #galleryCanvas {
+    width: min(74vw, 640px, calc((100vh - 150px) * 1.333));
+    height: auto;
   }
+  #message.cardMode #galleryLabel {
+    font-size: 10px;
+    margin-bottom: 6px;
+    letter-spacing: 0.26em;
+  }
+  #message.cardMode #artCardBtns {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    margin: 0;
+    gap: 8px;
+    z-index: 3;
+  }
+  #message.cardMode .artBtn {
+    font-size: 10px;
+    padding: 6px 10px;
+    box-shadow: 0 2px 10px rgba(20, 14, 6, 0.4);
+  }
+  #message.cardMode #winBuddyBox { margin-right: 1vw; }
+  #message.cardMode #winBuddyCv { width: clamp(80px, 11vh, 132px); height: clamp(80px, 11vh, 132px); }
+  #message.cardMode #winBuddySay { max-width: min(200px, 20vw); font-size: 13px; padding: 5px 9px; margin-bottom: 8px; }
+  #message.cardMode #msgBtns { gap: 10px; }
   #galleryLabel {
     font-size: 11px;
     font-weight: 700;
@@ -960,7 +993,10 @@
   @media (max-width: 720px), (max-height: 560px) {
     #menuBtns { flex-direction: row; flex-wrap: wrap; justify-content: center; }
     #menuBtns .menuBtn { width: 46%; min-width: 148px; white-space: nowrap; }
-    /* too narrow for card-left / blob-right: fall back to a centered stack */
+  }
+  /* only genuinely narrow (portrait) screens need the stack — wide-but-short
+     landscape keeps the painting-left / buddy-right fit-to-viewport layout */
+  @media (max-width: 560px) {
     #message.cardMode #cardRow { flex-wrap: wrap; justify-content: center; padding: 0; }
     #message.cardMode #galleryWrap { max-width: min(88vw, 520px); }
     #message.cardMode #winBuddyBox { margin-right: 0; }
